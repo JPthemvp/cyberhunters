@@ -274,8 +274,8 @@ window.CyberQB={
   getRandomQuestion(excl=[]){const pool=ALL_QUESTIONS.filter(q=>!excl.includes(q.id));return pool[Math.floor(Math.random()*pool.length)]||ALL_QUESTIONS[Math.floor(Math.random()*ALL_QUESTIONS.length)]},
 };
 // ─── SUPABASE ────────────────────────────────────────────────────
-const SUPA_URL='https://iiaxvkcebqyrpqyaurcq.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpYXh2a2NlYnF5cnBxeWF1cmNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MzAwMjksImV4cCI6MjEwMTUwNjAyOX0.hg-GvNXNFPmVyNR8co88Pj4rCClbeZLkm_x1zLAuBEs';
+const SUPA_URL='https://qrnlltneysyexfhvawgp.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybmxsdG5leXN5ZXhmaHZhd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzYxMzMsImV4cCI6MjEwMzg1MjEzM30.-8fZwTXmfJ5T4R6EfVlz_R8aQkCBNP4ijETpfxv1H_c';
 let sbClient,channel;
 try{ sbClient=window.supabase?.createClient(SUPA_URL,SUPA_KEY); }catch(e){}
 
