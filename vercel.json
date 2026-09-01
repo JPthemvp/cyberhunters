@@ -1,0 +1,22 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/games", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+      ]
+    },
+    {
+      "source": "/cyber-hunters.html",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+      ]
+    }
+  ]
+}

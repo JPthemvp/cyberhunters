@@ -431,7 +431,7 @@ function tryMove(now){
   const nx=player.tx+dx, ny=player.ty+dy;
   if(!canMove(nx,ny)){
     // Boss zone lock message
-    if(nx>=33&&ny>=14&&player.level<5){ showZoneHint('⚠️ Boss Zone locked — reach Level 5 first!'); }
+    if(nx>=33&&ny>=14&&player.level<5){ showZoneHint(`⚠️ Response HQ locked! Need Lv.5 — you're Lv.${player.level}. Battle monsters in other zones to level up!`); }
     return;
   }
   player.tx=nx; player.ty=ny; lastMove=now;
@@ -449,9 +449,18 @@ function getCurrentZone(){
   return ZONES.find(z=>player.tx>=z.xMin&&player.tx<=z.xMax&&player.ty>=z.yMin&&player.ty<=z.yMax)||null;
 }
 
+let lastZoneId=null;
 function updateZoneHUD(){
   const z=getCurrentZone();
   document.getElementById('zone-name').textContent=z?z.name:'Open World';
+  // Announce zone entry once
+  if(z&&z.pillar!==lastZoneId){
+    lastZoneId=z.pillar;
+    const pb=window.CyberQB?.QUESTION_BANK[z.pillar];
+    showZoneHint(`${pb?.icon||'📍'} Entering ${z.name} — ${pb?.description||'CE pillar zone'}`);
+  } else if(!z&&lastZoneId){
+    lastZoneId=null;
+  }
 }
 
 // ─── ENCOUNTER ──────────────────────────────────────────────────

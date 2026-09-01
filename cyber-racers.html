@@ -21,7 +21,7 @@ canvas{display:block;position:fixed;inset:0}
 #minimap{position:fixed;bottom:12px;right:12px;z-index:20}
 #minimap canvas{border-radius:8px;border:1.5px solid rgba(255,255,255,.15);box-shadow:0 4px 16px rgba(0,0,0,.5)}
 /* ─── OVERLAYS ─── */
-.overlay{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,8,18,.95);padding:24px}
+.overlay{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:rgba(5,8,18,.95);padding:24px;overflow-y:auto;padding-top:max(24px,8vh)}
 .overlay h1{font-size:clamp(28px,6vw,48px);margin-bottom:10px;text-align:center}
 .overlay p{opacity:.7;text-align:center;max-width:420px;line-height:1.6;margin-bottom:16px}
 .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#3a7fff,#00d4ff);border:none;border-radius:12px;padding:14px 32px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;transition:.2s}
@@ -656,14 +656,29 @@ function applyPowerup(pu){
 function updateAI(k){
   if(k.finished)return;
   k.aiTimer=(k.aiTimer||0)+1;
+  // AI answers hazard questions after a brief pause (cosmetic realism)
+  if(k.aiPaused>0){ k.aiPaused--; return; }
+  HAZARDS.forEach(hz=>{
+    if(hz.hit)return;
+    const dx=k.x-hz.x,dy=k.y-hz.y;
+    if(dx*dx+dy*dy<1200&&!k.aiPaused){
+      hz.hit=true; hz.respawnT=Date.now()+15000;
+      k.aiPaused=90+Math.floor(Math.random()*60); // pause 1.5–2.5s
+      // 70% chance AI "answers correctly" = boost, else slow
+      if(Math.random()<0.7){ k.aiBoosting=60; k.score=(k.score||0)+80; }
+      else { k.aiSlowed=40; }
+    }
+  });
   const look=Math.min(N-1,(nearestIdx(k.x,k.y)+15)%N);
   const tx=TK[look][0],ty=TK[look][1];
   const wantAng=Math.atan2(ty-k.y,tx-k.x);
   let diff=wantAng-k.angle;
   while(diff>Math.PI)diff-=2*Math.PI; while(diff<-Math.PI)diff+=2*Math.PI;
   k.angle+=diff*.08;
+  const topSpd=k.aiBoosting>0?4.8:k.aiSlowed>0?1.2:3.2+Math.random()*.3;
+  if(k.aiBoosting>0)k.aiBoosting--; if(k.aiSlowed>0)k.aiSlowed--;
   k.speed=(k.speed||2.5)+.05;
-  k.speed=Math.min(k.speed||5,3.2+Math.random()*.3);
+  k.speed=Math.min(k.speed||5,topSpd);
   k.x+=Math.cos(k.angle)*k.speed;
   k.y+=Math.sin(k.angle)*k.speed;
   const prog=progress(k.x,k.y);
