@@ -101,6 +101,12 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 /* ─── SOLO BACK BUTTON ─── */
 #solo-back{position:fixed;top:12px;left:12px;z-index:30;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
 #solo-back:hover{background:rgba(255,255,255,.1)}
+/* ─── SHELL HUD + FIRE BUTTON ─── */
+#shell-hud{position:fixed;bottom:90px;right:14px;z-index:30;display:none;flex-direction:column;align-items:center;gap:4px}
+#shell-count{font-size:28px;text-shadow:0 0 10px #ff5;filter:drop-shadow(0 0 6px #ff0)}
+#shell-label{font-size:10px;opacity:.6;letter-spacing:1px}
+#fire-btn{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#ff4400,#aa0000);border:3px solid #ff6;font-size:24px;cursor:pointer;box-shadow:0 0 20px rgba(255,80,0,.6);transition:.15s;display:flex;align-items:center;justify-content:center}
+#fire-btn:active{transform:scale(.92);box-shadow:0 0 30px rgba(255,100,0,.9)}
 /* ─── QUIT BUTTON (IN-RACE) ─── */
 #quit-race-btn{position:fixed;top:12px;right:12px;z-index:30;background:rgba(180,0,0,.55);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
 #quit-race-btn:hover{background:rgba(220,0,0,.75)}
@@ -248,6 +254,12 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 
 <!-- Solo Back Button -->
 <button id="solo-back" onclick="exitSolo()">← Menu</button>
+<!-- Shell HUD (shown when player has shells) -->
+<div id="shell-hud">
+  <div id="shell-count">🐢 ×0</div>
+  <div id="shell-label">SHELL</div>
+  <div id="fire-btn" onclick="fireShell()" title="Fire shell (Space)">🎯</div>
+</div>
 <!-- Quit Race Button (shown during any race) -->
 <button id="quit-race-btn" onclick="showQuitRaceDialog()">✕ Quit</button>
 <!-- Quit Confirmation Dialog -->
@@ -419,10 +431,10 @@ const PU_SLOTS=[15,45,75,105,135,165,195,225,255];
 const PUPS=PU_SLOTS.map((s,i)=>{
   const idx=s%N;
   const side=(i%2?1:-1)*(TRACK_W*.3);
-  const types=['boost','shield','slow'];
-  return {x:TK[idx][0]+NRM[idx][0]*side,y:TK[idx][1]+NRM[idx][1]*side,type:types[i%3],hit:false,respawnT:0};
+  const types=['boost','shield','slow','shell'];
+  return {x:TK[idx][0]+NRM[idx][0]*side,y:TK[idx][1]+NRM[idx][1]*side,type:types[i%4],hit:false,respawnT:0};
 });
-const PU_ICONS={boost:'⚡',shield:'🛡️',slow:'🐌'};
+const PU_ICONS={boost:'⚡',shield:'🛡️',slow:'🐌',shell:'🐢'};
 
 // ─── PLAYER / KART STATE ─────────────────────────────────────────
 const MY_ID=Math.random().toString(36).slice(2,8);
@@ -437,13 +449,20 @@ const player={
   boosting:0,spinning:0,shielded:false,slow:0,
   progress:0,prevProgress:0,laps:0,finished:false,
   score:0,correctAnswers:0,wrongAnswers:0,
+  shells:0, // Mario Kart-style shells to fire
 };
+// Active shell projectiles on the track
+const shells=[]; // {id,x,y,angle,speed,ownerId,frame,hit}
 const others={}; // keyed by player id
 const allPlayers={}; // lobby list
 
 // ─── INPUT ──────────────────────────────────────────────────────
 const keys={};
-window.addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault()});
+window.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();
+  if(e.key===' ')fireShell(); // Space = fire shell
+});
 window.addEventListener('keyup',e=>delete keys[e.key]);
 // Touch
 ['tc-left','tc-right','tc-up','tc-down'].forEach(id=>{
@@ -536,6 +555,8 @@ function connectRoom(){
     .on('broadcast',{event:'player_move'},({payload})=>handlePlayerMove(payload))
     .on('broadcast',{event:'player_quiz'},({payload})=>handlePlayerQuiz(payload))
     .on('broadcast',{event:'player_finish'},({payload})=>handlePlayerFinish(payload))
+    .on('broadcast',{event:'shell_fired'},({payload})=>handleShellFired(payload))
+    .on('broadcast',{event:'shell_hit'},({payload})=>handleShellHit(payload))
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
         channel.send({type:'broadcast',event:'player_join',payload:{id:MY_ID,name:myName,color:myColor,colorIdx:myColorIdx,carType:myCarType}});
@@ -570,6 +591,16 @@ function handlePlayerQuiz(p){
 }
 function handlePlayerFinish(p){
   if(p.id!==MY_ID&&others[p.id])others[p.id].finished=true;
+}
+function handleShellFired(p){
+  // Only add shells fired by OTHER players (my own are already added locally)
+  if(p.ownerId===MY_ID)return;
+  shells.push({id:p.id,x:p.x,y:p.y,angle:p.angle,speed:14,ownerId:p.ownerId,frame:0,hit:false});
+}
+function handleShellHit(p){
+  // Mark shell as hit so we stop rendering it
+  const s=shells.find(sh=>sh.id===p.shellId);
+  if(s)s.hit=true;
 }
 
 function renderLobby(){
@@ -705,7 +736,7 @@ function answerQuiz(idx,btn,q){
   if(!correct)btn.classList.add('wrong');
   document.getElementById('quiz-tip').style.display='block';
   document.getElementById('quiz-tip').textContent='💡 '+q.tip;
-  if(correct){ player.speed+=5; player.boosting=180; player.score+=100; player.correctAnswers++; showToast('✅ Correct! TURBO BOOST! 🚀','correct'); }
+  if(correct){ player.speed+=5; player.boosting=180; player.score+=100; player.correctAnswers++; addShell(1); showToast('✅ Correct! TURBO BOOST + SHELL loaded! 🚀🐢','correct'); }
   else { player.spinning=80; player.score=Math.max(0,player.score-20); player.wrongAnswers++; showToast('❌ Wrong! Spinning out!','wrong'); }
   setTimeout(closeQuiz, 2800);
 }
@@ -764,9 +795,79 @@ function updatePlayer(){
   });
 }
 function applyPowerup(pu){
-  if(pu.type==='boost'){ player.boosting=120; showToast('⚡ Boost Glow! (no speed cap — floor it!)','correct'); }
+  if(pu.type==='boost'){ player.speed+=3; player.boosting=120; showToast('⚡ Speed Boost!','correct'); }
   else if(pu.type==='shield'){ player.shielded=true; showToast('🛡️ Shield active!','correct'); }
   else if(pu.type==='slow'){ player.slow=120; showToast('🐌 Steering penalty!','wrong'); }
+  else if(pu.type==='shell'){ addShell(1); showToast('🐢 Shell loaded! Press SPACE or 🎯 to fire!','correct'); }
+}
+function addShell(n=1){
+  player.shells=Math.min(player.shells+n,3);
+  updateShellHUD();
+}
+function updateShellHUD(){
+  const hud=document.getElementById('shell-hud');
+  const count=document.getElementById('shell-count');
+  if(!hud)return;
+  hud.style.display=(raceActive&&player.shells>0)?'flex':'none';
+  if(count) count.textContent='🐢 ×'+player.shells;
+}
+function fireShell(){
+  if(!raceActive||player.shells<=0)return;
+  player.shells--;
+  updateShellHUD();
+  const shellId=MY_ID+'_s'+Date.now();
+  const s={id:shellId,x:player.x,y:player.y,angle:player.angle,speed:14,ownerId:MY_ID,frame:0,hit:false};
+  shells.push(s);
+  // Broadcast shell fired
+  if(channel) channel.send({type:'broadcast',event:'shell_fired',payload:{id:shellId,x:s.x,y:s.y,angle:s.angle,ownerId:MY_ID}}).catch(()=>{});
+}
+function updateShells(){
+  const toRemove=[];
+  shells.forEach(s=>{
+    if(s.hit){toRemove.push(s.id);return;}
+    s.x+=Math.cos(s.angle)*s.speed;
+    s.y+=Math.sin(s.angle)*s.speed;
+    s.frame++;
+    // Out of bounds or lived too long
+    if(s.frame>180){toRemove.push(s.id);return;}
+    // Check hit on local player (only for shells not owned by me)
+    if(s.ownerId!==MY_ID){
+      const dx=s.x-player.x,dy=s.y-player.y;
+      if(dx*dx+dy*dy<600){
+        if(player.shielded){ player.shielded=false; showToast('🛡️ Shield blocked a shell!','correct'); }
+        else { player.spinning=120; player.speed*=0.2; showToast('🐢 Hit by a shell! Spinning out!','wrong'); }
+        s.hit=true; toRemove.push(s.id);
+        // Broadcast hit
+        if(channel) channel.send({type:'broadcast',event:'shell_hit',payload:{shellId:s.id,targetId:MY_ID}}).catch(()=>{});
+      }
+    }
+    // Check hit on AI bots (if solo mode)
+    if(soloMode&&s.ownerId===MY_ID){
+      Object.values(others).forEach(o=>{
+        if(o.isAI&&!s.hit){
+          const dx=s.x-o.x,dy=s.y-o.y;
+          if(dx*dx+dy*dy<600){s.hit=true;o.aiSpinning=100;o.speed=(o.speed||0)*.1;}
+        }
+      });
+    }
+  });
+  toRemove.forEach(id=>{const i=shells.findIndex(s=>s.id===id);if(i>=0)shells.splice(i,1);});
+}
+function drawShells(ctx){
+  shells.forEach(s=>{
+    if(s.hit)return;
+    ctx.save();
+    ctx.font='16px serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    // Spin animation
+    ctx.translate(s.x,s.y);
+    ctx.rotate(s.frame*.3);
+    ctx.shadowColor='#ff0';
+    ctx.shadowBlur=12;
+    ctx.fillText('🐢',0,0);
+    ctx.restore();
+  });
 }
 
 // ─── AI KARTS ───────────────────────────────────────────────────
@@ -940,6 +1041,8 @@ function render(){
   });
   // My player
   drawKart(player.x,player.y,player.angle,myColor,myName,true,player.boosting>0,player.spinning>0,player.shielded,myCarType);
+  // Draw shell projectiles in world space
+  drawShells(ctx);
   ctx.restore();
   // Minimap
   renderMinimap();
@@ -1048,6 +1151,8 @@ function loop(){
   Object.values(others).forEach(o=>{if(o.isAI)updateAI(o);});
   HAZARDS.forEach(hz=>{if(hz.hit&&Date.now()>hz.respawnT)hz.hit=false;});
   PUPS.forEach(pu=>{if(pu.hit&&Date.now()>pu.respawnT)pu.hit=false;});
+  updateShells();
+  updateShellHUD();
   broadcastPosition();
   render();
 }

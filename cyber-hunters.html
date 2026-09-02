@@ -319,6 +319,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
 
+<!-- WORLD 2 WIN SCREEN -->
+<div class="overlay" id="w2-win-screen" style="display:none;background:radial-gradient(ellipse at 50% 30%,#2a0040 0%,#05080f 100%)">
+  <div style="font-size:72px;animation:float 2s ease-in-out infinite">🏆</div>
+  <h1 style="background:linear-gradient(135deg,#ffcc00,#cc55ff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:clamp(24px,5vw,42px)">Cyber Trust Advocate!</h1>
+  <p style="max-width:440px;opacity:.8;font-size:15px;line-height:1.7;margin:12px 0">You have mastered all <strong>22 Cyber Trust domains</strong> across 5 tiers — Cloud, OT, AI, Risk Assessment, and the full Advocate pinnacle. Singapore's organisations are safer because of you.</p>
+  <div style="margin:16px 0;padding:16px 20px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.3);border-radius:14px;max-width:400px;font-size:13px;line-height:1.8;text-align:left">
+    <div>🏅 <strong>5/5 Cyber Trust Domains mastered</strong></div>
+    <div>☁️ Cloud · 🏭 OT · 🤖 AI · 📊 Risk · 👑 Advocate</div>
+    <div style="margin-top:8px;opacity:.7">Apply this knowledge: visit <a href="https://www.csa.gov.sg/cyber-trust" target="_blank" style="color:#00d4ff">csa.gov.sg/cyber-trust</a> to pursue real certification!</div>
+  </div>
+  <button class="btn" style="background:linear-gradient(135deg,#ffcc00,#ff8800);color:#000;margin-top:8px" onclick="location.reload()">🏠 Return to Main Menu</button>
+</div>
+
 <!-- WORLD 2 TEASER SCREEN -->
 <div class="overlay" id="world2-screen" style="display:none">
   <div style="font-size:64px;animation:float 3s ease-in-out infinite">🌌</div>
@@ -528,6 +541,106 @@ const ZONES = [
   {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Response HQ',      boss:{name:'APT Overlord',sprite:'☠️',hp:120,xpR:250,badge:'🚨 Master Badge'}},
 ];
 
+// ─── WORLD 2 — CYBER TRUST REALM ────────────────────────────────
+// World indicator (1 = CE World, 2 = Cyber Trust World)
+let currentWorld = 1;
+
+// World 2 tile palette (cosmic purple/dark aesthetic)
+const TILE_COLORS_W2 = {
+  [T.GRASS]: '#1a0a2e',   // void purple
+  [T.PATH]:  '#2a1a4e',   // dark purple path
+  [T.WATER]: '#0a1a3a',   // digital abyss
+  [T.WALL]:  '#0a0014',
+  [T.TREE]:  '#0d0022',
+  [T.TALL]:  '#150835',
+  [T.SAND]:  '#2a1500',
+  [T.ZONE_SIGN]: '#4a0a6a',
+};
+const TILE_BORDERS_W2 = {
+  [T.GRASS]: '#2a1050',
+  [T.PATH]:  '#3a2060',
+  [T.WATER]: '#0a1550',
+  [T.WALL]:  '#050010',
+  [T.TREE]:  '#080018',
+  [T.TALL]:  '#1a0a40',
+  [T.SAND]:  '#3a1a00',
+};
+
+// World 2 zones (Cyber Trust domains)
+const ZONES_W2 = [
+  {pillar:'cloud', xMin:2,xMax:19,yMin:1,yMax:9,  color:'#00d4ff',name:'Cloud Citadel',    boss:{name:'Shadow Cloud Lord',sprite:'☁️',hp:80,xpR:200,badge:'☁️ Cloud Badge'}},
+  {pillar:'ot',    xMin:21,xMax:39,yMin:1,yMax:9,  color:'#ff8a00',name:'OT Fortress',      boss:{name:'Ghost Protocol',sprite:'🤖',hp:90,xpR:220,badge:'🏭 OT Badge'}},
+  {pillar:'ai',    xMin:2,xMax:19,yMin:11,yMax:29, color:'#cc55ff',name:'AI Nexus',          boss:{name:'Rogue AI Oracle',sprite:'🧠',hp:100,xpR:250,badge:'🤖 AI Badge'}},
+  {pillar:'risk',  xMin:21,xMax:32,yMin:11,yMax:29,color:'#3aff9a',name:'Risk Sanctum',      boss:{name:'The Auditor',sprite:'📋',hp:110,xpR:280,badge:'📊 Risk Badge'}},
+  {pillar:'advocate',xMin:33,xMax:39,yMin:14,yMax:29,color:'#ffcc00',name:'Advocate Pinnacle',boss:{name:'Cyber Trust Corruptor',sprite:'👑',hp:150,xpR:400,badge:'🏆 Advocate Badge'}},
+];
+
+// World 2 monsters
+const MONSTERS_W2 = {
+  cloud: [
+    {name:'Rogue Cloud Instance',sprite:'🌩️',hp:25,xpR:30},
+    {name:'Data Leakage Wraith',sprite:'💧',hp:30,xpR:35},
+    {name:'Misconfigured IaaS',sprite:'⚙️',hp:35,xpR:40},
+  ],
+  ot: [
+    {name:'SCADA Phantom',sprite:'🔌',hp:28,xpR:32},
+    {name:'OT Air-Gap Breaker',sprite:'📡',hp:33,xpR:38},
+    {name:'Industrial Malware',sprite:'🏭',hp:40,xpR:45},
+  ],
+  ai: [
+    {name:'Hallucination Bot',sprite:'🤯',hp:30,xpR:35},
+    {name:'Poison Data Agent',sprite:'☠️',hp:35,xpR:40},
+    {name:'Adversarial Input',sprite:'🎭',hp:40,xpR:48},
+  ],
+  risk: [
+    {name:'Compliance Gap',sprite:'📉',hp:32,xpR:36},
+    {name:'Supply Chain Mole',sprite:'🕵️',hp:36,xpR:42},
+    {name:'Unpatched Vendor',sprite:'🔓',hp:42,xpR:50},
+  ],
+  advocate: [
+    {name:'Domain Auditor',sprite:'📋',hp:50,xpR:60},
+    {name:'Tier Enforcer',sprite:'⚖️',hp:60,xpR:75},
+  ],
+};
+
+// World 2 Cyber Trust question bank
+const CT_QUESTIONS = [
+  // ── CLOUD DOMAIN ──
+  {id:'CT01',pillar:'cloud',q:'What is a key principle organisations must understand before moving to cloud?',opts:['Cloud providers handle all security','The shared responsibility model — cloud provider secures infrastructure, you secure your data','Cloud is always more secure than on-premise','No additional policies needed'],ans:1,tip:'Shared responsibility: the cloud provider secures the platform; you are responsible for your data, access controls, and configurations.',difficulty:1},
+  {id:'CT02',pillar:'cloud',q:'Under Cyber Trust, which cloud service models are explicitly in scope?',opts:['Only SaaS','Only IaaS and PaaS','IaaS, PaaS, and SaaS','Only private cloud'],ans:2,tip:'Cyber Trust covers all three cloud service models — IaaS (infrastructure), PaaS (platform), and SaaS (software) — each with specific security controls.',difficulty:2},
+  {id:'CT03',pillar:'cloud',q:'What is a critical cloud security control to protect data at rest?',opts:['Disable logging to save costs','Encrypt data at rest using strong encryption (e.g. AES-256)','Store all data in public S3 buckets for easy access','Use shared admin accounts'],ans:1,tip:'Data at rest must be encrypted. Weak or absent encryption is the top cause of cloud data breaches.',difficulty:1},
+  {id:'CT04',pillar:'cloud',q:'What should organisations do FIRST before using a new cloud service?',opts:['Sign up immediately and migrate all data','Conduct a risk assessment and review the provider\'s shared responsibility model','Ask employees what apps they prefer','Buy the cheapest plan available'],ans:1,tip:'Always conduct a risk assessment first. Understand what the provider secures vs. what you must secure before onboarding any cloud service.',difficulty:1},
+  {id:'CT05',pillar:'cloud',q:'Which is a Shadow IT risk in cloud environments?',opts:['Employees using CSA-approved tools','Employees subscribing to unsanctioned cloud apps using personal cards','Using multi-factor authentication','Regular cloud configuration reviews'],ans:1,tip:'Shadow IT: employees use cloud apps without IT approval. These bypass security controls and create data leakage risks. Maintain a cloud asset inventory.',difficulty:2},
+  // ── OT DOMAIN ──
+  {id:'CT06',pillar:'ot',q:'What does OT stand for in cybersecurity?',opts:['Online Technology','Operational Technology — industrial control systems like SCADA and PLCs','Output Terminal','Open Threat'],ans:1,tip:'OT (Operational Technology) refers to hardware/software that monitors and controls physical processes — factories, power grids, water treatment, etc.',difficulty:1},
+  {id:'CT07',pillar:'ot',q:'Why is patching OT systems more challenging than patching IT systems?',opts:['OT patches are free, so no budget issue','OT systems often cannot be taken offline, run legacy software, and have long vendor patch cycles','OT is air-gapped so no patches needed','OT staff patch faster than IT staff'],ans:1,tip:'OT systems run 24/7, use decades-old protocols, and going offline can halt operations. Patching requires careful scheduling and vendor coordination.',difficulty:2},
+  {id:'CT08',pillar:'ot',q:'What is "air-gapping" in OT security?',opts:['Leaving ventilation gaps in server rooms','Physically isolating OT networks from IT networks and the internet','Using wireless OT sensors','Installing air filters in data centres'],ans:1,tip:'Air-gapping physically separates the OT network so no direct internet or IT network path exists. It reduces the attack surface for internet-based threats.',difficulty:1},
+  {id:'CT09',pillar:'ot',q:'A factory discovers its SCADA system was accessed via a vendor\'s remote maintenance connection. What should have been in place?',opts:['Give vendor full-time access for convenience','No controls needed for trusted vendors','Strict third-party access controls: MFA, time-limited sessions, activity logging','Block all vendor access permanently'],ans:2,tip:'Third-party remote access to OT must use MFA, be time-limited, logged, and monitored. Supply chain is a major OT attack vector.',difficulty:2},
+  {id:'CT10',pillar:'ot',q:'Under Cyber Trust OT domain, what should organisations maintain to understand their industrial attack surface?',opts:['A list of employee birthdays','An OT asset inventory listing all control systems, devices, and network connections','A physical map of the factory layout only','Annual revenue projections'],ans:1,tip:'An OT asset inventory is foundational. You cannot protect what you do not know you have. It should include firmware versions, communication protocols, and network topology.',difficulty:1},
+  // ── AI DOMAIN ──
+  {id:'CT11',pillar:'ai',q:'What is "AI hallucination" and why is it a cybersecurity risk?',opts:['AI systems overheating','AI generating confident but false information, leading to wrong security decisions','AI being hacked by hackers','AI refusing to answer security questions'],ans:1,tip:'AI hallucination: the model generates plausible-sounding but factually wrong outputs. Acting on hallucinated security advice can introduce vulnerabilities.',difficulty:1},
+  {id:'CT12',pillar:'ai',q:'What is a "data poisoning" attack on AI systems?',opts:['Corrupting the AI\'s physical hardware','Injecting malicious or biased data into training datasets to manipulate model behaviour','Overloading AI with too many queries','Stealing the AI model\'s code'],ans:1,tip:'Data poisoning: attackers corrupt training data so the model learns wrong patterns — e.g. classifying malware as safe. Validate and vet training data sources.',difficulty:2},
+  {id:'CT13',pillar:'ai',q:'Your organisation uses an AI chatbot that employees share confidential data with. What is the primary risk?',opts:['The chatbot will become too smart','Confidential data leaking into the AI provider\'s training data or logs','Employees will stop working','The chatbot will get viruses'],ans:1,tip:'AI data leakage: sensitive data entered into AI tools may be retained, logged, or used for model training. Classify data and set clear AI usage policies.',difficulty:1},
+  {id:'CT14',pillar:'ai',q:'What is an "adversarial input" attack on AI models?',opts:['Using incorrect grammar when prompting AI','Subtly modifying inputs (images, text) to fool AI models into making wrong predictions','Asking AI too many questions at once','Using AI on a slow computer'],ans:1,tip:'Adversarial inputs: imperceptible changes to data that cause AI misclassification — e.g. a stop sign image that AI reads as "speed limit". Critical in AI-driven security tools.',difficulty:2},
+  {id:'CT15',pillar:'ai',q:'Before deploying an AI system, organisations should conduct a:',opts:['Marketing campaign','Ping test','Risk assessment covering data inputs, model integrity, and output reliability','Random employee vote'],ans:2,tip:'AI risk assessment should evaluate: what data the AI accesses, how model decisions are made and validated, and what happens when the AI is wrong or manipulated.',difficulty:1},
+  // ── RISK ASSESSMENT DOMAIN ──
+  {id:'CT16',pillar:'risk',q:'How many risk scenario categories does the Cyber Trust mark risk assessment cover?',opts:['3','4','6','10'],ans:2,tip:'6 risk scenario categories: Data breach, Human factor, Infrastructure, Physical security, Regulatory & compliance, and Supply chain.',difficulty:2},
+  {id:'CT17',pillar:'risk',q:'What is a "supply chain" cybersecurity risk?',opts:['Running out of office supplies','A vendor or third-party partner introducing vulnerabilities into your organisation','Slow delivery of hardware','Choosing the wrong cloud provider'],ans:1,tip:'Supply chain attacks: attackers compromise a vendor or software supplier to reach their customers. Review third-party security posture before onboarding.',difficulty:1},
+  {id:'CT18',pillar:'risk',q:'Under risk management, what is the purpose of a Business Impact Analysis (BIA)?',opts:['To calculate employee bonuses','To identify which business processes and systems are most critical, and the impact if disrupted','To plan the office Christmas party','To audit email usage'],ans:1,tip:'A BIA identifies critical assets and processes, then estimates financial, operational, and reputational impact if disrupted — essential input for prioritising security controls.',difficulty:2},
+  {id:'CT19',pillar:'risk',q:'What does "regulatory & compliance" risk mean for a Singapore SME?',opts:['Risk of breaking office dress code','Risk of failing to meet legal obligations like PDPA, MAS TRM, or sector-specific requirements','Risk of forgetting to pay annual business registration','Risk of hiring too many staff'],ans:1,tip:'Singapore organisations must comply with PDPA (data protection), and sector-specific rules like MAS TRM for financial institutions. Non-compliance = fines and reputational damage.',difficulty:1},
+  {id:'CT20',pillar:'risk',q:'After identifying risks, what are the four response options an organisation can take?',opts:['Ignore, report, blame, escalate','Accept, avoid, mitigate, transfer (e.g. via cyber insurance)','Delete, encrypt, patch, restart','Report, fine, arrest, prosecute'],ans:1,tip:'Risk treatment options: Accept (tolerate low risks), Avoid (stop the activity), Mitigate (apply controls), Transfer (insurance/outsourcing). Document decisions in a risk register.',difficulty:2},
+  // ── CYBER TRUST TIERS / GENERAL ──
+  {id:'CT21',pillar:'advocate',q:'How many tiers does the CSA Cyber Trust mark have, and what is the entry tier?',opts:['3 tiers, entry = Basic','5 tiers, entry = Supporter','7 tiers, entry = Foundation','10 tiers, entry = Starter'],ans:1,tip:'5 tiers: Supporter (entry, 10 domains), Practitioner (12), Promoter (14), Performer (18), Advocate (all 22 domains).',difficulty:1},
+  {id:'CT22',pillar:'advocate',q:'How many cybersecurity domains must an Advocate-tier organisation demonstrate?',opts:['10 domains','14 domains','18 domains','All 22 domains'],ans:3,tip:'Advocate is the highest Cyber Trust tier and requires all 22 cybersecurity domains to be addressed — covering classical IT, Cloud, OT, and AI security.',difficulty:2},
+  {id:'CT23',pillar:'advocate',q:'How long is a Cyber Trust certificate valid, and what ongoing obligation applies?',opts:['1 year, no ongoing checks','3 years, with mandatory annual surveillance audits','5 years, self-assessed only','Permanent, no renewal needed'],ans:1,tip:'Valid for 3 years. Annual surveillance audits by a third-party certifier ensure continued compliance. Failing an audit can suspend certification.',difficulty:1},
+  {id:'CT24',pillar:'advocate',q:'Who assesses and certifies organisations for the Cyber Trust mark?',opts:['CSA employees directly','Approved third-party certification bodies accredited by Singapore Accreditation Council (SAC)','The organisation self-certifies','Any IT vendor'],ans:1,tip:'Cyber Trust uses approved third-party certifiers accredited by SAC, ensuring independence. Self-certification is NOT allowed at any tier.',difficulty:2},
+  {id:'CT25',pillar:'advocate',q:'A health clinic collects patient records and processes payments. Which Cyber Trust tier should they aim for FIRST?',opts:['Advocate immediately','Supporter — establish foundational controls across 10 domains first, then progress','Wait until breached before certifying','No tier needed for healthcare'],ans:1,tip:'Start with Supporter (10 domains) to build foundational controls. Healthcare handles sensitive personal data (PDPA-sensitive) and payment data — Cyber Trust provides a structured improvement path.',difficulty:1},
+];
+
+// World 2 boss sequence (track which W2 bosses beaten)
+const W2_BOSS_ZONES=['cloud','ot','ai','risk','advocate'];
+
+// ─── WORLD 1 MONSTERS ───────────────────────────────────────────
 // Monsters per zone
 const MONSTERS = {
   assets: [{name:'Shadow Clone',sprite:'👤',hp:20,xpR:20},{name:'Phish Bot',sprite:'🎣',hp:25,xpR:25},{name:'Social Engineer',sprite:'🎭',hp:30,xpR:30}],
@@ -719,19 +832,26 @@ function tryMove(now){
   updateZoneHUD();
 }
 
+function activeZones(){ return currentWorld===2?ZONES_W2:ZONES; }
+function activeMonsters(){ return currentWorld===2?MONSTERS_W2:MONSTERS; }
 function getCurrentZone(){
-  return ZONES.find(z=>player.tx>=z.xMin&&player.tx<=z.xMax&&player.ty>=z.yMin&&player.ty<=z.yMax)||null;
+  return activeZones().find(z=>player.tx>=z.xMin&&player.tx<=z.xMax&&player.ty>=z.yMin&&player.ty<=z.yMax)||null;
 }
 
 let lastZoneId=null;
 function updateZoneHUD(){
   const z=getCurrentZone();
-  document.getElementById('zone-name').textContent=z?z.name:'Open World';
+  const worldLabel=currentWorld===2?' 🌌':'';
+  document.getElementById('zone-name').textContent=(z?z.name:'Open World')+worldLabel;
   // Announce zone entry once
   if(z&&z.pillar!==lastZoneId){
     lastZoneId=z.pillar;
-    const pb=window.CyberQB?.QUESTION_BANK[z.pillar];
-    showZoneHint(`${pb?.icon||'📍'} Entering ${z.name} — ${pb?.description||'CE pillar zone'}`);
+    if(currentWorld===2){
+      showZoneHint(`🌌 Entering ${z.name} — Cyber Trust Domain`);
+    } else {
+      const pb=window.CyberQB?.QUESTION_BANK[z.pillar];
+      showZoneHint(`${pb?.icon||'📍'} Entering ${z.name} — ${pb?.description||'CE pillar zone'}`);
+    }
   } else if(!z&&lastZoneId){
     lastZoneId=null;
   }
@@ -743,13 +863,15 @@ function tryEncounter(){
   if(inBattle)return;
   const z=getCurrentZone(); if(!z)return;
   if(Math.random()>0.55)return;
-  const isBossZone=z.pillar==='respond'&&player.tx>=33;
+  // Boss zone detection (W1: respond pillar; W2: advocate pillar)
+  const isBossZone=currentWorld===2?(z.pillar==='advocate'&&player.tx>=33):(z.pillar==='respond'&&player.tx>=33);
   let monster;
-  if(isBossZone&&!player.bossesDefeated.has(z.pillar)){
-    monster=z.boss; monster.isBoss=true; monster.pillar=z.pillar; monster.zoneRef=z;
+  if(isBossZone&&!player.bossesDefeated.has((currentWorld===2?'w2_':'')+z.pillar)){
+    monster={...z.boss}; monster.isBoss=true; monster.pillar=z.pillar; monster.zoneRef=z;
   } else {
-    const pool=MONSTERS[z.pillar];
-    const base=pool[Math.min(Math.floor(player.level/2),pool.length-1)];
+    const pool=activeMonsters()[z.pillar]||[];
+    if(!pool.length)return;
+    const base=pool[Math.min(Math.floor(player.level/3),pool.length-1)];
     monster={...base,isBoss:false,pillar:z.pillar,zoneRef:z};
   }
   flashEncounter(()=>startBattle(monster,z));
@@ -766,11 +888,18 @@ let battleTimer,battleCountdown,currentBattle={};
 
 function startBattle(monster,zone){
   inBattle=true;
-  let qs=window.CyberQB.getQuestionsByPillar(monster.pillar,8);
-  // High-level players (10+) get CSA fact questions mixed in 30% of the time
-  if(player.level>=10&&Math.random()<0.3){
-    const csaUnused=CSA_FACT_QUESTIONS.filter(q=>!player.usedQIds.has(q.id));
-    if(csaUnused.length>0) qs=[csaUnused[Math.floor(Math.random()*csaUnused.length)],...qs];
+  let qs;
+  if(currentWorld===2){
+    // World 2: use Cyber Trust questions for this domain
+    const domainQs=CT_QUESTIONS.filter(q=>q.pillar===monster.pillar);
+    qs=domainQs.length?domainQs:CT_QUESTIONS; // fallback to all CT questions
+  } else {
+    qs=window.CyberQB.getQuestionsByPillar(monster.pillar,8);
+    // High-level players (10+) get CSA fact questions mixed in 30% of the time
+    if(player.level>=10&&Math.random()<0.3){
+      const csaUnused=CSA_FACT_QUESTIONS.filter(q=>!player.usedQIds.has(q.id));
+      if(csaUnused.length>0) qs=[csaUnused[Math.floor(Math.random()*csaUnused.length)],...qs];
+    }
   }
   // Easy Question buff: filter to difficulty 1 only
   if(buffs.easyQ){
@@ -912,18 +1041,28 @@ function endBattle(won){
   inBattle=false;
   if(won){
     const mb=currentBattle;
-    if(mb.monster.isBoss&&!player.bossesDefeated.has(mb.monster.pillar)){
-      player.bossesDefeated.add(mb.monster.pillar||'unknown');
+    const bossKey=(currentWorld===2?'w2_':'')+mb.monster.pillar;
+    if(mb.monster.isBoss&&!player.bossesDefeated.has(bossKey)){
+      player.bossesDefeated.add(bossKey);
       gainXp(mb.monster.xpR||250);
       player.score+=500;
       addBadge(mb.monster.badge||'🎖️ Badge');
-      // First boss kill drops a Cyber Boat guaranteed
-      if(player.bossesDefeated.size===1&&!buffs.hasBoat){
-        setTimeout(()=>applyGroundItem({id:'boat',icon:'🚤',name:'Cyber Boat',desc:'Cross water tiles freely! You earned it!'}),3200);
+      if(currentWorld===2){
+        // World 2 boss defeat
+        const w2count=W2_BOSS_ZONES.filter(p=>player.bossesDefeated.has('w2_'+p)).length;
+        showZoneHint(`🌌 ${mb.monster.zoneRef?.name||'Domain'} cleared! ${w2count}/5 Cyber Trust Domains mastered.`);
+        if(w2count>=5) setTimeout(showW2Win,3500);
+      } else {
+        // World 1 boss defeat
+        // First boss kill drops a Cyber Boat guaranteed
+        if(player.bossesDefeated.size===1&&!buffs.hasBoat){
+          setTimeout(()=>applyGroundItem({id:'boat',icon:'🚤',name:'Cyber Boat',desc:'Cross water tiles freely! You earned it!'}),3200);
+        }
+        setTimeout(()=>checkExodiaTrigger(),4000);
+        const w1count=[...player.bossesDefeated].filter(k=>!k.startsWith('w2_')&&k!=='exodia').length;
+        if(w1count>=5) setTimeout(showWin,3500);
       }
       openGacha();
-      setTimeout(()=>checkExodiaTrigger(),4000);
-      if(player.bossesDefeated.size>=5)setTimeout(showWin,3500);
     } else {
       gainXp(mb.monster.xpR||30);
       if(Math.random()<0.3)setTimeout(openGacha,300);
@@ -1013,8 +1152,12 @@ function closeGacha(){
 
 // ─── WIN / GAME OVER ────────────────────────────────────────────
 function showWin(){
-  document.getElementById('win-stats').textContent=`Score: ${player.score} pts | Level ${player.level} | ${player.bossesDefeated.size}/5 Bosses defeated`;
+  const w1bosses=[...player.bossesDefeated].filter(k=>!k.startsWith('w2_')&&k!=='exodia').length;
+  document.getElementById('win-stats').textContent=`Score: ${player.score} pts | Level ${player.level} | ${w1bosses}/5 CE Bosses defeated`;
   document.getElementById('win-screen').style.display='flex';
+}
+function showW2Win(){
+  document.getElementById('w2-win-screen').style.display='flex';
 }
 function showGameOver(){
   document.getElementById('gameover-screen').style.display='flex';
@@ -1053,8 +1196,10 @@ function drawWorld(){
     for(let c=startC;c<endC;c++){
       const t=MAP_DATA[r][c];
       const x=c*TILE, y=r*TILE;
-      // Base tile
-      ctx.fillStyle=TILE_COLORS[t]||'#2a5c2a';
+      // Base tile (use W2 palette in World 2)
+      const tileColorMap=currentWorld===2?TILE_COLORS_W2:TILE_COLORS;
+      const tileBorderMap=currentWorld===2?TILE_BORDERS_W2:TILE_BORDERS;
+      ctx.fillStyle=tileColorMap[t]||'#2a5c2a';
       ctx.fillRect(x,y,TILE,TILE);
       // Tile overlay
       if(t===T.WATER){
@@ -1090,18 +1235,18 @@ function drawWorld(){
         for(let d=0;d<4;d++) ctx.fillRect(x+(d*7+3)%TILE, y+(d*11+3)%TILE,2,2);
       }
       // Border
-      ctx.strokeStyle=TILE_BORDERS[t]||'rgba(0,0,0,.2)';
+      ctx.strokeStyle=tileBorderMap[t]||'rgba(0,0,0,.2)';
       ctx.lineWidth=.5;
       ctx.strokeRect(x,y,TILE,TILE);
     }
   }
   // Zone colored ground tints
-  ZONES.forEach(z=>{
+  activeZones().forEach(z=>{
     ctx.fillStyle=z.color+'12';
     ctx.fillRect(z.xMin*TILE,z.yMin*TILE,(z.xMax-z.xMin+1)*TILE,(z.yMax-z.yMin+1)*TILE);
   });
   // Zone labels
-  ZONES.forEach(z=>{
+  activeZones().forEach(z=>{
     const cx=(z.xMin+z.xMax)/2*TILE, cy=(z.yMin+1)*TILE+16;
     ctx.save();
     ctx.font='bold '+Math.max(10,TILE*.28)+'px Segoe UI';
@@ -1271,9 +1416,10 @@ let exodiaActive=false, exodiaRound=0, exodiaMaxRounds=5, exodiaHp=500;
 const EXODIA_MAX_HP=500;
 
 function checkExodiaTrigger(){
-  // Exodia appears when all 5 zone bosses are defeated + level >= 5
-  if(exodiaActive)return;
-  const allBossesDefeated=player.bossesDefeated.size>=5;
+  // Exodia appears when all 5 W1 zone bosses are defeated + level >= 5 (World 1 only)
+  if(exodiaActive||currentWorld===2)return;
+  const w1bosses=[...player.bossesDefeated].filter(k=>!k.startsWith('w2_')&&k!=='exodia').length;
+  const allBossesDefeated=w1bosses>=5;
   if(allBossesDefeated&&player.level>=5&&!player.bossesDefeated.has('exodia')){
     setTimeout(()=>triggerExodia(),1500);
   }
@@ -1377,9 +1523,27 @@ function exodiaVictory(){
 }
 
 function startWorld2(){
-  // Placeholder — full World 2 would load a new map
   document.getElementById('world2-screen').style.display='none';
-  showZoneHint('🌌 Cyber Trust Realm — Coming in the next update! Keep levelling up!');
+  currentWorld=2;
+  // Reset player position to starting corner
+  player.tx=3; player.ty=3;
+  player.bossesDefeated=player.bossesDefeated||new Set();
+  lastZoneId=null;
+  // Flash transition
+  const fl=document.createElement('div');
+  fl.style.cssText='position:fixed;inset:0;background:#cc55ff;z-index:9999;opacity:1;transition:opacity 1.5s;pointer-events:none';
+  document.body.appendChild(fl);
+  setTimeout(()=>{fl.style.opacity=0;},100);
+  setTimeout(()=>{fl.remove();},1700);
+  // World 2 intro banner
+  setTimeout(()=>{
+    showZoneHint('🌌 CYBER TRUST REALM — 5 Tiers · 22 Domains · New threats await!');
+    document.getElementById('zone-name').textContent='Cyber Trust Realm 🌌';
+    // Show world indicator in HUD
+    const badge=document.getElementById('level-badge');
+    if(badge) badge.style.borderColor='#cc55ff';
+  },1800);
+  updateZoneHUD();
 }
 
 // ── SHOW BATTLE RESULT BAR (update to use tip popup on mobile) ──

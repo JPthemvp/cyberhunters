@@ -49,6 +49,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
 
 .footer-note{margin-top:20px;font-size:11px;opacity:.35;text-align:center}
 
+/* ── CSA SIDEBAR (landing) ── */
+#csa-float{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:row;align-items:center}
+#csa-float-tab{background:rgba(58,127,255,.18);border:1px solid rgba(58,127,255,.35);border-right:none;border-radius:10px 0 0 10px;padding:10px 8px;cursor:pointer;writing-mode:vertical-rl;font-size:10px;font-weight:800;color:#7ab0ff;letter-spacing:1px;transition:.2s;white-space:nowrap}
+#csa-float-tab:hover{background:rgba(58,127,255,.35);color:#fff}
+#csa-float-panel{width:0;overflow:hidden;transition:width .3s ease;background:rgba(8,12,24,.98);border:1px solid rgba(58,127,255,.3);border-right:none;border-radius:14px 0 0 14px}
+#csa-float-panel.open{width:230px}
+#csa-float-inner{width:230px;padding:16px}
+#csa-float-inner h4{font-size:11px;letter-spacing:1.5px;opacity:.5;margin-bottom:12px}
+.csa-l{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px;color:#7ab0ff;text-decoration:none;cursor:pointer;transition:.15s}
+.csa-l:hover{color:#fff}
+.csa-l:last-child{border:none}
+.csa-grant{margin-top:10px;background:rgba(58,255,154,.08);border:1px solid rgba(58,255,154,.25);border-radius:8px;padding:8px 10px;font-size:11px;color:#3aff9a;line-height:1.5}
+.csa-qr{margin-top:10px;text-align:center}
+.csa-qr svg{width:80px;height:80px;border-radius:6px;background:#fff;padding:4px}
+
 /* ── GAME FRAMES ── */
 #hunters-frame,#racers-frame{position:fixed;inset:0;z-index:50;display:none}
 #back-btn{position:fixed;top:12px;right:14px;z-index:200;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px);transition:.2s;color:#fff}
@@ -108,6 +123,43 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
   <div class="footer-note">Powered by CSA Cyber Essentials · Built for Singapore SMEs · Questions sourced from CE AI Edition Facilitator Guide</div>
 </div>
 
+<!-- CSA SIDEBAR (landing page) -->
+<div id="csa-float">
+  <div id="csa-float-tab" onclick="toggleCsaFloat()">📖 CSA</div>
+  <div id="csa-float-panel">
+    <div id="csa-float-inner">
+      <h4>CSA RESOURCES</h4>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🛡️ Cyber Essentials</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/cyber-trust" target="_blank">⭐ Cyber Trust Mark</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cisoaas" target="_blank">👔 Find CISOaaS Provider</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🔧 Free Toolkits (3 types)</a>
+      <a class="csa-l" href="https://ihp.csa.gov.sg" target="_blank">🌐 Internet Hygiene Portal</a>
+      <div class="csa-grant">💰 <strong>Up to 70% grant</strong> for eligible SMEs via Enterprise Development Grant (EDG). Check business.gov.sg</div>
+      <div class="csa-qr">
+        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="#000">
+          <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/>
+          <rect x="2" y="2" width="3" height="3"/><rect x="14" y="0" width="7" height="7"/>
+          <rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
+          <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/>
+          <rect x="2" y="16" width="3" height="3"/><rect x="9" y="0" width="1" height="2"/>
+          <rect x="11" y="0" width="1" height="1"/><rect x="9" y="3" width="2" height="1"/>
+          <rect x="12" y="2" width="2" height="2"/><rect x="9" y="5" width="1" height="2"/>
+          <rect x="11" y="6" width="2" height="1"/><rect x="8" y="8" width="2" height="2"/>
+          <rect x="11" y="8" width="2" height="1"/><rect x="14" y="8" width="2" height="2"/>
+          <rect x="17" y="8" width="2" height="2"/><rect x="8" y="10" width="1" height="2"/>
+          <rect x="10" y="10" width="3" height="2"/><rect x="14" y="11" width="1" height="1"/>
+          <rect x="16" y="11" width="2" height="1"/><rect x="8" y="13" width="3" height="2"/>
+          <rect x="12" y="14" width="2" height="1"/><rect x="15" y="13" width="2" height="1"/>
+          <rect x="18" y="14" width="2" height="2"/><rect x="8" y="16" width="1" height="2"/>
+          <rect x="10" y="17" width="2" height="1"/><rect x="13" y="16" width="3" height="2"/>
+          <rect x="17" y="17" width="1" height="2"/>
+        </svg>
+        <div style="font-size:10px;opacity:.5;margin-top:4px">Scan → csa.gov.sg</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- BACK BUTTON (shown during game) -->
 <button id="back-btn" onclick="goBack()">← Menu</button>
 
@@ -135,6 +187,11 @@ function launchMode(mode){
     iframe.allow='fullscreen';
     frame.appendChild(iframe);
   }
+}
+let csaFloatOpen=false;
+function toggleCsaFloat(){
+  csaFloatOpen=!csaFloatOpen;
+  document.getElementById('csa-float-panel').classList.toggle('open',csaFloatOpen);
 }
 function goBack(){
   document.getElementById('hunters-frame').style.display='none';
