@@ -514,7 +514,7 @@ let headstartRecipients=[]; // IDs that get a 0.12 progress headstart for this s
 
 const player={
   x:TK[0][0],y:TK[0][1],angle:Math.atan2(TK[1][1]-TK[0][1],TK[1][0]-TK[0][0]),
-  speed:0,maxSpeed:999,accel:.32,friction:.96,turnRate:.055,
+  speed:0,maxSpeed:999,accel:.55,friction:.94,turnRate:.055,
   boosting:0,spinning:0,shielded:false,slow:0,
   progress:0,prevProgress:0,laps:0,finished:false,
   score:0,correctAnswers:0,wrongAnswers:0,
@@ -1020,7 +1020,7 @@ function updateAI(k){
   let diff=wantAng-k.angle;
   while(diff>Math.PI)diff-=2*Math.PI; while(diff<-Math.PI)diff+=2*Math.PI;
   k.angle+=diff*.08;
-  const topSpd=k.aiBoosting>0?4.8:k.aiSlowed>0?1.2:3.2+Math.random()*.3;
+  const topSpd=k.aiBoosting>0?9:k.aiSlowed>0?2:5.5+Math.random()*.5;
   if(k.aiBoosting>0)k.aiBoosting--; if(k.aiSlowed>0)k.aiSlowed--;
   k.speed=(k.speed||2.5)+.05;
   k.speed=Math.min(k.speed||5,topSpd);
