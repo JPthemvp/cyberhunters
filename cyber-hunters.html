@@ -117,6 +117,41 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 #buff-bar{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;pointer-events:none}
 .buff-chip{background:rgba(0,0,0,.7);border:1px solid rgba(255,204,0,.5);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#ffcc00;animation:buffPulse 1.5s ease-in-out infinite}
 @keyframes buffPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* ── ORIENTATION OVERLAY ── */
+#orient-overlay{position:fixed;inset:0;z-index:200;background:#05080f;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#orient-overlay .orient-icon{font-size:72px;animation:rotateHint 2s ease-in-out infinite}
+@keyframes rotateHint{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
+/* ── TIP POPUP (mobile) ── */
+#tip-popup{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);padding:20px}
+#tip-popup-box{background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(58,127,255,.4);border-radius:18px;padding:24px;max-width:360px;width:100%;text-align:center}
+#tip-popup-icon{font-size:40px;margin-bottom:10px}
+#tip-popup-title{font-size:16px;font-weight:800;margin-bottom:8px}
+#tip-popup-body{font-size:13px;opacity:.8;line-height:1.6;margin-bottom:16px}
+/* ── QUIT DIALOG ── */
+#quit-dialog{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8)}
+#quit-box{background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(255,80,80,.4);border-radius:18px;padding:28px 32px;text-align:center;max-width:320px}
+#quit-box h3{font-size:20px;margin-bottom:8px}
+#quit-box p{opacity:.7;font-size:14px;margin-bottom:20px}
+.quit-btns{display:flex;gap:12px;justify-content:center}
+/* ── CSA SIDEBAR PANEL ── */
+#csa-panel{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:4px}
+.csa-tab{background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);border-right:none;border-radius:10px 0 0 10px;padding:8px 10px;cursor:pointer;writing-mode:vertical-rl;text-orientation:mixed;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);transition:.2s;white-space:nowrap;letter-spacing:.5px}
+.csa-tab:hover{background:rgba(58,127,255,.2);color:#fff;border-color:rgba(58,127,255,.4)}
+#csa-drawer{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:24;width:220px;background:rgba(10,14,26,.97);border:1px solid rgba(58,127,255,.3);border-right:none;border-radius:14px 0 0 14px;padding:16px;transition:transform .3s;transform:translateY(-50%) translateX(240px)}
+#csa-drawer.open{transform:translateY(-50%) translateX(0)}
+.csa-link{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px;color:#7ab0ff;text-decoration:none;cursor:pointer}
+.csa-link:last-child{border:none}
+.csa-link:hover{color:#fff}
+/* ── QUIT BTN IN HUD ── */
+#quit-btn{position:fixed;top:12px;left:12px;z-index:25;background:rgba(255,60,60,.15);border:1px solid rgba(255,80,80,.3);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:#ff8080;display:none;backdrop-filter:blur(6px)}
+#quit-btn:hover{background:rgba(255,60,60,.3)}
+/* ── EXODIA BOSS SPECIAL ── */
+#exodia-video{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:10px;background:#000;display:none}
+.exodia-battle{background:radial-gradient(ellipse 100% 80% at 50% 50%,#1a0028 0%,#05080f 100%)!important}
+.exodia-name{background:linear-gradient(135deg,#ff00ff,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* ── WORLD 2 TEASER ── */
+#world2-screen{background:linear-gradient(135deg,#0a001a,#1a0030)}
+
 </style>
 </head>
 <body>
@@ -196,6 +231,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
       <div class="hp-text" id="player-hp-text">5/5 HP</div>
     </div>
   </div>
+  <video id="exodia-video" autoplay muted playsinline webkit-playsinline></video>
   <div id="battle-textbox">
     <div class="pillar-label" id="battle-pillar" style="color:#3a7fff">🗂️ ASSETS</div>
     <div id="battle-question">Loading…</div>
@@ -206,6 +242,95 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="battle-opts" id="battle-opts"></div>
   </div>
   <div id="battle-result-bar"></div>
+</div>
+
+<!-- ORIENTATION OVERLAY (mobile) -->
+<div id="orient-overlay">
+  <div class="orient-icon">📱</div>
+  <h2 style="font-size:22px;margin:16px 0 8px">Tilt for Best Experience</h2>
+  <p style="opacity:.7;font-size:14px;max-width:280px;line-height:1.6">Rotate your phone to <strong>landscape (horizontal)</strong> for the best Cyber Hunters experience!</p>
+  <button class="btn" style="margin-top:20px" onclick="dismissOrient()">Got it! ▶</button>
+</div>
+
+<!-- TIP POPUP (mobile answer feedback) -->
+<div id="tip-popup">
+  <div id="tip-popup-box">
+    <div id="tip-popup-icon">❌</div>
+    <div id="tip-popup-title">Wrong Answer!</div>
+    <div id="tip-popup-body">Loading tip…</div>
+    <button class="btn" style="width:100%" onclick="closeTipPopup()">Got it! 💪</button>
+  </div>
+</div>
+
+<!-- QUIT DIALOG -->
+<div id="quit-dialog">
+  <div id="quit-box">
+    <h3>⚠️ Quit Game?</h3>
+    <p>Your progress will be lost. Are you sure?</p>
+    <div class="quit-btns">
+      <button class="btn" style="background:rgba(255,255,255,.1);color:#fff" onclick="closeQuit()">Keep Playing</button>
+      <button class="btn danger" onclick="location.reload()">Quit</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSA SIDEBAR -->
+<div id="csa-panel">
+  <div class="csa-tab" onclick="toggleCsaDrawer()">📖 CSA INFO</div>
+</div>
+<div id="csa-drawer">
+  <div style="font-size:12px;font-weight:800;opacity:.5;letter-spacing:1px;margin-bottom:10px">CSA RESOURCES</div>
+  <a class="csa-link" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🛡️ Cyber Essentials</a>
+  <a class="csa-link" href="https://www.csa.gov.sg/cyber-trust" target="_blank">⭐ Cyber Trust Mark</a>
+  <a class="csa-link" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cisoaas" target="_blank">👔 Find CISOaaS Provider</a>
+  <a class="csa-link" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🔧 Free Toolkits (3 available)</a>
+  <a class="csa-link" href="https://ihp.csa.gov.sg" target="_blank">🌐 Internet Hygiene Portal</a>
+  <div style="margin-top:10px;text-align:center">
+    <div style="font-size:10px;opacity:.5;margin-bottom:6px">Scan for Cyber Essentials</div>
+    <svg width="90" height="90" viewBox="0 0 90 90" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <!-- QR placeholder pattern -->
+      <rect width="90" height="90" fill="#0a0e1a" rx="6"/>
+      <rect x="8" y="8" width="24" height="24" fill="none" stroke="#7ab0ff" stroke-width="3" rx="2"/>
+      <rect x="14" y="14" width="12" height="12" fill="#7ab0ff" rx="1"/>
+      <rect x="58" y="8" width="24" height="24" fill="none" stroke="#7ab0ff" stroke-width="3" rx="2"/>
+      <rect x="64" y="14" width="12" height="12" fill="#7ab0ff" rx="1"/>
+      <rect x="8" y="58" width="24" height="24" fill="none" stroke="#7ab0ff" stroke-width="3" rx="2"/>
+      <rect x="14" y="64" width="12" height="12" fill="#7ab0ff" rx="1"/>
+      <rect x="38" y="8" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="44" y="8" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="38" y="14" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="44" y="14" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="58" y="38" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="64" y="38" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="70" y="38" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="38" y="38" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="44" y="44" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="50" y="38" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="38" y="44" width="4" height="4" fill="#7ab0ff"/>
+      <rect x="58" y="58" width="14" height="4" fill="#7ab0ff"/>
+      <rect x="58" y="64" width="4" height="10" fill="#7ab0ff"/>
+      <rect x="70" y="64" width="4" height="10" fill="#7ab0ff"/>
+      <text x="45" y="82" fill="#3a7fff" font-size="6" text-anchor="middle" font-family="monospace">go.gov.sg/ce</text>
+    </svg>
+  </div>
+  <div style="margin-top:8px;font-size:10px;opacity:.4;text-align:center">Up to 70% grant for SMEs · EDG</div>
+</div>
+
+<!-- QUIT BUTTON (in-game) -->
+<button id="quit-btn" onclick="openQuit()">✕ Quit</button>
+
+<!-- WORLD 2 TEASER SCREEN -->
+<div class="overlay" id="world2-screen" style="display:none">
+  <div style="font-size:64px;animation:float 3s ease-in-out infinite">🌌</div>
+  <h1 style="background:linear-gradient(135deg,#cc55ff,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Cyber Legend!</h1>
+  <p style="max-width:400px">You have defeated Exodia and mastered all 5 Cyber Essentials pillars. A new world awaits — <strong>the Cyber Trust Realm</strong>.</p>
+  <div style="margin:16px 0;padding:16px;background:rgba(200,85,255,.1);border:1px solid rgba(200,85,255,.3);border-radius:12px;max-width:380px;font-size:13px;opacity:.8;line-height:1.7">
+    🏆 5 Tiers · 22 Domains · Risk-Based Assessment<br>
+    ☁️ Cloud · 🏭 OT · 🤖 AI Security<br>
+    <strong style="color:#cc55ff">Cyber Trust Mark — CSA Singapore</strong>
+  </div>
+  <button class="btn" style="background:linear-gradient(135deg,#cc55ff,#ff8800)" onclick="startWorld2()">Enter Cyber Trust Realm ▶</button>
+  <button class="btn" style="background:rgba(255,255,255,.1);margin-top:8px" onclick="location.reload()">Return to Main Menu</button>
 </div>
 
 <!-- GACHA OVERLAY -->
@@ -397,7 +522,7 @@ const MAP_DATA = (()=>{
 // Zone definitions (col range, row range, pillar key)
 const ZONES = [
   {pillar:'assets',  xMin:2,xMax:19,yMin:1,yMax:9,  color:'#3a7fff',name:'Asset Atoll',      boss:{name:'Shadow IT Lord',sprite:'🕵️',hp:60,xpR:100,badge:'🗂️ Asset Badge'}},
-  {pillar:'secure',  xMin:21,xMax:39,yMin:1,yMax:9,  color:'#3aff9a',name:'Security Sanctum',boss:{name:'Ransomware Dragon',sprite:'🐲',hp:80,xpR:150,badge:'🛡️ Shield Badge'}},
+  {pillar:'secure',  xMin:21,xMax:39,yMin:1,yMax:9,  color:'#3aff9a',name:'Secured Sanctum',boss:{name:'Ransomware Dragon',sprite:'🐲',hp:80,xpR:150,badge:'🛡️ Shield Badge'}},
   {pillar:'update',  xMin:2,xMax:19,yMin:11,yMax:29, color:'#ffcc00',name:'Patch Plains',     boss:{name:'Zero-Day Phantom',sprite:'👻',hp:70,xpR:120,badge:'🔄 Update Badge'}},
   {pillar:'backup',  xMin:21,xMax:32,yMin:11,yMax:29,color:'#ff7a3c',name:'Backup Bastion',   boss:{name:'Data Void Wraith',sprite:'💀',hp:90,xpR:180,badge:'💾 Backup Badge'}},
   {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Response HQ',      boss:{name:'APT Overlord',sprite:'☠️',hp:120,xpR:250,badge:'🚨 Master Badge'}},
@@ -421,7 +546,11 @@ const player = {tx:5,ty:5,face:'down',moving:false,moveT:0,px:5,py:5,
   shield:false, doubleXp:false, hintUsed:false,
   bossesDefeated: new Set(),
 };
-const XP_PER_LEVEL=[0,100,250,450,700,1000,1400,1900];
+const XP_PER_LEVEL=[0,100,250,450,700,1000,1400,1900,2500,3200,4000,5000,6200,7500,9000,12000];
+const LEVEL_TITLES=['','Trainee','Analyst','Associate','Specialist','Cyber Novice',
+  'Senior Analyst','Security Pro','Threat Hunter','Security Master','Cyber Expert',
+  'Elite Analyst','Security Architect','CISO Candidate','Cyber Defender','Cyber Legend'];
+
 
 // Camera
 let camX=0,camY=0;
@@ -638,6 +767,11 @@ let battleTimer,battleCountdown,currentBattle={};
 function startBattle(monster,zone){
   inBattle=true;
   let qs=window.CyberQB.getQuestionsByPillar(monster.pillar,8);
+  // High-level players (10+) get CSA fact questions mixed in 30% of the time
+  if(player.level>=10&&Math.random()<0.3){
+    const csaUnused=CSA_FACT_QUESTIONS.filter(q=>!player.usedQIds.has(q.id));
+    if(csaUnused.length>0) qs=[csaUnused[Math.floor(Math.random()*csaUnused.length)],...qs];
+  }
   // Easy Question buff: filter to difficulty 1 only
   if(buffs.easyQ){
     const easy=qs.filter(q=>q.difficulty===1);
@@ -690,9 +824,12 @@ function updateBattleHpBars(){
   document.getElementById('player-hp-text').textContent=player.hp+'/'+player.maxHp+' HP';
 }
 
-function startBattleTimer(q){
+function startBattleTimer(qOrSecs,onTimeout){
   clearInterval(battleTimer);
-  battleCountdown=25;
+  // Accept either a question object (old path) or a duration + callback (Exodia path)
+  const secs=(typeof qOrSecs==='number')?qOrSecs:30;
+  const cb=(typeof qOrSecs==='number')?onTimeout:()=>timeoutAnswer(qOrSecs);
+  battleCountdown=secs;
   const fill=document.getElementById('battle-timer-fill');
   const num=document.getElementById('timer-num');
   num.textContent=battleCountdown;
@@ -700,12 +837,13 @@ function startBattleTimer(q){
   battleTimer=setInterval(()=>{
     battleCountdown--;
     num.textContent=battleCountdown;
-    fill.style.width=(battleCountdown/25*100)+'%';
+    fill.style.width=(battleCountdown/secs*100)+'%';
     if(battleCountdown<=5)fill.style.background='#ff5050';
     else fill.style.background='#3aff9a';
-    if(battleCountdown<=0){ clearInterval(battleTimer); timeoutAnswer(q); }
+    if(battleCountdown<=0){ clearInterval(battleTimer); cb&&cb(); }
   },1000);
 }
+function stopBattleTimer(){ clearInterval(battleTimer); }
 
 function timeoutAnswer(q){
   clearInterval(battleTimer);
@@ -727,7 +865,13 @@ function showBattleResult(correct,label,q){
   const bar=document.getElementById('battle-result-bar');
   bar.style.display='flex';
   bar.className='battle-result-bar '+(correct?'correct':'wrong');
-  bar.innerHTML=`<span>${label}</span><span id="tip-text">${q.tip}</span>`;
+  bar.innerHTML=`<span>${label}</span>`;
+  // On mobile: centered popup for tip; on desktop: show in bar
+  if(isMobile&&q.tip){
+    showTipPopup(correct?'✅':'❌',correct?'Correct! +XP':'Wrong!',q.tip);
+  } else {
+    bar.innerHTML+=`<span id="tip-text">${q.tip}</span>`;
+  }
   if(correct){
     const dmg=Math.floor(mb.monsterMaxHp/( mb.monster.isBoss?mb.maxQ:1 ));
     mb.monsterHp=Math.max(0,mb.monsterHp-dmg);
@@ -769,11 +913,16 @@ function endBattle(won){
   if(won){
     const mb=currentBattle;
     if(mb.monster.isBoss&&!player.bossesDefeated.has(mb.monster.pillar)){
-      player.bossesDefeated.add(mb.monster.pillar);
+      player.bossesDefeated.add(mb.monster.pillar||'unknown');
       gainXp(mb.monster.xpR||250);
       player.score+=500;
       addBadge(mb.monster.badge||'🎖️ Badge');
+      // First boss kill drops a Cyber Boat guaranteed
+      if(player.bossesDefeated.size===1&&!buffs.hasBoat){
+        setTimeout(()=>applyGroundItem({id:'boat',icon:'🚤',name:'Cyber Boat',desc:'Cross water tiles freely! You earned it!'}),3200);
+      }
       openGacha();
+      setTimeout(()=>checkExodiaTrigger(),4000);
       if(player.bossesDefeated.size>=5)setTimeout(showWin,3500);
     } else {
       gainXp(mb.monster.xpR||30);
@@ -788,7 +937,7 @@ function endBattle(won){
 function gainXp(amt){
   player.xp+=amt;
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
-  if(player.xp>=next&&player.level<8){ player.level++; player.xp=0; showLevelUp(); }
+  if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); }
   updateXpBar();
 }
 function updateScoreDisplay(){ document.getElementById('score-display').textContent=player.score+' pts'; }
@@ -796,14 +945,18 @@ function updateXpBar(){
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
   const pct=Math.min(100,player.xp/next*100);
   document.getElementById('xp-bar').style.width=pct+'%';
-  const titles=['Trainee','Analyst','Associate','Specialist','Senior','Expert','Pro','Master'];
-  document.getElementById('level-badge').textContent='Lv.'+player.level+' '+titles[player.level-1];
+  const title=LEVEL_TITLES[Math.min(player.level,LEVEL_TITLES.length-1)]||'Legend';
+  document.getElementById('level-badge').textContent='Lv.'+player.level+' '+title+' · '+playerName;
 }
 function showLevelUp(){
   const banner=document.getElementById('levelup-banner');
   document.getElementById('levelup-text').textContent='Now Level '+player.level+'!';
   banner.classList.add('show');
-  if(player.level>=5)document.getElementById('levelup-text').textContent='Now Level '+player.level+'! Boss Zone unlocked!';
+  let lvlMsg='Now Level '+player.level+'! '+title+'!';
+  if(player.level===5)lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!';
+  if(player.level===10)lvlMsg='⭐ Cyber Expert! New challenges unlocked!';
+  if(player.level===15)lvlMsg='🏆 CYBER LEGEND! Cyber Trust World unlocked!';
+  document.getElementById('levelup-text').textContent=lvlMsg;
   setTimeout(()=>banner.classList.remove('show'),2500);
 }
 
@@ -1026,6 +1179,221 @@ function loop(now){
   drawWorld();
 }
 
+// ── MOBILE ORIENTATION ──────────────────────────────────────────
+const isMobile='ontouchstart' in window||navigator.maxTouchPoints>0;
+function checkOrientation(){
+  if(!isMobile)return;
+  const isLandscape=window.innerWidth>window.innerHeight;
+  document.getElementById('orient-overlay').style.display=isLandscape?'none':'flex';
+}
+function dismissOrient(){
+  document.getElementById('orient-overlay').style.display='none';
+}
+window.addEventListener('orientationchange',()=>setTimeout(checkOrientation,300));
+
+// ── QUIT DIALOG ──────────────────────────────────────────────────
+function openQuit(){ document.getElementById('quit-dialog').style.display='flex'; }
+function closeQuit(){ document.getElementById('quit-dialog').style.display='none'; }
+
+// ── CSA SIDEBAR ──────────────────────────────────────────────────
+let csaOpen=false;
+function toggleCsaDrawer(){
+  csaOpen=!csaOpen;
+  document.getElementById('csa-drawer').classList.toggle('open',csaOpen);
+}
+
+// ── TIP POPUP (mobile) ──────────────────────────────────────────
+function showTipPopup(icon,title,body){
+  document.getElementById('tip-popup-icon').textContent=icon;
+  document.getElementById('tip-popup-title').textContent=title;
+  document.getElementById('tip-popup-body').textContent=body;
+  document.getElementById('tip-popup').style.display='flex';
+}
+function closeTipPopup(){
+  document.getElementById('tip-popup').style.display='none';
+}
+
+// ── EXODIA BOSS QUESTIONS (with video) ──────────────────────────
+const EXODIA_QUESTIONS=[
+  {
+    video:'videos/scenario-a.mov',
+    pillar:'🚨 SCENARIO A',
+    q:'The simulation shows a ransomware attack encrypting company files. What should the company do FIRST?',
+    opts:['Pay the ransom immediately to get files back','Isolate affected systems, visit nomoreransom.org, then report to SingCERT','Delete all encrypted files and reinstall','Continue working — antiviruses will fix it'],
+    ans:1,tip:'NEVER pay ransom. Isolate → nomoreransom.org for free decryptors → restore from offline backup → report to SingCERT. Paying funds criminals and data may not be recovered.'
+  },
+  {
+    video:'videos/scenario-b.mov',
+    pillar:'🎭 SCENARIO B',
+    q:'The simulation shows a social engineering call impersonating IT support. Staff are asked for passwords. What is the BEST response?',
+    opts:['Be polite and provide the information','Hang up and call back on the official verified number','Ask the caller for their employee ID','Transfer the call to another colleague'],
+    ans:1,tip:'Legitimate IT will never ask for your password. Hang up and call the official helpdesk number. Social engineers create urgency — slow down and verify.'
+  },
+  {
+    video:'videos/scenario-c.mov',
+    pillar:'🤖 SCENARIO C',
+    q:'The simulation shows a deepfake video call where a "CFO" requests an urgent $500,000 fund transfer. What do you do?',
+    opts:['Process the transfer — the CFO looks and sounds real','Verify via a separate trusted channel (call their personal number) before any action','Reply in the same video call asking for an approval code','Transfer 50% first as a test'],
+    ans:1,tip:'In 2024, a Hong Kong employee paid US$25.6M after a deepfake CFO call. Always verify high-value requests through a SEPARATE trusted channel you initiate yourself.'
+  },
+  {
+    video:'videos/scenario-g.mov',
+    pillar:'🔐 SCENARIO G',
+    q:'The simulation shows staff submitting confidential client contracts into an unapproved AI tool. What is the PRIMARY risk?',
+    opts:['The AI may give inaccurate summaries','Provider terms may allow use of submitted data for AI training, exposing confidential information','The AI tool might be slow','The contract format may not be supported'],
+    ans:1,tip:'Samsung engineers leaked source code via ChatGPT in 2023. Unapproved AI tools may train on your data. Always check data governance policies and only use IT-approved AI tools.'
+  },
+  {
+    video:'videos/scenario-h.mp4',
+    pillar:'🧠 SCENARIO H',
+    q:'The simulation shows AI-generated disinformation manipulating employees into taking harmful actions. What is the FIRST step to protect your organisation?',
+    opts:['Ban all AI tools immediately across the organisation','Establish AI governance policies, approved tools list, and mandatory employee awareness training','Only use AI tools from large tech companies','Wait for CSA to issue specific guidance'],
+    ans:1,tip:'IBM found 20% of organisations suffered breaches from shadow AI. Establish governance first: approved tools list, data handling policies, and employee training on AI manipulation tactics.'
+  },
+];
+
+// CSA FACT QUESTIONS (for high-level players / World 2 prep)
+const CSA_FACT_QUESTIONS=[
+  {id:'CF1',pillar:'⭐ Cyber Trust',q:'How many cybersecurity preparedness tiers does the CSA Cyber Trust mark have?',opts:['3 tiers','5 tiers','7 tiers','10 tiers'],ans:1,tip:'Cyber Trust has 5 tiers: Supporter, Practitioner, Promoter, Performer, and Advocate — each requiring more domains than the last.',difficulty:2},
+  {id:'CF2',pillar:'⭐ Cyber Trust',q:'How many cybersecurity preparedness domains are in the full CSA Cyber Trust mark?',opts:['10 domains','15 domains','22 domains','30 domains'],ans:2,tip:'Cyber Trust covers 22 domains. Supporter tier requires 10, scaling up to all 22 domains for Advocate — the highest tier.',difficulty:2},
+  {id:'CF3',pillar:'📱 CSA Resources',q:'What is CSA\'s Internet Hygiene Portal (IHP) used for?',opts:['Filing incident reports to SingCERT','Checking your organisation\'s internet-facing assets for security hygiene issues','Applying for cybersecurity grants','Registering as a CISOaaS provider'],ans:1,tip:'The IHP (ihp.csa.gov.sg) is a free tool that checks your internet-facing assets — websites, mail servers, etc. — for common vulnerabilities and poor configurations.',difficulty:1},
+  {id:'CF4',pillar:'⭐ Cyber Trust',q:'Under the CSA Cyber Trust mark certification, how long is the certificate valid?',opts:['1 year','2 years','3 years with annual surveillance audits','5 years'],ans:2,tip:'Cyber Trust certification is valid for 3 years, with mandatory annual surveillance audits to ensure continued compliance. Renewal required after expiry.',difficulty:1},
+  {id:'CF5',pillar:'💰 Grants',q:'Singapore SMEs can receive up to what % in grant support for cybersecurity through the Enterprise Development Grant (EDG)?',opts:['30%','50%','70%','90%'],ans:2,tip:'Eligible SMEs can get up to 70% support through the Enterprise Development Grant (EDG) for cybersecurity projects. Check business.gov.sg for current eligibility.',difficulty:1},
+  {id:'CF6',pillar:'👔 CISOaaS',q:'What does the CSA CISOaaS programme connect Singapore SMEs with?',opts:['Free antivirus software','Qualified Chief Information Security Officers on a subscription basis','Government cybersecurity auditors','Free penetration testing services'],ans:1,tip:'CISOaaS (CISO-as-a-Service) lets SMEs access experienced CISOs without hiring full-time. Providers are vetted by CSA. Visit csa.gov.sg to find approved providers.',difficulty:2},
+  {id:'CF7',pillar:'🤖 Cyber Trust',q:'Beyond classical IT security, the Cyber Trust mark covers which additional technology domains?',opts:['Cloud only','Cloud and OT','Cloud, OT, and AI','Cloud, OT, AI, and IoT'],ans:2,tip:'Cyber Trust explicitly covers 4 areas: Classical cybersecurity, Cloud security, OT (Operational Technology) security, and AI security — reflecting modern digital environments.',difficulty:2},
+  {id:'CF8',pillar:'⭐ Cyber Trust',q:'Which of these is NOT one of the 6 risk scenario categories in the Cyber Trust mark risk assessment?',opts:['Data breach','Supply chain','Cryptocurrency attack','Human factor'],ans:2,tip:'The 6 Cyber Trust risk categories are: Data breach, Human factor, Infrastructure, Physical security, Regulatory & compliance, and Supply chain. Crypto attacks fall under infrastructure.',difficulty:2},
+  {id:'CF9',pillar:'📚 CSA Toolkits',q:'How many free cybersecurity toolkit types has CSA developed for organisations?',opts:['1 (for IT staff only)','2 (leaders and employees)','3 (for org leaders, employees, and IT/cybersecurity personnel)','5 (one per CE pillar)'],ans:2,tip:'CSA provides 3 toolkits: for organisation leaders, employees, and IT/cybersecurity personnel. Available free at csa.gov.sg. Use them for internal awareness programmes.',difficulty:1},
+  {id:'CF10',pillar:'🏥 Real World',q:'A Singapore health clinic suffered a ransomware attack that forced it to close permanently. What could have BEST prevented this?',opts:['Paying the ransom faster','Having tested offline backups AND an incident response plan','Better passwords only','Contacting police immediately'],ans:1,tip:'The clinic had backups that were also encrypted. The key lessons: maintain OFFLINE backups (separate from live environment) and regularly TEST restoration. An IR plan speeds recovery.',difficulty:2},
+];
+
+// ── EXODIA BOSS SYSTEM ──────────────────────────────────────────
+let exodiaActive=false, exodiaRound=0, exodiaMaxRounds=5, exodiaHp=500;
+const EXODIA_MAX_HP=500;
+
+function checkExodiaTrigger(){
+  // Exodia appears when all 5 zone bosses are defeated + level >= 5
+  if(exodiaActive)return;
+  const allBossesDefeated=player.bossesDefeated.size>=5;
+  if(allBossesDefeated&&player.level>=5&&!player.bossesDefeated.has('exodia')){
+    setTimeout(()=>triggerExodia(),1500);
+  }
+}
+
+function triggerExodia(){
+  exodiaActive=true;
+  exodiaRound=0;
+  exodiaHp=EXODIA_MAX_HP;
+  showZoneHint('⚠️ EXODIA awakens! The ultimate threat approaches!');
+  setTimeout(startExodiaRound,2000);
+}
+
+function startExodiaRound(){
+  if(exodiaRound>=exodiaMaxRounds){
+    exodiaVictory(); return;
+  }
+  const eq=EXODIA_QUESTIONS[exodiaRound];
+  inBattle=true;
+  // Special Exodia battle UI
+  document.getElementById('battle-overlay').classList.add('exodia-battle');
+  document.getElementById('enemy-name').innerHTML='<span class="exodia-name">⚡ EXODIA</span>';
+  document.getElementById('enemy-sprite').textContent='👁️';
+  document.getElementById('enemy-lvl').textContent='FINAL BOSS';
+  document.getElementById('player-battle-name').textContent=playerName;
+  document.getElementById('player-battle-lvl').textContent='Lv.'+player.level;
+  document.getElementById('player-battle-sprite').textContent=playerAvatar;
+  // Set HP bars
+  document.getElementById('enemy-hp-fill').style.width=(exodiaHp/EXODIA_MAX_HP*100)+'%';
+  document.getElementById('enemy-hp-text').textContent=exodiaHp+'/'+EXODIA_MAX_HP+' HP';
+  document.getElementById('player-hp-fill').style.width=(player.hp/player.maxHp*100)+'%';
+  document.getElementById('player-hp-text').textContent=player.hp+'/'+player.maxHp+' HP';
+  // Show video
+  const vid=document.getElementById('exodia-video');
+  vid.style.display='block';
+  vid.src=eq.video;
+  vid.load(); vid.play().catch(()=>{});
+  // Show question
+  document.getElementById('battle-pillar').textContent=eq.pillar;
+  document.getElementById('battle-pillar').style.color='#ff55ff';
+  document.getElementById('battle-question').textContent=eq.q;
+  // Options
+  const opts=document.getElementById('battle-opts');
+  opts.innerHTML='';
+  const labels=['A','B','C','D'];
+  eq.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='battle-opt';
+    btn.textContent=labels[i]+'. '+o;
+    btn.onclick=()=>answerExodia(i,eq);
+    opts.appendChild(btn);
+  });
+  document.getElementById('battle-overlay').style.display='flex';
+  startBattleTimer(30,()=>answerExodia(-1,eq));
+}
+
+function answerExodia(chosen,eq){
+  stopBattleTimer();
+  const correct=chosen===eq.ans;
+  document.querySelectorAll('.battle-opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===eq.ans)b.classList.add('correct');
+    else if(i===chosen)b.classList.add('wrong');
+  });
+  const vid=document.getElementById('exodia-video');
+  vid.pause();
+  if(correct){
+    const dmg=100;
+    exodiaHp=Math.max(0,exodiaHp-dmg);
+    gainXp(80); player.score+=300;
+    showBattleResultBar(true,'⚡ Direct hit! Exodia takes '+dmg+' damage!',eq.tip);
+    document.getElementById('enemy-sprite').classList.add('sprite-shake');
+  } else {
+    player.hp=Math.max(0,player.hp-2);
+    updateHpHearts();
+    showBattleResultBar(false,(chosen===-1?'⏱️ Timed out!':'❌ Wrong!')+ ' Exodia strikes back! -2 HP',eq.tip);
+    if(player.hp<=0){ setTimeout(()=>{ document.getElementById('battle-overlay').style.display='none'; showGameOver(); },2500); return; }
+  }
+  document.getElementById('enemy-hp-fill').style.width=(exodiaHp/EXODIA_MAX_HP*100)+'%';
+  document.getElementById('enemy-hp-text').textContent=exodiaHp+'/'+EXODIA_MAX_HP+' HP';
+  exodiaRound++;
+  setTimeout(()=>{
+    document.getElementById('battle-result-bar').style.display='none';
+    if(exodiaRound>=exodiaMaxRounds||exodiaHp<=0) exodiaVictory();
+    else startExodiaRound();
+  },3000);
+}
+
+function exodiaVictory(){
+  exodiaActive=false;
+  player.bossesDefeated.add('exodia');
+  document.getElementById('battle-overlay').style.display='none';
+  document.getElementById('exodia-video').style.display='none';
+  document.getElementById('battle-overlay').classList.remove('exodia-battle');
+  inBattle=false;
+  gainXp(500); player.score+=2000;
+  showZoneHint('🏆 EXODIA DEFEATED! You are a true Cyber Legend!');
+  setTimeout(()=>{
+    document.getElementById('world2-screen').style.display='flex';
+  },3000);
+}
+
+function startWorld2(){
+  // Placeholder — full World 2 would load a new map
+  document.getElementById('world2-screen').style.display='none';
+  showZoneHint('🌌 Cyber Trust Realm — Coming in the next update! Keep levelling up!');
+}
+
+// ── SHOW BATTLE RESULT BAR (update to use tip popup on mobile) ──
+function showBattleResultBar(correct,msg,tip){
+  const bar=document.getElementById('battle-result-bar');
+  bar.className='battle-result-bar '+(correct?'correct':'wrong');
+  bar.innerHTML=`<span>${correct?'✅':'❌'} ${msg}</span>`;
+  bar.style.display='flex';
+  // On mobile: also show a centered popup for the tip
+  if(isMobile&&tip){
+    showTipPopup(correct?'✅':'❌',correct?'Correct! +XP':'Wrong!',tip);
+  }
+}
+
 // ── CHARACTER SELECTION ──────────────────────────────────────────
 let playerName='Hunter', playerAvatar='🧑‍💻';
 function showCharSelect(){
@@ -1053,6 +1421,12 @@ function startGame(){
   gameRunning=true;
   spawnGroundItems();
   updateXpBar();
+  // Show quit button
+  document.getElementById('quit-btn').style.display='block';
+  // Show CSA panel
+  document.getElementById('csa-panel').style.display='flex';
+  // Mobile orientation check
+  if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
   requestAnimationFrame(loop);

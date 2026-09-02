@@ -101,6 +101,17 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 /* ─── SOLO BACK BUTTON ─── */
 #solo-back{position:fixed;top:12px;left:12px;z-index:30;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
 #solo-back:hover{background:rgba(255,255,255,.1)}
+/* ─── QUIT BUTTON (IN-RACE) ─── */
+#quit-race-btn{position:fixed;top:12px;right:12px;z-index:30;background:rgba(180,0,0,.55);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
+#quit-race-btn:hover{background:rgba(220,0,0,.75)}
+#quit-race-dialog{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center}
+#quit-race-box{background:#0d1120;border:1.5px solid rgba(255,255,255,.15);border-radius:18px;padding:32px 40px;text-align:center;max-width:340px}
+#quit-race-box h3{font-size:20px;margin-bottom:10px}
+#quit-race-box p{opacity:.7;font-size:14px;margin-bottom:24px}
+.quit-btns{display:flex;gap:12px;justify-content:center}
+.quit-btns button{padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none}
+#confirm-quit-race{background:#e03;color:#fff}
+#cancel-quit-race{background:rgba(255,255,255,.12);color:#fff}
 /* ─── CAR SELECT ─── */
 .car-select-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
 .car-opt{width:72px;height:72px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.2s;font-size:10px;color:rgba(255,255,255,.6);font-weight:700}
@@ -237,6 +248,19 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 
 <!-- Solo Back Button -->
 <button id="solo-back" onclick="exitSolo()">← Menu</button>
+<!-- Quit Race Button (shown during any race) -->
+<button id="quit-race-btn" onclick="showQuitRaceDialog()">✕ Quit</button>
+<!-- Quit Confirmation Dialog -->
+<div id="quit-race-dialog" style="display:none">
+  <div id="quit-race-box">
+    <h3>🏁 Quit Race?</h3>
+    <p>Your progress will be lost. Are you sure you want to leave the race?</p>
+    <div class="quit-btns">
+      <button id="confirm-quit-race" onclick="confirmQuitRace()">Yes, Quit</button>
+      <button id="cancel-quit-race" onclick="hideQuitRaceDialog()">Keep Racing</button>
+    </div>
+  </div>
+</div>
 
 <!-- Touch Controls: Left | Gas (centre) | Right -->
 <div id="touch-controls" style="display:none">
@@ -451,8 +475,21 @@ function pickType(el){
 }
 
 // ─── SOLO BACK ───────────────────────────────────────────────────
+function showQuitRaceDialog(){ document.getElementById('quit-race-dialog').style.display='flex'; }
+function hideQuitRaceDialog(){ document.getElementById('quit-race-dialog').style.display='none'; }
+function confirmQuitRace(){
+  hideQuitRaceDialog();
+  raceActive=false;
+  document.getElementById('quit-race-btn').style.display='none';
+  document.getElementById('solo-back').style.display='none';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('minimap').style.display='none';
+  document.getElementById('touch-controls').style.display='none';
+  document.getElementById('title-screen').style.display='flex';
+}
 function exitSolo(){
   raceActive=false;
+  document.getElementById('quit-race-btn').style.display='none';
   document.getElementById('solo-back').style.display='none';
   document.getElementById('hud').style.display='none';
   document.getElementById('minimap').style.display='none';
@@ -599,6 +636,7 @@ function beginCountdown(){
 // ─── RACE START ──────────────────────────────────────────────────
 function startRace(){
   raceActive=true; raceStartT=Date.now();
+  document.getElementById('quit-race-btn').style.display='block';
   player.x=TK[0][0]; player.y=TK[0][1];
   player.angle=Math.atan2(TK[1][1]-TK[0][1],TK[1][0]-TK[0][0]);
   player.speed=0; player.laps=0; player.progress=0; player.prevProgress=0;
@@ -667,7 +705,7 @@ function answerQuiz(idx,btn,q){
   if(!correct)btn.classList.add('wrong');
   document.getElementById('quiz-tip').style.display='block';
   document.getElementById('quiz-tip').textContent='💡 '+q.tip;
-  if(correct){ player.boosting=120; player.score+=100; player.correctAnswers++; showToast('✅ Correct! Boost glow — keep accelerating!','correct'); }
+  if(correct){ player.speed+=5; player.boosting=180; player.score+=100; player.correctAnswers++; showToast('✅ Correct! TURBO BOOST! 🚀','correct'); }
   else { player.spinning=80; player.score=Math.max(0,player.score-20); player.wrongAnswers++; showToast('❌ Wrong! Spinning out!','wrong'); }
   setTimeout(closeQuiz, 2800);
 }
@@ -690,8 +728,9 @@ function updatePlayer(){
   // Slow only affects turn radius (wider steering), not speed
   const turnMult=player.slow>0?0.55:1;
   if(player.spinning<=0)player.angle+=turn*player.turnRate*turnMult*(Math.abs(player.speed)/8+.1);
-  // Boost = visual glow only, no speed multiplier
-  player.speed+=accel*player.accel;
+  // Boost also applies speed multiplier when active
+  const boostMult=player.boosting>0?1.6:1;
+  player.speed+=accel*player.accel*boostMult;
   player.speed*=player.friction;
   player.speed=Math.max(-1.5,player.speed);
   player.x+=Math.cos(player.angle)*player.speed;
