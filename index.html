@@ -46,6 +46,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
 .solo .card-btn{background:linear-gradient(135deg,#3a7fff,#00d4ff);color:#fff}
 .multi .card-btn{background:linear-gradient(135deg,#ffcc00,#ff8a00);color:#000}
 .card-btn:hover{transform:scale(1.02);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.boss-divider{display:flex;align-items:center;gap:8px;margin:10px 0 6px;width:100%}
+.boss-divider::before,.boss-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+.boss-divider span{font-size:10px;opacity:.4;letter-spacing:1px;text-transform:uppercase}
+.boss-btn{background:linear-gradient(135deg,#ff0044,#ff8800)!important;color:#fff;animation:bossPulse 2.5s ease-in-out infinite}
+@keyframes bossPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,68,.0)}50%{box-shadow:0 0 18px 4px rgba(255,0,68,.45)}}
 
 .footer-note{margin-top:20px;font-size:11px;opacity:.35;text-align:center}
 
@@ -88,7 +93,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
 
   <div class="mode-cards">
     <!-- SOLO -->
-    <div class="mode-card solo" onclick="launchMode('hunters')">
+    <div class="mode-card solo">
       <div class="card-icon">🗺️</div>
       <div class="card-title">Story Mode</div>
       <div class="card-tag">SINGLE PLAYER</div>
@@ -100,7 +105,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
         <li>🎁 Gacha loot rewards</li>
         <li>📱 Mobile D-pad controls</li>
       </ul>
-      <button class="card-btn">▶ Play Story Mode</button>
+      <button class="card-btn" onclick="launchMode('hunters')">▶ Play Story Mode</button>
+      <div class="boss-divider"><span>or</span></div>
+      <button class="card-btn boss-btn" onclick="launchMode('boss')">☠️ Final Boss Mode</button>
     </div>
 
     <!-- MULTIPLAYER -->
@@ -171,12 +178,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
 function launchMode(mode){
   document.getElementById('landing').style.display='none';
   document.getElementById('back-btn').style.display='block';
-  const src=mode==='racers'?'cyber-racers.html':'cyber-hunters.html';
-  const frameId=mode==='racers'?'racers-frame':'hunters-frame';
+  const isBoss=mode==='boss';
+  const isRacers=mode==='racers';
+  const src=isRacers?'cyber-racers.html':(isBoss?'cyber-hunters.html?boss=1':'cyber-hunters.html');
+  const frameId=isRacers?'racers-frame':'hunters-frame';
   document.getElementById(frameId).style.display='block';
   const frame=document.getElementById(frameId);
-  if(!frame.dataset.loaded){
+  // Always reload when switching to boss mode so the param takes effect
+  if(!frame.dataset.loaded||isBoss){
     frame.dataset.loaded='1';
+    frame.innerHTML='';
     const iframe=document.createElement('iframe');
     iframe.src=src;
     iframe.style.cssText='width:100%;height:100%;border:none;display:block';

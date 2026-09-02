@@ -1611,6 +1611,18 @@ function startGame(){
   updateHpHearts();
   updateZoneHUD();
   requestAnimationFrame(loop);
+  // ── FINAL BOSS MODE: skip story, go straight to Exodia ──────────
+  if(new URLSearchParams(window.location.search).get('boss')==='1'){
+    // Max out level so Exodia trigger fires immediately
+    player.level=10;
+    player.hp=player.maxHp;
+    // Mark all 5 W1 bosses defeated to allow Exodia
+    ['assets','secure','update','backup','respond'].forEach(p=>player.bossesDefeated.add(p));
+    setTimeout(()=>{
+      showZoneHint('☠️ FINAL BOSS MODE — EXODIA AWAITS!');
+      setTimeout(triggerExodia,1800);
+    },800);
+  }
 }
 </script>
 </body>
