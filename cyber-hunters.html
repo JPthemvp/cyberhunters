@@ -1486,28 +1486,28 @@ function closeTipPopup(){
 // ── EXODIA BOSS QUESTIONS (with video) ──────────────────────────
 const EXODIA_QUESTIONS=[
   {
-    video:'videos/scenario-a.mov',
+    video:'videos/scenario-a.mp4',
     pillar:'🚨 SCENARIO A',
     q:'The simulation shows a ransomware attack encrypting company files. What should the company do FIRST?',
     opts:['Pay the ransom immediately to get files back','Isolate affected systems, visit nomoreransom.org, then report to SingCERT','Delete all encrypted files and reinstall','Continue working — antiviruses will fix it'],
     ans:1,tip:'NEVER pay ransom. Isolate → nomoreransom.org for free decryptors → restore from offline backup → report to SingCERT. Paying funds criminals and data may not be recovered.'
   },
   {
-    video:'videos/scenario-b.mov',
+    video:'videos/scenario-b.mp4',
     pillar:'🎭 SCENARIO B',
     q:'The simulation shows a social engineering call impersonating IT support. Staff are asked for passwords. What is the BEST response?',
     opts:['Be polite and provide the information','Hang up and call back on the official verified number','Ask the caller for their employee ID','Transfer the call to another colleague'],
     ans:1,tip:'Legitimate IT will never ask for your password. Hang up and call the official helpdesk number. Social engineers create urgency — slow down and verify.'
   },
   {
-    video:'videos/scenario-c.mov',
+    video:'videos/scenario-c.mp4',
     pillar:'🤖 SCENARIO C',
     q:'The simulation shows a deepfake video call where a "CFO" requests an urgent $500,000 fund transfer. What do you do?',
     opts:['Process the transfer — the CFO looks and sounds real','Verify via a separate trusted channel (call their personal number) before any action','Reply in the same video call asking for an approval code','Transfer 50% first as a test'],
     ans:1,tip:'In 2024, a Hong Kong employee paid US$25.6M after a deepfake CFO call. Always verify high-value requests through a SEPARATE trusted channel you initiate yourself.'
   },
   {
-    video:'videos/scenario-g.mov',
+    video:'videos/scenario-g.mp4',
     pillar:'🔐 SCENARIO G',
     q:'The simulation shows staff submitting confidential client contracts into an unapproved AI tool. What is the PRIMARY risk?',
     opts:['The AI may give inaccurate summaries','Provider terms may allow use of submitted data for AI training, exposing confidential information','The AI tool might be slow','The contract format may not be supported'],
@@ -1586,25 +1586,29 @@ function startExodiaRound(){
   // Show video + scenario text fallback
   const vid=document.getElementById('exodia-video');
   const scenTxt=document.getElementById('exodia-scenario-text');
-  // Derive mp4 path as fallback (replace .mov with .mp4 if browser can't play mov)
+  function showScenarioText(){
+    vid.style.display='none';
+    scenTxt.style.display='block';
+    const raw=eq.q||'';
+    const snippet=raw.split('What')[0].replace(/^The simulation shows\s*/i,'').trim();
+    scenTxt.textContent='📋 Scenario: '+(snippet||raw.slice(0,120));
+  }
+  // Always prefer .mp4; .mov only plays on Safari
   const mp4src=eq.video.replace(/\.mov$/,'.mp4');
   vid.innerHTML='';
-  const src1=document.createElement('source'); src1.src=eq.video; vid.appendChild(src1);
-  if(mp4src!==eq.video){const src2=document.createElement('source'); src2.src=mp4src; vid.appendChild(src2);}
+  // Put .mp4 first so Chrome/Edge picks it; also add original as fallback
+  const s1=document.createElement('source'); s1.src=mp4src; s1.type='video/mp4'; vid.appendChild(s1);
+  if(mp4src!==eq.video){const s2=document.createElement('source'); s2.src=eq.video; s2.type='video/mp4'; vid.appendChild(s2);}
   vid.style.display='block';
   scenTxt.style.display='none';
+  vid.onerror=showScenarioText;
+  // Wait for canplay before calling play() so browser has buffered enough
+  vid.oncanplay=null;
+  const onCanPlay=()=>{ vid.oncanplay=null; vid.play().catch(showScenarioText); };
+  vid.oncanplay=onCanPlay;
   vid.load();
-  vid.play().catch(()=>{
-    // Autoplay blocked or format unsupported — show text scenario
-    vid.style.display='none';
-    scenTxt.style.display='block';
-    scenTxt.textContent='📋 Scenario: '+eq.q.split('What')[0].split('The simulation shows').slice(-1)[0].trim();
-  });
-  vid.onerror=()=>{
-    vid.style.display='none';
-    scenTxt.style.display='block';
-    scenTxt.textContent='📋 Scenario: '+eq.q.split('What')[0].split('The simulation shows').slice(-1)[0].trim();
-  };
+  // Timeout fallback: if no canplay in 4s, show text
+  const vidTimeout=setTimeout(()=>{ if(vid.paused&&vid.readyState<2){ vid.oncanplay=null; showScenarioText(); }},4000);
   // Show question
   document.getElementById('battle-pillar').textContent=eq.pillar;
   document.getElementById('battle-pillar').style.color='#ff55ff';
