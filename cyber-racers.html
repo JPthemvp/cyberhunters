@@ -98,13 +98,24 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 #gacha-overlay{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(5,8,18,.9)}
 #gacha-box{background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(58,127,255,.3);border-radius:20px;padding:32px 40px;text-align:center;max-width:360px;width:90%;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
 @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-/* ─── TOUCH CONTROLS ─── */
-#touch-controls{position:fixed;bottom:16px;z-index:25;width:100%;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;pointer-events:none}
-.touch-zone{pointer-events:all;width:76px;height:76px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:background .1s;opacity:.7}
-.touch-zone:active,.touch-zone.pressed{background:rgba(58,127,255,.3)}
-#tc-center-col{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-.touch-zone.gas{background:rgba(58,255,154,.1);border-color:rgba(58,255,154,.3);width:90px;height:90px;font-size:28px}
-.touch-zone.gas:active,.touch-zone.gas.pressed{background:rgba(58,255,154,.3)}
+/* ─── VIRTUAL JOYSTICK ─── */
+#joystick-wrap{position:fixed;bottom:24px;left:20px;z-index:25;pointer-events:none;display:none}
+#joystick-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.18);position:relative;pointer-events:all;touch-action:none;-webkit-tap-highlight-color:transparent}
+#joystick-nub{width:44px;height:44px;border-radius:50%;background:rgba(58,127,255,.7);border:2px solid rgba(58,127,255,.9);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:background .1s;pointer-events:none;box-shadow:0 0 12px rgba(58,127,255,.5)}
+#joystick-base.active #joystick-nub{background:rgba(58,255,154,.8);border-color:#3aff9a;box-shadow:0 0 16px rgba(58,255,154,.6)}
+/* cross-hair lines inside base */
+#joystick-base::before,#joystick-base::after{content:'';position:absolute;background:rgba(255,255,255,.1);border-radius:2px}
+#joystick-base::before{width:2px;height:70%;top:15%;left:50%;transform:translateX(-50%)}
+#joystick-base::after{height:2px;width:70%;left:15%;top:50%;transform:translateY(-50%)}
+/* GAS BUTTON */
+#gas-btn{position:fixed;bottom:24px;right:20px;z-index:25;width:96px;height:96px;border-radius:50%;background:rgba(58,255,154,.15);border:2px solid rgba(58,255,154,.4);display:none;align-items:center;justify-content:center;flex-direction:column;font-size:26px;font-weight:900;color:#3aff9a;pointer-events:all;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;gap:2px}
+#gas-btn.pressed{background:rgba(58,255,154,.35);box-shadow:0 0 20px rgba(58,255,154,.4)}
+#gas-btn span{font-size:10px;font-weight:700;letter-spacing:.5px;opacity:.8}
+/* BRAKE BUTTON (above gas) */
+#brake-btn{position:fixed;bottom:132px;right:20px;z-index:25;width:64px;height:64px;border-radius:50%;background:rgba(255,80,80,.12);border:2px solid rgba(255,80,80,.35);display:none;align-items:center;justify-content:center;font-size:22px;color:#ff8080;pointer-events:all;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
+#brake-btn.pressed{background:rgba(255,80,80,.3)}
+/* hide old dpad */
+#touch-controls{display:none!important}
 /* ─── SOLO BACK: hidden — index.html back-btn handles menu return ─── */
 #solo-back{display:none!important}
 /* ─── SHELL HUD + FIRE BUTTON ─── */
@@ -300,14 +311,18 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 </div>
 
 <!-- Touch Controls: Left | Gas (centre) | Right -->
-<div id="touch-controls" style="display:none">
-  <div class="touch-zone" id="tc-left" data-key="left">◀</div>
-  <div id="tc-center-col">
-    <div class="touch-zone gas" id="tc-up" data-key="up">▲</div>
-    <div class="touch-zone" id="tc-down" data-key="down">▼</div>
+<div id="touch-controls" style="display:none"></div>
+
+<!-- VIRTUAL JOYSTICK (steering + throttle) -->
+<div id="joystick-wrap">
+  <div id="joystick-base">
+    <div id="joystick-nub"></div>
   </div>
-  <div class="touch-zone" id="tc-right" data-key="right">▶</div>
 </div>
+
+<!-- GAS & BRAKE BUTTONS -->
+<button id="gas-btn"><span>⛽</span><span>GAS</span></button>
+<button id="brake-btn">🛑</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
@@ -533,15 +548,70 @@ window.addEventListener('keydown',e=>{
   if(e.key===' ')fireShell(); // Space = fire shell
 });
 window.addEventListener('keyup',e=>delete keys[e.key]);
-// Touch
-['tc-left','tc-right','tc-up','tc-down'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(!el)return;
-  const k=el.dataset.key;
-  el.addEventListener('touchstart',e=>{e.preventDefault();keys['touch_'+k]=true;el.classList.add('pressed')},{passive:false});
-  el.addEventListener('touchend',e=>{e.preventDefault();delete keys['touch_'+k];el.classList.remove('pressed')},{passive:false});
-  el.addEventListener('touchcancel',e=>{delete keys['touch_'+k];el.classList.remove('pressed')});
-});
+// ─── VIRTUAL JOYSTICK ──────────────────────────────────────────────
+(function setupJoystick(){
+  const base=document.getElementById('joystick-base');
+  const nub=document.getElementById('joystick-nub');
+  const RADIUS=55; // half of 110px base
+  const DEAD=0.15; // deadzone fraction
+  let joyId=null, joyOriginX=0, joyOriginY=0;
+
+  function setNub(dx,dy){
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const capped=Math.min(dist,RADIUS-6);
+    const nx=dist>0?dx/dist*capped:0;
+    const ny=dist>0?dy/dist*capped:0;
+    nub.style.left=(50+nx/RADIUS*50)+'%';
+    nub.style.top=(50+ny/RADIUS*50)+'%';
+    // Map to key states
+    const fx=nx/RADIUS, fy=ny/RADIUS; // -1..1
+    keys['touch_left'] = fx < -DEAD;
+    keys['touch_right']= fx >  DEAD;
+    keys['touch_up']   = fy < -DEAD; // up = throttle
+    keys['touch_down'] = fy >  DEAD; // down = brake
+  }
+
+  function resetNub(){
+    nub.style.left='50%'; nub.style.top='50%';
+    ['touch_left','touch_right','touch_up','touch_down'].forEach(k=>delete keys[k]);
+    base.classList.remove('active');
+    joyId=null;
+  }
+
+  base.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    joyId=t.identifier;
+    const r=base.getBoundingClientRect();
+    joyOriginX=r.left+r.width/2;
+    joyOriginY=r.top+r.height/2;
+    base.classList.add('active');
+    setNub(t.clientX-joyOriginX, t.clientY-joyOriginY);
+  },{passive:false});
+
+  base.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    const t=[...e.changedTouches].find(t=>t.identifier===joyId);
+    if(!t)return;
+    setNub(t.clientX-joyOriginX, t.clientY-joyOriginY);
+  },{passive:false});
+
+  ['touchend','touchcancel'].forEach(ev=>base.addEventListener(ev,e=>{
+    e.preventDefault();
+    const t=[...e.changedTouches].find(t=>t.identifier===joyId);
+    if(t) resetNub();
+  },{passive:false}));
+
+  // GAS & BRAKE buttons
+  const gasBtn=document.getElementById('gas-btn');
+  const brakeBtn=document.getElementById('brake-btn');
+  function bindBtn(btn,key){
+    btn.addEventListener('touchstart',e=>{e.preventDefault();keys['touch_'+key]=true;btn.classList.add('pressed')},{passive:false});
+    ['touchend','touchcancel'].forEach(ev=>btn.addEventListener(ev,e=>{e.preventDefault();delete keys['touch_'+key];btn.classList.remove('pressed')},{passive:false}));
+  }
+  bindBtn(gasBtn,'up');
+  bindBtn(brakeBtn,'down');
+})();
 
 // ─── CAMERA ──────────────────────────────────────────────────────
 let camX=TK[0][0]-W/2,camY=TK[0][1]-H/2;
@@ -572,7 +642,9 @@ function confirmQuitRace(){
   document.getElementById('solo-back').style.display='none';
   document.getElementById('hud').style.display='none';
   document.getElementById('minimap').style.display='none';
-  document.getElementById('touch-controls').style.display='none';
+  document.getElementById('joystick-wrap').style.display='none';
+  document.getElementById('gas-btn').style.display='none';
+  document.getElementById('brake-btn').style.display='none';
   document.getElementById('title-screen').style.display='flex';
 }
 function exitSolo(){
@@ -581,7 +653,9 @@ function exitSolo(){
   document.getElementById('solo-back').style.display='none';
   document.getElementById('hud').style.display='none';
   document.getElementById('minimap').style.display='none';
-  document.getElementById('touch-controls').style.display='none';
+  document.getElementById('joystick-wrap').style.display='none';
+  document.getElementById('gas-btn').style.display='none';
+  document.getElementById('brake-btn').style.display='none';
   document.getElementById('title-screen').style.display='flex';
   // Reset player
   player.speed=0; player.laps=0; player.finished=false; player.score=0;
@@ -764,7 +838,11 @@ function startRace(){
   }
   document.getElementById('hud').style.display='flex';
   document.getElementById('minimap').style.display='block';
-  if('ontouchstart' in window)document.getElementById('touch-controls').style.display='flex';
+  if('ontouchstart' in window){
+    document.getElementById('joystick-wrap').style.display='block';
+    document.getElementById('gas-btn').style.display='flex';
+    document.getElementById('brake-btn').style.display='flex';
+  }
   // Update stage label in HUD
   const stageMeta=STAGE_TRACKS[currentStage];
   document.getElementById('lap-sub').textContent=`${stageMeta.emoji} ${stageMeta.name.toUpperCase()}`;
@@ -1044,7 +1122,9 @@ function showResults(){
   if(raceEndShown)return; raceEndShown=true;
   document.getElementById('hud').style.display='none';
   document.getElementById('minimap').style.display='none';
-  document.getElementById('touch-controls').style.display='none';
+  document.getElementById('joystick-wrap').style.display='none';
+  document.getElementById('gas-btn').style.display='none';
+  document.getElementById('brake-btn').style.display='none';
   document.getElementById('quit-race-btn').style.display='none';
 
   const allKarts=[
