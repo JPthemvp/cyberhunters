@@ -17,7 +17,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 #hud-mid{text-align:center}
 #zone-name{font-size:12px;opacity:.7;font-weight:600;letter-spacing:1px;text-transform:uppercase}
 #score-display{font-size:18px;font-weight:700;color:#ffcc00}
-#hud-right{display:flex;gap:6px;align-items:center}
+#hud-right{display:flex;gap:6px;align-items:center;padding-right:72px}
 .hp-heart{font-size:18px;transition:opacity .3s}
 .hp-heart.lost{opacity:.2}
 /* ── BATTLE OVERLAY ── */
@@ -143,7 +143,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .csa-link:last-child{border:none}
 .csa-link:hover{color:#fff}
 /* ── QUIT BTN IN HUD ── */
-#quit-btn{position:fixed;top:12px;left:12px;z-index:25;background:rgba(255,60,60,.15);border:1px solid rgba(255,80,80,.3);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:#ff8080;display:none;backdrop-filter:blur(6px)}
+#quit-btn{position:fixed;bottom:16px;left:12px;z-index:25;background:rgba(255,60,60,.15);border:1px solid rgba(255,80,80,.3);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:#ff8080;display:none;backdrop-filter:blur(6px)}
 #quit-btn:hover{background:rgba(255,60,60,.3)}
 /* ── EXODIA BOSS SPECIAL ── */
 #exodia-video{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:10px;background:#000;display:none}
@@ -1283,6 +1283,15 @@ function drawWorld(){
   ctx.fillStyle='rgba(0,0,0,.3)';
   ctx.beginPath();
   ctx.ellipse(px,py+TILE*.4+1,TILE*.25,TILE*.1,0,0,Math.PI*2);
+  ctx.fill();
+  // Contrasting background circle so avatar is always visible on any tile
+  const bgR=TILE*.38;
+  const bgGrd=ctx.createRadialGradient(px,py+bob-2,0,px,py+bob-2,bgR);
+  bgGrd.addColorStop(0,'rgba(10,14,30,.75)');
+  bgGrd.addColorStop(1,'rgba(10,14,30,0)');
+  ctx.beginPath();
+  ctx.arc(px,py+bob-2,bgR,0,Math.PI*2);
+  ctx.fillStyle=bgGrd;
   ctx.fill();
   // Body
   ctx.font=TILE*.7+'px serif';
