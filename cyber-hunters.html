@@ -540,7 +540,7 @@ const ZONES = [
   {pillar:'secure',  xMin:21,xMax:39,yMin:1,yMax:9,  color:'#3aff9a',name:'Secured Sanctum',boss:{name:'Ransomware Dragon',sprite:'🐲',hp:80,xpR:150,badge:'🛡️ Shield Badge'}},
   {pillar:'update',  xMin:2,xMax:19,yMin:11,yMax:29, color:'#ffcc00',name:'Patch Plains',     boss:{name:'Zero-Day Phantom',sprite:'👻',hp:70,xpR:120,badge:'🔄 Update Badge'}},
   {pillar:'backup',  xMin:21,xMax:32,yMin:11,yMax:29,color:'#ff7a3c',name:'Backup Bastion',   boss:{name:'Data Void Wraith',sprite:'💀',hp:90,xpR:180,badge:'💾 Backup Badge'}},
-  {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Response HQ',      boss:{name:'APT Overlord',sprite:'☠️',hp:120,xpR:250,badge:'🚨 Master Badge'}},
+  {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Response HQ',      boss:{name:'APT Commander',sprite:'☠️',hp:85,xpR:160,badge:'🚨 Respond Badge'}},
 ];
 
 // ─── WORLD 2 — CYBER TRUST REALM ────────────────────────────────
@@ -819,7 +819,7 @@ function tryMove(now){
   const nx=player.tx+dx, ny=player.ty+dy;
   if(!canMove(nx,ny)){
     // Boss zone lock message
-    if(nx>=33&&ny>=14&&player.level<5){ showZoneHint(`⚠️ Response HQ locked! Need Lv.5 — you're Lv.${player.level}. Battle monsters in other zones to level up!`); }
+    if(nx>=33&&ny>=14&&player.level<3){ showZoneHint(`⚠️ Response HQ locked! Need Lv.3 — you're Lv.${player.level}. Keep battling to level up!`); }
     return;
   }
   player.tx=nx; player.ty=ny; lastMove=now;
@@ -1440,7 +1440,13 @@ function triggerExodia(){
   exodiaActive=true;
   exodiaRound=0;
   exodiaHp=EXODIA_MAX_HP;
-  showZoneHint('⚠️ EXODIA awakens! The ultimate threat approaches!');
+  showZoneHint('☠️ ALL 5 BOSSES DEFEATED — EXODIA AWAKENS! The ultimate cyber threat is here. Brace yourself!');
+  // Flash the screen red to signal the true final boss
+  const fl=document.createElement('div');
+  fl.style.cssText='position:fixed;inset:0;background:#ff0044;z-index:9998;opacity:.35;pointer-events:none;transition:opacity 1.2s';
+  document.body.appendChild(fl);
+  setTimeout(()=>{fl.style.opacity=0;},200);
+  setTimeout(()=>{fl.remove();},1500);
   setTimeout(startExodiaRound,2000);
 }
 
