@@ -145,6 +145,42 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 /* ── QUIT BTN IN HUD ── */
 #quit-btn{position:fixed;bottom:16px;left:12px;z-index:25;background:rgba(255,60,60,.15);border:1px solid rgba(255,80,80,.3);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;color:#ff8080;display:none;backdrop-filter:blur(6px)}
 #quit-btn:hover{background:rgba(255,60,60,.3)}
+/* ── BACKPACK PANEL ── */
+.bp-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.45);cursor:pointer;transition:.2s;letter-spacing:.3px}
+.bp-tab.active{color:#3a7fff;border-bottom-color:#3a7fff}
+/* Ball card */
+.ball-card{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;margin-bottom:10px}
+.ball-icon-big{font-size:36px;line-height:1}
+.ball-info{flex:1}
+.ball-name{font-size:15px;font-weight:800}
+.ball-desc{font-size:11px;opacity:.6;margin-top:2px;line-height:1.4}
+.ball-rate{font-size:11px;font-weight:700;margin-top:4px}
+.ball-qty{font-size:22px;font-weight:900;color:#ffcc00;min-width:40px;text-align:right}
+/* CyberDex grid */
+.dex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
+.dex-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.2s}
+.dex-card:hover{border-color:rgba(58,127,255,.5);background:rgba(58,127,255,.08)}
+.dex-card.caught{border-color:rgba(58,255,154,.4);background:rgba(58,255,154,.06)}
+.dex-card.uncaught{filter:grayscale(1);opacity:.45}
+.dex-sprite{font-size:28px;line-height:1;margin-bottom:4px}
+.dex-num{font-size:9px;opacity:.4;letter-spacing:.5px}
+.dex-name{font-size:10px;font-weight:700;word-break:break-word;line-height:1.2}
+/* Captured list */
+.cap-card{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(58,255,154,.06);border:1px solid rgba(58,255,154,.2);border-radius:12px;margin-bottom:8px}
+.cap-sprite{font-size:30px;line-height:1}
+.cap-info{flex:1}
+.cap-name{font-size:14px;font-weight:700}
+.cap-meta{font-size:11px;opacity:.55;margin-top:2px}
+.cap-ball{font-size:18px}
+/* Throw ball button */
+.throw-btn{background:rgba(255,204,0,.12);border:1.5px solid rgba(255,204,0,.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;color:#ffcc00;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px}
+.throw-btn:hover:not(:disabled){background:rgba(255,204,0,.25);transform:translateY(-1px)}
+.throw-btn:disabled{opacity:.3;cursor:default}
+/* Backpack floating button */
+#backpack-btn{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ffcc00;display:none;backdrop-filter:blur(6px);gap:6px;align-items:center}
+#backpack-btn:hover{background:rgba(255,204,0,.15)}
+/* ── CATCH WOBBLE ANIMATION ── */
+@keyframes wobble1{0%{transform:translate(-50%,-50%) rotate(0deg)}25%{transform:translate(-50%,-50%) rotate(-18deg)}75%{transform:translate(-50%,-50%) rotate(18deg)}100%{transform:translate(-50%,-50%) rotate(0deg)}}
 /* ── EXODIA BOSS SPECIAL ── */
 #exodia-video{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:10px;background:#000;display:none}
 .exodia-battle{background:radial-gradient(ellipse 100% 80% at 50% 50%,#1a0028 0%,#05080f 100%)!important}
@@ -242,6 +278,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="battle-opts" id="battle-opts"></div>
   </div>
   <div id="battle-result-bar"></div>
+  <!-- THROW BALL ROW (shown during normal battles) -->
+  <div id="throw-ball-row" style="display:none;justify-content:center;gap:8px;padding:8px 0;flex-wrap:wrap"></div>
+</div>
+
+<!-- CATCH ANIMATION OVERLAY -->
+<div id="catch-overlay" style="position:fixed;inset:0;z-index:85;pointer-events:none;display:none">
+  <div id="catch-ball-anim" style="position:absolute;font-size:40px;transition:all .35s cubic-bezier(.25,.46,.45,.94)">⚪</div>
+  <div id="catch-wobble-box" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:56px;display:none"></div>
+  <div id="catch-result-msg" style="position:absolute;top:60%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:800;text-align:center;display:none;padding:8px 20px;border-radius:20px;backdrop-filter:blur(8px)"></div>
+</div>
+
+<!-- BACKPACK / CYBERDEX PANEL -->
+<div id="backpack-panel" style="position:fixed;inset:0;z-index:95;background:rgba(5,8,18,.97);display:none;flex-direction:column;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.1)">
+    <div style="display:flex;gap:0">
+      <button class="bp-tab active" id="bp-tab-balls" onclick="switchBpTab('balls')">🎒 Backpack</button>
+      <button class="bp-tab" id="bp-tab-dex" onclick="switchBpTab('dex')">📡 CyberDex</button>
+      <button class="bp-tab" id="bp-tab-captured" onclick="switchBpTab('captured')">🧬 Captured</button>
+    </div>
+    <button onclick="closeBackpack()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:#fff;cursor:pointer;font-size:13px;font-weight:700">✕ Close</button>
+  </div>
+  <div id="bp-content" style="flex:1;overflow-y:auto;padding:16px 18px"></div>
 </div>
 
 <!-- ORIENTATION OVERLAY (mobile) -->
@@ -318,6 +376,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
+
+<!-- BACKPACK BUTTON -->
+<button id="backpack-btn" onclick="openBackpack()">🎒 <span id="bp-ball-summary">Bag</span></button>
 
 <!-- DEV: SKIP TO FINAL BOSS (testing only) -->
 <button id="dev-boss-btn" onclick="devSkipToExodia()" title="TEST: Skip to Final Boss (Exodia)" style="position:fixed;bottom:52px;left:12px;z-index:30;background:rgba(255,0,68,.18);border:1px dashed rgba(255,0,68,.5);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#ff4466;display:none;backdrop-filter:blur(6px);letter-spacing:.5px">☠️ TEST BOSS</button>
@@ -663,6 +724,9 @@ const player = {tx:5,ty:5,face:'down',moving:false,moveT:0,px:5,py:5,
   collectedBadges: new Set(),
   shield:false, doubleXp:false, hintUsed:false,
   bossesDefeated: new Set(),
+  // ── CATCH SYSTEM ──
+  balls:{byteTrap:5,cipherNet:2,quantumSnare:0,coreExploit:0},
+  captured:[], // [{dexId,name,sprite,pillar,ball,caughtAt}]
 };
 const XP_PER_LEVEL=[0,100,250,450,700,1000,1400,1900,2500,3200,4000,5000,6200,7500,9000,12000];
 const LEVEL_TITLES=['','Trainee','Analyst','Associate','Specialist','Cyber Novice',
@@ -944,6 +1008,9 @@ function showBattleQuestion(q,monster,zone){
     opts.appendChild(b);
   });
   document.getElementById('battle-result-bar').style.display='none';
+  // Show throw-ball row (only for non-boss monsters)
+  if(!monster.isBoss) showThrowBallRow(monster);
+  else hideThrowBallRow();
   // Timer
   startBattleTimer(q);
 }
@@ -1042,6 +1109,7 @@ function showBattleResult(correct,label,q){
 
 function endBattle(won){
   clearInterval(battleTimer);
+  hideThrowBallRow();
   document.getElementById('battle-overlay').style.display='none';
   inBattle=false;
   if(won){
@@ -1135,6 +1203,7 @@ function addBadge(badge){
 let gachaOpen=false;
 function openGacha(){
   if(gachaOpen)return; gachaOpen=true;
+  giveGachaBalls(); // chance to award capture balls
   const reward=window.CyberQB.getRandomGacha();
   document.getElementById('gacha-rarity').textContent=reward.rarity;
   document.getElementById('gacha-rarity').style.color=reward.rc||'#7a9fff';
@@ -1605,9 +1674,11 @@ function startGame(){
   gameRunning=true;
   spawnGroundItems();
   updateXpBar();
-  // Show quit button + dev test button
+  // Show quit button + dev test button + backpack
   document.getElementById('quit-btn').style.display='block';
   document.getElementById('dev-boss-btn').style.display='block';
+  document.getElementById('backpack-btn').style.display='flex';
+  updateBallSummary();
   // Show CSA panel
   document.getElementById('csa-panel').style.display='flex';
   // Mobile orientation check
@@ -1617,6 +1688,403 @@ function startGame(){
   requestAnimationFrame(loop);
 }
 
+// ════════════════════════════════════════════════════════════
+// ──  CYBER CAPTURE SYSTEM  ──────────────────────────────────
+// ════════════════════════════════════════════════════════════
+
+// ── BALL DEFINITIONS ────────────────────────────────────────
+const BALLS=[
+  {id:'byteTrap',    name:'Byte Trap',      icon:'⚪', color:'#aaa',   baseRate:.22, desc:'Standard capture device. Works on low-level threats.',    rateLabel:'22% base'},
+  {id:'cipherNet',   name:'Cipher Net',     icon:'🔵', color:'#3a7fff',baseRate:.42, desc:'Reinforced net for mid-tier cyber threats.',               rateLabel:'42% base'},
+  {id:'quantumSnare',name:'Quantum Snare',  icon:'🟣', color:'#cc55ff',baseRate:.68, desc:'Advanced quantum-locked containment sphere.',              rateLabel:'68% base'},
+  {id:'coreExploit', name:'Core Exploit',   icon:'🔴', color:'#ff2244',baseRate:.97, desc:'CLASSIFIED — near-guaranteed capture of any threat.',      rateLabel:'97% base'},
+];
+
+// ── CYBER MONSTER REGISTRY (100 entries) ────────────────────
+const MONSTER_DEX=[
+// ── ASSETS THREATS ──
+  {id:1,  name:'Shadow Crawler',     sprite:'🕷️', pillar:'assets',  rarity:'common',  desc:'A silent data thief that slithers through network shadows, stealing credentials undetected.'},
+  {id:2,  name:'Clipboard Wraith',   sprite:'📋', pillar:'assets',  rarity:'common',  desc:'Haunts your clipboard, capturing every copy-paste action — passwords, codes, secrets.'},
+  {id:3,  name:'KeyLogger Specter',  sprite:'⌨️', pillar:'assets',  rarity:'common',  desc:'Invisible ghost that records every keystroke, transmitting them to a remote attacker.'},
+  {id:4,  name:'USB Phantom',        sprite:'💾', pillar:'assets',  rarity:'common',  desc:'Lurks inside USB drives, spreading malware the moment a device is plugged in.'},
+  {id:5,  name:'QR Poison',          sprite:'📷', pillar:'assets',  rarity:'uncommon',desc:'Disguises itself as a helpful QR code. Scanning it redirects you to malicious sites.'},
+  {id:6,  name:'Supply Ghost',       sprite:'📦', pillar:'assets',  rarity:'rare',    desc:'Infiltrates software supply chains, hiding inside trusted vendor updates.'},
+  {id:7,  name:'Asset Mimic',        sprite:'🎭', pillar:'assets',  rarity:'uncommon',desc:'Masquerades as a legitimate application, fooling even trained security teams.'},
+  {id:8,  name:'Data Leech',         sprite:'🩸', pillar:'assets',  rarity:'common',  desc:'Slowly drains your data stores over months, staying just below detection thresholds.'},
+  {id:9,  name:'Shadow AI Bot',      sprite:'🌫️', pillar:'assets',  rarity:'rare',    desc:'An unapproved AI agent deployed by a rogue employee, leaking company data to external servers.'},
+  {id:10, name:'Deepfake Doppel',    sprite:'👥', pillar:'assets',  rarity:'epic',    desc:'A synthetic clone of your CEO — face, voice, mannerisms — used to authorise fraudulent transfers.'},
+// ── SECURE THREATS ──
+  {id:11, name:'Brute Force Ogre',   sprite:'👊', pillar:'secure',  rarity:'common',  desc:'A relentless attacker that hammers login portals with billions of password combinations.'},
+  {id:12, name:'Credential Thief',   sprite:'🔓', pillar:'secure',  rarity:'common',  desc:'Specialises in harvesting leaked username-password pairs from dark web forums.'},
+  {id:13, name:'MFA Bypasser',       sprite:'🔑', pillar:'secure',  rarity:'uncommon',desc:'Intercepts one-time passwords via SIM-swap or real-time phishing proxy sites.'},
+  {id:14, name:'WiFi Demon',         sprite:'📶', pillar:'secure',  rarity:'uncommon',desc:'Sets up evil twin access points in cafes and airports to intercept your traffic.'},
+  {id:15, name:'VPN Leech',          sprite:'🌐', pillar:'secure',  rarity:'uncommon',desc:'Exploits misconfigured VPN endpoints to pivot into internal corporate networks.'},
+  {id:16, name:'Password Hydra',     sprite:'🐍', pillar:'secure',  rarity:'rare',    desc:'A multi-headed beast — defeat one attack vector and two more emerge simultaneously.'},
+  {id:17, name:'Session Hijacker',   sprite:'👻', pillar:'secure',  rarity:'uncommon',desc:'Steals authenticated session tokens, letting it impersonate you without your password.'},
+  {id:18, name:'SSL Stripper',       sprite:'🔒', pillar:'secure',  rarity:'rare',    desc:'Downgrades your HTTPS connection to HTTP, exposing all data in plaintext.'},
+  {id:19, name:'Firewall Breacher',  sprite:'🧱', pillar:'secure',  rarity:'uncommon',desc:'Probes firewall rule sets for misconfigured ports, exploiting the smallest gap.'},
+  {id:20, name:'Cloud Miscreant',    sprite:'☁️', pillar:'secure',  rarity:'rare',    desc:'Thrives in poorly configured cloud environments — exposed S3 buckets are its playground.'},
+// ── UPDATE THREATS ──
+  {id:21, name:'Zero-Day Wraith',    sprite:'🕳️', pillar:'update',  rarity:'epic',    desc:'Exploits vulnerabilities that vendors don\'t even know exist yet. Extremely dangerous.'},
+  {id:22, name:'Patch Dodger',       sprite:'🏃', pillar:'update',  rarity:'common',  desc:'Hides in systems where admins keep clicking "Remind me later" on security updates.'},
+  {id:23, name:'Legacy Leech',       sprite:'🦕', pillar:'update',  rarity:'uncommon',desc:'Lives inside ancient end-of-life systems that IT forgot to decommission.'},
+  {id:24, name:'CVE Crawler',        sprite:'🐛', pillar:'update',  rarity:'common',  desc:'Scans for publicly known CVEs and auto-exploits unpatched systems at scale.'},
+  {id:25, name:'EoL Specter',        sprite:'💀', pillar:'update',  rarity:'rare',    desc:'A ghost born from expired software support contracts — permanent vulnerabilities.'},
+  {id:26, name:'Exploit Kit',        sprite:'⚠️', pillar:'update',  rarity:'uncommon',desc:'A pre-packaged attacker\'s toolbox that automates exploitation of known weaknesses.'},
+  {id:27, name:'Memory Corruptor',   sprite:'🧠', pillar:'update',  rarity:'rare',    desc:'Triggers buffer overflows and heap corruption to gain arbitrary code execution.'},
+  {id:28, name:'RCE Phantom',        sprite:'💥', pillar:'update',  rarity:'epic',    desc:'Achieves remote code execution — runs any command on your system from anywhere.'},
+  {id:29, name:'SQL Injector',       sprite:'💉', pillar:'update',  rarity:'uncommon',desc:'Injects malicious database commands through poorly sanitised web form inputs.'},
+  {id:30, name:'XSS Sprite',         sprite:'✨', pillar:'update',  rarity:'common',  desc:'Injects client-side scripts into web pages, hijacking sessions of visiting users.'},
+// ── BACKUP THREATS ──
+  {id:31, name:'Ransomware Seed',    sprite:'💸', pillar:'backup',  rarity:'rare',    desc:'A dormant seed that germinates to encrypt all your files and demand crypto payment.'},
+  {id:32, name:'Data Void Wraith',   sprite:'🌀', pillar:'backup',  rarity:'rare',    desc:'Deletes backups first, then encrypts production data — leaving you with nothing.'},
+  {id:33, name:'Backup Corruptor',   sprite:'🗑️', pillar:'backup',  rarity:'uncommon',desc:'Silently corrupts backup files so they fail when you desperately need to restore.'},
+  {id:34, name:'Crypto Locker',      sprite:'🔐', pillar:'backup',  rarity:'epic',    desc:'Military-grade encryption locks your entire file system behind an unbreakable key.'},
+  {id:35, name:'Wiper Bot',          sprite:'🧹', pillar:'backup',  rarity:'rare',    desc:'Deployed by nation-state attackers to permanently destroy data — no ransom, just chaos.'},
+  {id:36, name:'Offline Leech',      sprite:'📡', pillar:'backup',  rarity:'rare',    desc:'Targets air-gapped backup systems via electromagnetic or acoustic side channels.'},
+  {id:37, name:'Cloud Ransomer',     sprite:'⛅', pillar:'backup',  rarity:'epic',    desc:'Encrypts your cloud storage and revokes access keys simultaneously.'},
+  {id:38, name:'Double Extorter',    sprite:'🎪', pillar:'backup',  rarity:'rare',    desc:'Steals data AND encrypts it — pay or they publish your confidential files online.'},
+  {id:39, name:'Data Vampire',       sprite:'🧛', pillar:'backup',  rarity:'uncommon',desc:'Slowly drains backup storage over months, leaving partial corrupted archives.'},
+  {id:40, name:'Archive Phantom',    sprite:'📁', pillar:'backup',  rarity:'uncommon',desc:'Corrupts compressed archives so they extract incorrectly — discovered only in crisis.'},
+// ── RESPOND THREATS ──
+  {id:41, name:'APT Agent',          sprite:'🕵️', pillar:'respond', rarity:'rare',    desc:'Advanced Persistent Threat actor living quietly inside your network for months.'},
+  {id:42, name:'Breach Bot',         sprite:'📡', pillar:'respond', rarity:'uncommon',desc:'Signals home to a command-and-control server, reporting your network\'s secrets.'},
+  {id:43, name:'Log Eraser',         sprite:'🪣', pillar:'respond', rarity:'rare',    desc:'Destroys audit logs and forensic evidence right as incident responders arrive.'},
+  {id:44, name:'Incident Blocker',   sprite:'🚫', pillar:'respond', rarity:'uncommon',desc:'Interferes with incident response tools, blocking containment attempts.'},
+  {id:45, name:'SIEM Confuser',      sprite:'📊', pillar:'respond', rarity:'uncommon',desc:'Floods your security monitoring system with millions of false alerts to hide real attacks.'},
+  {id:46, name:'Lateral Mover',      sprite:'🦀', pillar:'respond', rarity:'rare',    desc:'Moves sideways through your network, hopping from machine to machine undetected.'},
+  {id:47, name:'C2 Beacon',          sprite:'📻', pillar:'respond', rarity:'rare',    desc:'A command-and-control beacon that phones home every few minutes for new instructions.'},
+  {id:48, name:'Persistence Ghost',  sprite:'🏠', pillar:'respond', rarity:'rare',    desc:'Creates hidden registry keys, cron jobs, and bootkit entries to survive reboots.'},
+  {id:49, name:'Privilege Escalator',sprite:'📈', pillar:'respond', rarity:'epic',    desc:'Exploits OS flaws to promote itself from regular user to full system administrator.'},
+  {id:50, name:'Exfil Drone',        sprite:'✈️', pillar:'respond', rarity:'rare',    desc:'Quietly ferries stolen data to external servers in small encrypted chunks.'},
+// ── NETWORK THREATS ──
+  {id:51, name:'Packet Sniffer',     sprite:'🦈', pillar:'secure',  rarity:'common',  desc:'Intercepts and reads unencrypted network packets flowing through your infrastructure.'},
+  {id:52, name:'DDoS Swarm',         sprite:'🐝', pillar:'respond', rarity:'uncommon',desc:'Coordinates thousands of compromised devices to overwhelm your servers with traffic.'},
+  {id:53, name:'DNS Poisoner',       sprite:'🍄', pillar:'secure',  rarity:'rare',    desc:'Corrupts DNS cache so your users get sent to fake login pages when they type real URLs.'},
+  {id:54, name:'BGP Hijacker',       sprite:'🗺️', pillar:'secure',  rarity:'epic',    desc:'Reroutes entire internet traffic flows through attacker-controlled infrastructure.'},
+  {id:55, name:'MITM Specter',       sprite:'👁️', pillar:'secure',  rarity:'rare',    desc:'Silently sits between you and your bank, reading and modifying every message.'},
+  {id:56, name:'Port Scanner',       sprite:'🔍', pillar:'assets',  rarity:'common',  desc:'Quietly maps every open port on your network — the attacker\'s reconnaissance scout.'},
+  {id:57, name:'Botnet Drone',       sprite:'🤖', pillar:'respond', rarity:'uncommon',desc:'Your own compromised device, now serving an attacker\'s botnet without your knowledge.'},
+  {id:58, name:'Tor Lurker',         sprite:'🌑', pillar:'respond', rarity:'rare',    desc:'Operates via the Tor network, making its origin practically untraceable.'},
+  {id:59, name:'IP Spoofer',         sprite:'🎭', pillar:'secure',  rarity:'uncommon',desc:'Fakes its source IP address to bypass blocklists and frame innocent parties.'},
+  {id:60, name:'ARP Poisoner',       sprite:'⚡', pillar:'secure',  rarity:'uncommon',desc:'Corrupts network ARP tables so all LAN traffic flows through the attacker\'s machine.'},
+// ── SOCIAL ENGINEERING ──
+  {id:61, name:'Phish Lure',         sprite:'🎣', pillar:'assets',  rarity:'common',  desc:'A perfectly crafted fake email that impersonates your bank, CEO, or IT department.'},
+  {id:62, name:'Spear Phisher',      sprite:'🏹', pillar:'assets',  rarity:'uncommon',desc:'Highly targeted phishing using personal details scraped from social media profiles.'},
+  {id:63, name:'Vishing Wraith',     sprite:'📞', pillar:'assets',  rarity:'uncommon',desc:'Calls your staff pretending to be IT support, extracting passwords over the phone.'},
+  {id:64, name:'Smishing Sprite',    sprite:'📱', pillar:'assets',  rarity:'common',  desc:'Sends urgent SMS messages with malicious links disguised as delivery notifications.'},
+  {id:65, name:'Pretexting Ghost',   sprite:'🪪', pillar:'assets',  rarity:'uncommon',desc:'Constructs an elaborate false identity to gain trust before extracting information.'},
+  {id:66, name:'Tailgater',          sprite:'🚶', pillar:'assets',  rarity:'common',  desc:'Follows authorised staff through security doors without badging in.'},
+  {id:67, name:'USB Baiter',         sprite:'💿', pillar:'assets',  rarity:'uncommon',desc:'Drops infected USB drives in car parks, waiting for curious employees to plug them in.'},
+  {id:68, name:'Watering Hole',      sprite:'💧', pillar:'update',  rarity:'rare',    desc:'Compromises websites your team frequently visits, infecting visitors silently.'},
+  {id:69, name:'BEC Demon',          sprite:'📧', pillar:'assets',  rarity:'rare',    desc:'Business Email Compromise — impersonates your CEO to instruct finance to wire funds.'},
+  {id:70, name:'Impersonation Bot',  sprite:'🤡', pillar:'assets',  rarity:'uncommon',desc:'Automates impersonation at scale, sending thousands of tailored fraud messages per hour.'},
+// ── AI / CLOUD THREATS ──
+  {id:71, name:'Hallucination Bot',  sprite:'🤯', pillar:'assets',  rarity:'uncommon',desc:'Exploits AI hallucination to inject false information into AI-generated reports.'},
+  {id:72, name:'Prompt Injector',    sprite:'💬', pillar:'assets',  rarity:'rare',    desc:'Hijacks AI assistants with hidden instructions embedded in documents or emails.'},
+  {id:73, name:'Model Poisoner',     sprite:'🧪', pillar:'assets',  rarity:'epic',    desc:'Corrupts AI training data so the model learns to classify malware as safe.'},
+  {id:74, name:'Adversarial Input',  sprite:'🎨', pillar:'assets',  rarity:'rare',    desc:'Adds imperceptible pixel-level noise to images, causing AI models to misclassify them.'},
+  {id:75, name:'Shadow AI Specter',  sprite:'👤', pillar:'assets',  rarity:'rare',    desc:'Unauthorised AI deployments by employees, leaking sensitive data to external providers.'},
+  {id:76, name:'Deepfake Weaver',    sprite:'🕸️', pillar:'assets',  rarity:'epic',    desc:'Generates hyper-realistic synthetic video and audio to impersonate executives at will.'},
+  {id:77, name:'S3 Ghost',           sprite:'🪣', pillar:'backup',  rarity:'uncommon',desc:'Finds publicly exposed cloud storage buckets and quietly exfiltrates all contents.'},
+  {id:78, name:'API Abuser',         sprite:'🔌', pillar:'secure',  rarity:'uncommon',desc:'Hammers unprotected API endpoints to extract data or cause cascading system failures.'},
+  {id:79, name:'Container Escape',   sprite:'📤', pillar:'update',  rarity:'rare',    desc:'Breaks out of containerised environments to access the underlying host system.'},
+  {id:80, name:'Serverless Lurker',  sprite:'⚙️', pillar:'secure',  rarity:'rare',    desc:'Hides inside serverless function invocations, executing between billing cycles.'},
+// ── OT / IOT THREATS ──
+  {id:81, name:'SCADA Phantom',      sprite:'🏭', pillar:'update',  rarity:'epic',    desc:'Attacks industrial control systems — can halt power grids, water plants, factories.'},
+  {id:82, name:'PLC Worm',           sprite:'🔧', pillar:'update',  rarity:'rare',    desc:'Infects Programmable Logic Controllers, subtly altering industrial processes.'},
+  {id:83, name:'IoT Zombie',         sprite:'💡', pillar:'secure',  rarity:'common',  desc:'A compromised smart device — your own CCTV camera now spies for the attacker.'},
+  {id:84, name:'Smart Meter Leech',  sprite:'⚡', pillar:'assets',  rarity:'uncommon',desc:'Manipulates smart meter readings to commit energy fraud or map facility usage.'},
+  {id:85, name:'Medical Ghost',      sprite:'🏥', pillar:'respond', rarity:'epic',    desc:'Targets hospital systems and medical devices — lives are at stake.'},
+  {id:86, name:'Router Rooter',      sprite:'📡', pillar:'secure',  rarity:'uncommon',desc:'Permanently compromises your home or office router\'s firmware.'},
+// ── EXOTIC / RARE ──
+  {id:87, name:'Rootkit Reaper',     sprite:'🌿', pillar:'update',  rarity:'epic',    desc:'Hides deep in the operating system kernel — invisible to antivirus, nearly impossible to remove.'},
+  {id:88, name:'Polymorphic Phantom',sprite:'🔄', pillar:'update',  rarity:'epic',    desc:'Rewrites its own code every execution cycle, defeating signature-based detection.'},
+  {id:89, name:'Logic Bomb',         sprite:'💣', pillar:'respond', rarity:'rare',    desc:'Dormant code planted by a disgruntled employee that detonates on a specific date.'},
+  {id:90, name:'Time Bandit',        sprite:'⏰', pillar:'update',  rarity:'uncommon',desc:'Exploits race conditions and timing vulnerabilities in multi-threaded applications.'},
+  {id:91, name:'Cold Boot Ghost',    sprite:'🥶', pillar:'secure',  rarity:'rare',    desc:'Recovers encryption keys from RAM after a hard reboot using memory forensics.'},
+  {id:92, name:'Side Channel Leech', sprite:'🔮', pillar:'secure',  rarity:'epic',    desc:'Infers secret data by analysing power consumption, timing, or electromagnetic emissions.'},
+  {id:93, name:'Supply Saboteur',    sprite:'🏗️', pillar:'assets',  rarity:'epic',    desc:'Inserts malicious code upstream into open-source libraries used by thousands of companies.'},
+  {id:94, name:'LotL Specter',       sprite:'🌾', pillar:'respond', rarity:'rare',    desc:'"Living off the Land" — uses your own built-in system tools as weapons against you.'},
+  {id:95, name:'Nation Ghost',       sprite:'🏛️', pillar:'respond', rarity:'legendary',desc:'A nation-state sponsored threat actor with unlimited resources and zero-day stockpiles.'},
+  {id:96, name:'Fileless Wraith',    sprite:'👁️', pillar:'update',  rarity:'epic',    desc:'Executes entirely in RAM — leaves zero files on disk, defeating forensic investigation.'},
+  {id:97, name:'Typosquat Fiend',    sprite:'🔤', pillar:'assets',  rarity:'common',  desc:'Registers domains one typo away from trusted sites — g00gle.com instead of google.com.'},
+  {id:98, name:'Steganography Ghost',sprite:'🖼️', pillar:'assets',  rarity:'rare',    desc:'Hides malware commands inside innocent-looking images sent via email.'},
+  {id:99, name:'Cryptojacker',       sprite:'⛏️', pillar:'backup',  rarity:'uncommon',desc:'Silently mines cryptocurrency on your servers, spiking your electricity bills.'},
+  {id:100,name:'Insider Threat',     sprite:'😈', pillar:'respond', rarity:'legendary',desc:'The most dangerous threat — a trusted employee or contractor with malicious intent.'},
+];
+
+// ── BALL CATCH RATES ────────────────────────────────────────
+const RARITY_MOD={common:1.0,uncommon:0.7,rare:0.45,epic:0.25,legendary:0.08};
+
+function calcCatchRate(ballId, monster){
+  const ball=BALLS.find(b=>b.id===ballId); if(!ball)return 0;
+  const rar=RARITY_MOD[monster.rarity||'common']||0.5;
+  // Lower level monsters are slightly easier
+  const lvlMod=monster.isBoss?0.5:1;
+  // Damaged monsters easier (hp ratio)
+  const mb=currentBattle;
+  const hpRatio=mb?(mb.monsterHp/mb.monsterMaxHp):1;
+  const hpBonus=1+(1-hpRatio)*0.4; // up to +40% when low HP
+  return Math.min(0.98, ball.baseRate * rar * lvlMod * hpBonus);
+}
+
+// ── SHOW THROW BALL ROW ─────────────────────────────────────
+function showThrowBallRow(monster){
+  if(monster.isBoss){return;} // can't catch bosses
+  const row=document.getElementById('throw-ball-row');
+  row.innerHTML='';
+  row.style.display='flex';
+  BALLS.forEach(ball=>{
+    const qty=player.balls[ball.id]||0;
+    const btn=document.createElement('button');
+    btn.className='throw-btn';
+    btn.disabled=qty===0;
+    btn.innerHTML=`${ball.icon} ${ball.name} <span style="opacity:.6">(${qty})</span>`;
+    btn.onclick=()=>throwBall(ball.id,monster,btn);
+    row.appendChild(btn);
+  });
+}
+
+function hideThrowBallRow(){
+  const row=document.getElementById('throw-ball-row');
+  row.style.display='none'; row.innerHTML='';
+}
+
+// ── THROW BALL ANIMATION + CATCH ───────────────────────────
+let catchInProgress=false;
+function throwBall(ballId, monster, btn){
+  if(catchInProgress)return;
+  catchInProgress=true;
+  const ball=BALLS.find(b=>b.id===ballId);
+  if(!ball||!player.balls[ballId])return;
+  player.balls[ballId]--;
+  updateBallSummary();
+  stopBattleTimer();
+  // Disable all throw buttons
+  document.querySelectorAll('.throw-btn').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.battle-opt').forEach(b=>b.disabled=true);
+
+  const rate=calcCatchRate(ballId,monster);
+  const caught=Math.random()<rate;
+
+  const overlay=document.getElementById('catch-overlay');
+  const ballAnim=document.getElementById('catch-ball-anim');
+  const wobbleBox=document.getElementById('catch-wobble-box');
+  const resultMsg=document.getElementById('catch-result-msg');
+
+  overlay.style.display='block';
+  ballAnim.textContent=ball.icon;
+  ballAnim.style.cssText=`position:absolute;font-size:40px;top:70%;left:20%;transition:all .5s cubic-bezier(.25,.46,.45,.94)`;
+  resultMsg.style.display='none';
+  wobbleBox.style.display='none';
+
+  // Phase 1: ball flies to monster
+  setTimeout(()=>{
+    ballAnim.style.top='30%'; ballAnim.style.left='55%';
+    ballAnim.style.fontSize='48px';
+  },50);
+  // Phase 2: monster disappears, ball wobbles
+  setTimeout(()=>{
+    document.getElementById('enemy-sprite').style.opacity='0';
+    ballAnim.style.display='none';
+    wobbleBox.style.display='block';
+    wobbleBox.textContent=ball.icon;
+    wobbleBox.style.fontSize='56px';
+    wobbleBox.style.animation='wobble1 .4s ease-in-out';
+  },600);
+
+  const wobbles=caught?3:Math.floor(Math.random()*2)+1;
+  let w=0;
+  const wobbleInterval=setInterval(()=>{
+    w++;
+    wobbleBox.style.animation='none';
+    void wobbleBox.offsetWidth; // reflow
+    wobbleBox.style.animation='wobble1 .4s ease-in-out';
+    if(w>=wobbles){
+      clearInterval(wobbleInterval);
+      setTimeout(()=>finishCatch(caught,ball,monster,overlay,wobbleBox,resultMsg),450);
+    }
+  },500);
+}
+
+function finishCatch(caught, ball, monster, overlay, wobbleBox, resultMsg){
+  if(caught){
+    wobbleBox.textContent='✅';
+    resultMsg.style.display='block';
+    resultMsg.style.background='rgba(58,255,154,.2)';
+    resultMsg.style.border='1px solid rgba(58,255,154,.5)';
+    resultMsg.style.color='#3aff9a';
+    // Find dex entry
+    const dexEntry=MONSTER_DEX.find(d=>d.name===monster.name||d.sprite===monster.sprite);
+    const capData={
+      dexId:dexEntry?dexEntry.id:0,
+      name:monster.name,
+      sprite:monster.sprite,
+      pillar:monster.pillar,
+      ball:ball.id,
+      ballIcon:ball.icon,
+      caughtAt:new Date().toLocaleDateString(),
+    };
+    const alreadyCaught=player.captured.some(c=>c.dexId===capData.dexId&&c.dexId>0);
+    player.captured.push(capData);
+    const xpGain=alreadyCaught?15:60;
+    gainXp(xpGain);
+    player.score+=50;
+    resultMsg.innerHTML=`${ball.icon} Captured <strong>${monster.name}</strong>!${alreadyCaught?' (duplicate — stored)':`<br><span style="font-size:12px;opacity:.7">+${xpGain} XP · New CyberDex entry!</span>`}`;
+    setTimeout(()=>endCatchSequence(overlay,true),2200);
+  } else {
+    wobbleBox.textContent='💥';
+    resultMsg.style.display='block';
+    resultMsg.style.background='rgba(255,80,80,.2)';
+    resultMsg.style.border='1px solid rgba(255,80,80,.4)';
+    resultMsg.style.color='#ff7070';
+    resultMsg.innerHTML=`<strong>${monster.name}</strong> broke free!`;
+    document.getElementById('enemy-sprite').style.opacity='1';
+    setTimeout(()=>endCatchSequence(overlay,false),1800);
+  }
+}
+
+function endCatchSequence(overlay, success){
+  overlay.style.display='none';
+  document.getElementById('enemy-sprite').style.opacity='1';
+  catchInProgress=false;
+  if(success){
+    // End the battle (monster captured)
+    hideThrowBallRow();
+    clearInterval(battleTimer);
+    inBattle=false;
+    document.getElementById('battle-overlay').style.display='none';
+    document.getElementById('backpack-btn').style.display='flex';
+    updateBallSummary();
+    showItemToast('🎉 Captured! Check your CyberDex','#3aff9a');
+  } else {
+    // Re-enable buttons
+    document.querySelectorAll('.battle-opt').forEach(b=>b.disabled=false);
+    document.querySelectorAll('.throw-btn').forEach(b=>{
+      const bid=b.textContent.trim().split(' ')[1]; // rough parse
+      BALLS.forEach(ball=>{
+        if(b.innerHTML.includes(ball.name)) b.disabled=(player.balls[ball.id]||0)===0;
+      });
+    });
+    // Restart timer
+    if(currentBattle) startBattleTimer(currentBattle.q||30,()=>{});
+  }
+}
+
+// ── BALL SUMMARY (top-center) ───────────────────────────────
+function updateBallSummary(){
+  const total=BALLS.reduce((s,b)=>s+(player.balls[b.id]||0),0);
+  const el=document.getElementById('bp-ball-summary');
+  if(el) el.textContent=`${total} balls · ${player.captured.length} caught`;
+}
+
+// ── BACKPACK PANEL ─────────────────────────────────────────
+let currentBpTab='balls';
+function openBackpack(){
+  document.getElementById('backpack-panel').style.display='flex';
+  renderBpTab(currentBpTab);
+}
+function closeBackpack(){ document.getElementById('backpack-panel').style.display='none'; }
+function switchBpTab(tab){
+  currentBpTab=tab;
+  document.querySelectorAll('.bp-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('bp-tab-'+tab).classList.add('active');
+  renderBpTab(tab);
+}
+function renderBpTab(tab){
+  const c=document.getElementById('bp-content');
+  if(tab==='balls') renderBallsTab(c);
+  else if(tab==='dex') renderDexTab(c);
+  else renderCapturedTab(c);
+}
+
+function renderBallsTab(c){
+  c.innerHTML=`<h2 style="margin-bottom:12px;font-size:16px">🎒 Capture Devices</h2>`;
+  BALLS.forEach(ball=>{
+    const qty=player.balls[ball.id]||0;
+    const rateBar=Math.round(ball.baseRate*100);
+    c.innerHTML+=`<div class="ball-card">
+      <div class="ball-icon-big">${ball.icon}</div>
+      <div class="ball-info">
+        <div class="ball-name" style="color:${ball.color}">${ball.name}</div>
+        <div class="ball-desc">${ball.desc}</div>
+        <div class="ball-rate" style="color:${ball.color}">Catch rate: ${ball.rateLabel} · modified by rarity & HP</div>
+      </div>
+      <div class="ball-qty">${qty}</div>
+    </div>`;
+  });
+  c.innerHTML+=`<div style="margin-top:12px;font-size:11px;opacity:.4;line-height:1.6">💡 Balls drop from gacha rewards. Damaged monsters are easier to catch.<br>You cannot catch boss monsters — weaken them with questions first!</div>`;
+}
+
+function renderDexTab(c){
+  const caughtIds=new Set(player.captured.map(p=>p.dexId));
+  const caughtCount=new Set([...caughtIds].filter(id=>id>0)).size;
+  c.innerHTML=`<h2 style="margin-bottom:4px;font-size:16px">📡 CyberDex <span style="font-size:12px;opacity:.5;font-weight:400">${caughtCount}/${MONSTER_DEX.length} discovered</span></h2>
+  <div style="font-size:11px;opacity:.4;margin-bottom:12px">Capture cyber threats to complete your CyberDex. Gray = not yet caught.</div>
+  <div class="dex-grid">`;
+  MONSTER_DEX.forEach(m=>{
+    const caught=caughtIds.has(m.id);
+    const rarityColors={common:'#aaa',uncommon:'#3aff9a',rare:'#3a7fff',epic:'#cc55ff',legendary:'#ffd700'};
+    c.innerHTML+=`<div class="dex-card ${caught?'caught':'uncaught'}" onclick="showDexDetail(${m.id})" title="${caught?m.name:'???'}">
+      <div class="dex-sprite">${caught?m.sprite:'❓'}</div>
+      <div class="dex-num">#${String(m.id).padStart(3,'0')}</div>
+      <div class="dex-name" style="color:${caught?rarityColors[m.rarity]:'#666'}">${caught?m.name:'???'}</div>
+    </div>`;
+  });
+  c.innerHTML+='</div>';
+}
+
+function showDexDetail(id){
+  const m=MONSTER_DEX.find(d=>d.id===id);
+  if(!m)return;
+  const caughtIds=new Set(player.captured.map(p=>p.dexId));
+  const caught=caughtIds.has(m.id);
+  const rarityColors={common:'#aaa',uncommon:'#3aff9a',rare:'#3a7fff',epic:'#cc55ff',legendary:'#ffd700'};
+  const pillarColors={assets:'#3a7fff',secure:'#3aff9a',update:'#ffcc00',backup:'#ff7a3c',respond:'#ff5a5a'};
+  const pCol=pillarColors[m.pillar]||'#aaa';
+  const rCol=rarityColors[m.rarity]||'#aaa';
+  const c=document.getElementById('bp-content');
+  c.innerHTML=`<button onclick="switchBpTab('dex')" style="background:rgba(255,255,255,.07);border:none;border-radius:20px;padding:5px 14px;color:#fff;cursor:pointer;font-size:12px;margin-bottom:16px">← Back to CyberDex</button>
+  <div style="text-align:center;padding:20px 0">
+    <div style="font-size:72px;margin-bottom:8px">${caught?m.sprite:'❓'}</div>
+    <div style="font-size:10px;opacity:.4;letter-spacing:1px">#${String(m.id).padStart(3,'0')} · <span style="color:${rCol};text-transform:uppercase">${caught?m.rarity:'???'}</span></div>
+    <div style="font-size:22px;font-weight:800;margin:6px 0;color:${caught?'#fff':'#555'}">${caught?m.name:'Not yet captured'}</div>
+    ${caught?`<div style="font-size:12px;padding:3px 10px;background:${pCol}22;color:${pCol};border-radius:20px;display:inline-block;margin-bottom:12px;border:1px solid ${pCol}44">${m.pillar.toUpperCase()}</div>
+    <div style="font-size:13px;opacity:.7;line-height:1.6;max-width:320px;margin:0 auto">${m.desc}</div>`
+    :'<div style="font-size:13px;opacity:.4;margin-top:8px">Encounter and capture this threat to unlock its entry.</div>'}
+  </div>`;
+}
+
+function renderCapturedTab(c){
+  if(!player.captured.length){
+    c.innerHTML=`<div style="text-align:center;padding:40px 0;opacity:.4"><div style="font-size:48px;margin-bottom:12px">🧬</div><div>No threats captured yet.<br>Use Byte Traps in battle to start!</div></div>`;
+    return;
+  }
+  c.innerHTML=`<h2 style="margin-bottom:12px;font-size:16px">🧬 Captured Threats <span style="font-size:12px;opacity:.5;font-weight:400">${player.captured.length} total</span></h2>`;
+  [...player.captured].reverse().forEach(cap=>{
+    c.innerHTML+=`<div class="cap-card">
+      <div class="cap-sprite">${cap.sprite}</div>
+      <div class="cap-info">
+        <div class="cap-name">${cap.name}</div>
+        <div class="cap-meta">${cap.pillar?.toUpperCase()||''} · Caught ${cap.caughtAt}</div>
+      </div>
+      <div class="cap-ball">${cap.ballIcon||'⚪'}</div>
+    </div>`;
+  });
+}
+
+// ── GIVE BALLS FROM GACHA ────────────────────────────────────
+function giveGachaBalls(){
+  // Called after gacha roll — chance to award balls
+  const roll=Math.random();
+  if(roll<0.4){ player.balls.byteTrap+=2; showItemToast('🎁 +2 Byte Traps in your bag!','#aaa'); }
+  else if(roll<0.65){ player.balls.cipherNet+=1; showItemToast('🎁 +1 Cipher Net in your bag!','#3a7fff'); }
+  else if(roll<0.78){ player.balls.quantumSnare+=1; showItemToast('🎁 +1 Quantum Snare!','#cc55ff'); }
+  else if(roll<0.82){ player.balls.coreExploit+=1; showItemToast('🎁 ⭐ RARE: +1 Core Exploit!','#ffd700'); }
+  updateBallSummary();
+}
+
 function devSkipToExodia(){
   if(exodiaActive)return;
   document.getElementById('dev-boss-btn').style.display='none';
@@ -1624,20 +2092,6 @@ function devSkipToExodia(){
   ['assets','secure','update','backup','respond'].forEach(p=>player.bossesDefeated.add(p));
   showZoneHint('🧪 DEV MODE — Triggering Exodia now!');
   setTimeout(triggerExodia,1000);
-}
-
-  // ── FINAL BOSS MODE: skip story, go straight to Exodia ──────────
-  if(new URLSearchParams(window.location.search).get('boss')==='1'){
-    // Max out level so Exodia trigger fires immediately
-    player.level=10;
-    player.hp=player.maxHp;
-    // Mark all 5 W1 bosses defeated to allow Exodia
-    ['assets','secure','update','backup','respond'].forEach(p=>player.bossesDefeated.add(p));
-    setTimeout(()=>{
-      showZoneHint('☠️ FINAL BOSS MODE — EXODIA AWAITS!');
-      setTimeout(triggerExodia,1800);
-    },800);
-  }
 }
 </script>
 </body>
