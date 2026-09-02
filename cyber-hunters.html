@@ -181,6 +181,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 #backpack-btn:hover{background:rgba(255,204,0,.15)}
 /* ── CATCH WOBBLE ANIMATION ── */
 @keyframes bossPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,68,.0)}50%{box-shadow:0 0 18px 4px rgba(255,0,68,.5)}}
+/* ── PET SELECT ── */
+.pet-opt{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 4px;cursor:pointer;text-align:center;transition:.2s}
+.pet-opt:hover{border-color:rgba(58,255,154,.5);background:rgba(58,255,154,.07)}
+.pet-opt.selected{border-color:#3aff9a;background:rgba(58,255,154,.12)}
+.pet-name{font-size:10px;font-weight:700;margin-top:3px;line-height:1.2}
+.pet-perk{font-size:9px;opacity:.55;margin-top:2px;line-height:1.3}
+/* ── PET HUD INDICATOR ── */
+#pet-hud{position:fixed;bottom:50px;right:14px;z-index:25;font-size:22px;display:none;filter:drop-shadow(0 0 8px rgba(58,255,154,.6));animation:petFloat 2.5s ease-in-out infinite}
+@keyframes petFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes wobble1{0%{transform:translate(-50%,-50%) rotate(0deg)}25%{transform:translate(-50%,-50%) rotate(-18deg)}75%{transform:translate(-50%,-50%) rotate(18deg)}100%{transform:translate(-50%,-50%) rotate(0deg)}}
 /* ── EXODIA BOSS SPECIAL ── */
 #exodia-video{width:100%;max-height:140px;object-fit:contain;border-radius:10px;margin-bottom:6px;background:#000;display:none}
@@ -284,6 +293,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   <div id="battle-result-bar"></div>
   <!-- THROW BALL ROW (shown during normal battles) -->
   <div id="throw-ball-row" style="display:none;justify-content:center;gap:8px;padding:8px 0;flex-wrap:wrap"></div>
+  <!-- BATTLE BACKPACK SHORTCUT -->
+  <div id="battle-bp-row" style="display:none;justify-content:center;padding:4px 0 8px">
+    <button onclick="openBackpack()" style="background:rgba(255,204,0,.12);border:1px solid rgba(255,204,0,.35);border-radius:18px;padding:5px 14px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer">🎒 Open Backpack / Balls</button>
+  </div>
 </div>
 
 <!-- CATCH ANIMATION OVERLAY -->
@@ -378,6 +391,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   <div style="margin-top:8px;font-size:10px;opacity:.4;text-align:center">Up to 70% grant for SMEs · EDG</div>
 </div>
 
+<!-- PET COMPANION HUD -->
+<div id="pet-hud" title="Your cyber pet companion"></div>
+
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
 
@@ -385,7 +401,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <button id="backpack-btn" onclick="openBackpack()">🎒 CyberDex / Backpack <span id="bp-ball-summary"></span></button>
 
 <!-- DEV: SKIP TO FINAL BOSS (testing only) -->
-<button id="dev-boss-btn" onclick="devSkipToExodia()" title="TEST: Skip to Final Boss (Exodia)" style="position:fixed;bottom:52px;left:12px;z-index:30;background:rgba(255,0,68,.18);border:1px dashed rgba(255,0,68,.5);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#ff4466;display:none;backdrop-filter:blur(6px);letter-spacing:.5px">☠️ TEST BOSS</button>
+<button id="dev-boss-btn" onclick="devSkipToExodia()" title="TEST: Skip to Final Boss (Exodia)" style="position:fixed;top:50px;right:14px;z-index:9980;background:rgba(255,0,68,.18);border:1px dashed rgba(255,0,68,.5);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#ff4466;display:none;backdrop-filter:blur(6px);letter-spacing:.5px">☠️ TEST BOSS</button>
 
 <!-- WORLD 2 WIN SCREEN -->
 <div class="overlay" id="w2-win-screen" style="display:none;background:radial-gradient(ellipse at 50% 30%,#2a0040 0%,#05080f 100%)">
@@ -450,8 +466,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- CHARACTER SELECT SCREEN -->
 <div class="overlay" id="char-select" style="display:none">
-  <h1 style="font-size:clamp(24px,6vw,36px)">Choose Your Hunter</h1>
-  <p style="margin-bottom:4px">Pick your avatar and enter your name</p>
+  <h1 style="font-size:clamp(22px,5vw,32px);margin-bottom:2px">Choose Your Hunter</h1>
+  <p style="margin-bottom:6px;opacity:.7;font-size:13px">Pick your avatar and enter your name</p>
   <div class="avatar-grid" id="avatar-grid">
     <div class="avatar-opt selected" data-avatar="🦁" onclick="selectAvatar(this)">🦁</div>
     <div class="avatar-opt" data-avatar="🧙" onclick="selectAvatar(this)">🧙</div>
@@ -466,11 +482,44 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="avatar-opt" data-avatar="🦅" onclick="selectAvatar(this)">🦅</div>
     <div class="avatar-opt" data-avatar="🤖" onclick="selectAvatar(this)">🤖</div>
   </div>
+
+  <!-- PET COMPANION SELECT -->
+  <div style="margin-top:12px;width:100%;max-width:500px">
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">🐾 Choose Your Cyber Pet</div>
+    <div id="pet-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%">
+      <div class="pet-opt selected" data-pet="antivirus" onclick="selectPet(this)" title="Anti-Virus Pup">
+        <div style="font-size:28px">🛡️</div>
+        <div class="pet-name">Anti-Virus</div>
+        <div class="pet-perk">+1 shield/battle</div>
+      </div>
+      <div class="pet-opt" data-pet="malware" onclick="selectPet(this)" title="Malware Buster">
+        <div style="font-size:28px">🔥</div>
+        <div class="pet-name">Malware Buster</div>
+        <div class="pet-perk">Wrong ans = no HP loss (1×/battle)</div>
+      </div>
+      <div class="pet-opt" data-pet="firewall" onclick="selectPet(this)" title="Firewall Guardian">
+        <div style="font-size:28px">🧱</div>
+        <div class="pet-name">Firewall</div>
+        <div class="pet-perk">+2 max HP</div>
+      </div>
+      <div class="pet-opt" data-pet="irp" onclick="selectPet(this)" title="Incident Response Plan">
+        <div style="font-size:28px">📋</div>
+        <div class="pet-name">IRP Bot</div>
+        <div class="pet-perk">+20% catch rate</div>
+      </div>
+      <div class="pet-opt" data-pet="assetmgr" onclick="selectPet(this)" title="Asset Inventory Manager">
+        <div style="font-size:28px">🗂️</div>
+        <div class="pet-name">Asset Mgr</div>
+        <div class="pet-perk">+30% XP gain</div>
+      </div>
+    </div>
+  </div>
+
   <div class="name-in-wrap">
     <div style="font-size:12px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Your Name</div>
     <input class="name-field" id="player-name-field" placeholder="Enter your hunter name" maxlength="16" value="">
   </div>
-  <button class="btn" style="margin-top:20px" onclick="startGame()">▶ Start Adventure</button>
+  <button class="btn" style="margin-top:16px" onclick="startGame()">▶ Start Adventure</button>
   <button class="btn" style="background:rgba(255,255,255,.08);margin-top:8px" onclick="backToTitle()">← Back</button>
 </div>
 
@@ -990,7 +1039,9 @@ function startBattle(monster,zone){
   const q=qs.find(q=>!player.usedQIds.has(q.id))||qs[0];
   player.usedQIds.add(q.id);
   const monHp=monster.hp||30;
-  currentBattle={monster,zone,q,monsterHp:monHp,monsterMaxHp:monHp,questionCount:0,maxQ:monster.isBoss?5:1};
+  const minQ=monster.isBoss?5:2; // at least 2 questions for normal monsters
+  currentBattle={monster,zone,q,monsterHp:monHp,monsterMaxHp:monHp,questionCount:0,maxQ:minQ};
+  petBattleStart();
   document.getElementById('battle-overlay').style.display='flex';
   showBattleQuestion(q,monster,zone);
 }
@@ -1094,7 +1145,14 @@ function showBattleResult(correct,label,q){
     document.getElementById('enemy-sprite').classList.add('sprite-shake');
     setTimeout(()=>document.getElementById('enemy-sprite').classList.remove('sprite-shake'),400);
   } else {
-    if(!player.shield){
+    if(player.petNoHpOnce){
+      // Pet perk: absorb one wrong answer per battle
+      player.petNoHpOnce=false;
+      showItemToast(PETS[selectedPet]?.icon||'🐾','Pet Saved You!','Wrong answer absorbed by your pet!');
+    } else if(player.petShieldReady){
+      player.petShieldReady=false;
+      showItemToast(PETS[selectedPet]?.icon||'🛡️','Pet Shield!','Your pet blocked that hit!');
+    } else if(!player.shield){
       player.hp=Math.max(0,player.hp-1);
       updateHpHearts();
     } else { player.shield=false; }
@@ -1107,8 +1165,9 @@ function showBattleResult(correct,label,q){
   setTimeout(()=>{
     mb.questionCount++;
     if(player.hp<=0){ endBattle(false); return; }
-    if(mb.monsterHp<=0){ endBattle(true); return; }
-    if(mb.monster.isBoss&&mb.questionCount<mb.maxQ){
+    if(mb.monsterHp<=0 && mb.questionCount>=mb.maxQ){ endBattle(true); return; }
+    if(mb.questionCount<mb.maxQ){
+      // Continue battle — next question
       const pool=window.CyberQB.QUESTION_BANK[mb.monster.pillar].questions;
       const next=pool.find(q=>!player.usedQIds.has(q.id))||pool[Math.floor(Math.random()*pool.length)];
       player.usedQIds.add(next.id);
@@ -1157,6 +1216,7 @@ function endBattle(won){
 
 // ─── XP & LEVELING ──────────────────────────────────────────────
 function gainXp(amt){
+  amt=Math.floor(amt*(player.petXpMult||1));
   player.xp+=amt;
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
   if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); }
@@ -1700,6 +1760,7 @@ function startGame(){
   document.getElementById('char-select').style.display='none';
   document.getElementById('title-screen').style.display='none';
   gameRunning=true;
+  applyPetPerks();
   spawnGroundItems();
   updateXpBar();
   // Show quit button + dev test button + backpack
@@ -1854,7 +1915,8 @@ function calcCatchRate(ballId, monster){
   const mb=currentBattle;
   const hpRatio=mb?(mb.monsterHp/mb.monsterMaxHp):1;
   const hpBonus=1+(1-hpRatio)*0.4; // up to +40% when low HP
-  return Math.min(0.98, ball.baseRate * rar * lvlMod * hpBonus);
+  const petBonus=1+(player.petCatchBonus||0);
+  return Math.min(0.98, ball.baseRate * rar * lvlMod * hpBonus * petBonus);
 }
 
 // ── SHOW THROW BALL ROW ─────────────────────────────────────
@@ -1863,6 +1925,7 @@ function showThrowBallRow(monster){
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
   row.style.display='flex';
+  document.getElementById('battle-bp-row').style.display='flex';
   BALLS.forEach(ball=>{
     const qty=player.balls[ball.id]||0;
     const btn=document.createElement('button');
@@ -1877,6 +1940,7 @@ function showThrowBallRow(monster){
 function hideThrowBallRow(){
   const row=document.getElementById('throw-ball-row');
   row.style.display='none'; row.innerHTML='';
+  document.getElementById('battle-bp-row').style.display='none';
 }
 
 // ── THROW BALL ANIMATION + CATCH ───────────────────────────
@@ -1960,6 +2024,17 @@ function finishCatch(caught, ball, monster, overlay, wobbleBox, resultMsg){
     gainXp(xpGain);
     player.score+=50;
     resultMsg.innerHTML=`${ball.icon} Captured <strong>${monster.name}</strong>!${alreadyCaught?' (duplicate — stored)':`<br><span style="font-size:12px;opacity:.7">+${xpGain} XP · New CyberDex entry!</span>`}`;
+    // Milestone catch badges
+    const uniqueCaught=new Set(player.captured.filter(c=>c.dexId>0).map(c=>c.dexId)).size;
+    const CATCH_MILESTONES=[
+      {n:1,badge:'🔵 First Catch',msg:'First cyber monster caught!'},
+      {n:5,badge:'🟢 Bug Collector',msg:'5 unique monsters caught!'},
+      {n:10,badge:'🟡 Threat Hunter',msg:'10 unique monsters caught!'},
+      {n:25,badge:'🟠 Cyber Tamer',msg:'25 unique monsters caught!'},
+      {n:50,badge:'🔴 CyberDex Master',msg:'50 unique monsters caught!'},
+    ];
+    const milestone=CATCH_MILESTONES.find(m=>m.n===uniqueCaught);
+    if(milestone){ setTimeout(()=>{ addBadge(milestone.badge); showZoneHint('🏅 '+milestone.badge+' — '+milestone.msg); },2400); }
     setTimeout(()=>endCatchSequence(overlay,true),2200);
   } else {
     wobbleBox.textContent='💥';
@@ -2111,6 +2186,48 @@ function giveGachaBalls(){
   else if(roll<0.78){ player.balls.quantumSnare+=1; showItemToast('🎁 +1 Quantum Snare!','#cc55ff'); }
   else if(roll<0.82){ player.balls.coreExploit+=1; showItemToast('🎁 ⭐ RARE: +1 Core Exploit!','#ffd700'); }
   updateBallSummary();
+}
+
+// ── PET COMPANION ───────────────────────────────────────────
+const PETS={
+  antivirus:{icon:'🛡️',name:'Anti-Virus Pup',perk:'shield'},
+  malware:  {icon:'🔥',name:'Malware Buster',perk:'noHpLoss'},
+  firewall: {icon:'🧱',name:'Firewall Guardian',perk:'hpBonus'},
+  irp:      {icon:'📋',name:'IRP Bot',perk:'catchBonus'},
+  assetmgr: {icon:'🗂️',name:'Asset Manager',perk:'xpBonus'},
+};
+let selectedPet='antivirus';
+
+function selectPet(el){
+  document.querySelectorAll('.pet-opt').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPet=el.dataset.pet;
+}
+
+function applyPetPerks(){
+  const pet=PETS[selectedPet]||PETS.antivirus;
+  // Show pet on HUD
+  const hud=document.getElementById('pet-hud');
+  hud.textContent=pet.icon; hud.style.display='block';
+  hud.title=pet.name+' — '+getPetPerkDesc(pet.perk);
+  // Apply stat perks
+  if(pet.perk==='hpBonus'){ player.maxHp+=2; player.hp=player.maxHp; }
+  if(pet.perk==='shield'){ player.petShieldReady=true; }
+  if(pet.perk==='catchBonus'){ player.petCatchBonus=0.2; }
+  if(pet.perk==='xpBonus'){ player.petXpMult=1.3; }
+  if(pet.perk==='noHpLoss'){ player.petNoHpOnce=true; }
+}
+
+function getPetPerkDesc(perk){
+  return {shield:'Blocks 1 HP loss per battle',noHpLoss:'1 free wrong answer per battle',
+    hpBonus:'+2 max HP',catchBonus:'+20% catch rate',xpBonus:'+30% XP'}[perk]||'';
+}
+
+// Hook pet shield into answer logic & reset per battle
+function petBattleStart(){
+  const pet=PETS[selectedPet]||PETS.antivirus;
+  if(pet.perk==='shield') player.petShieldReady=true;
+  if(pet.perk==='noHpLoss') player.petNoHpOnce=true;
 }
 
 function launchFinalBossFromTitle(){
