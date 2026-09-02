@@ -98,18 +98,18 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 #tc-center-col{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
 .touch-zone.gas{background:rgba(58,255,154,.1);border-color:rgba(58,255,154,.3);width:90px;height:90px;font-size:28px}
 .touch-zone.gas:active,.touch-zone.gas.pressed{background:rgba(58,255,154,.3)}
-/* ─── SOLO BACK BUTTON ─── */
-#solo-back{position:fixed;top:12px;left:12px;z-index:30;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
-#solo-back:hover{background:rgba(255,255,255,.1)}
+/* ─── SOLO BACK + QUIT (now inside HUD area, not floating over canvas) ─── */
+#solo-back{position:fixed;bottom:16px;left:16px;z-index:30;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
+#solo-back:hover{background:rgba(255,255,255,.12)}
 /* ─── SHELL HUD + FIRE BUTTON ─── */
-#shell-hud{position:fixed;bottom:90px;right:14px;z-index:30;display:none;flex-direction:column;align-items:center;gap:4px}
-#shell-count{font-size:28px;text-shadow:0 0 10px #ff5;filter:drop-shadow(0 0 6px #ff0)}
+#shell-hud{position:fixed;bottom:140px;right:14px;z-index:30;display:none;flex-direction:column;align-items:center;gap:4px}
+#shell-count{font-size:26px;text-shadow:0 0 10px #ff5;filter:drop-shadow(0 0 6px #ff0)}
 #shell-label{font-size:10px;opacity:.6;letter-spacing:1px}
-#fire-btn{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#ff4400,#aa0000);border:3px solid #ff6;font-size:24px;cursor:pointer;box-shadow:0 0 20px rgba(255,80,0,.6);transition:.15s;display:flex;align-items:center;justify-content:center}
+#fire-btn{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#ff4400,#aa0000);border:3px solid #ff6;font-size:22px;cursor:pointer;box-shadow:0 0 20px rgba(255,80,0,.6);transition:.15s;display:flex;align-items:center;justify-content:center}
 #fire-btn:active{transform:scale(.92);box-shadow:0 0 30px rgba(255,100,0,.9)}
-/* ─── QUIT BUTTON (IN-RACE) ─── */
-#quit-race-btn{position:fixed;top:12px;right:12px;z-index:30;background:rgba(180,0,0,.55);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
-#quit-race-btn:hover{background:rgba(220,0,0,.75)}
+/* ─── QUIT BUTTON (IN-RACE) — bottom-left above solo-back ─── */
+#quit-race-btn{position:fixed;bottom:60px;left:16px;z-index:30;background:rgba(160,0,0,.6);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
+#quit-race-btn:hover{background:rgba(210,0,0,.8)}
 #quit-race-dialog{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center}
 #quit-race-box{background:#0d1120;border:1.5px solid rgba(255,255,255,.15);border-radius:18px;padding:32px 40px;text-align:center;max-width:340px}
 #quit-race-box h3{font-size:20px;margin-bottom:10px}
@@ -191,15 +191,18 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
     <div>
       <div class="field-label">Your Ride</div>
       <div class="car-combo-grid" id="car-combo-select">
-        <div class="car-combo selected" data-cidx="0" data-ctype="sports" style="--cc-glow:rgba(58,127,255,.55);border-color:#3a7fff" onclick="pickCar(this)"><span class="cc-emoji">🏎️</span><div class="cc-bar" style="background:#3a7fff"></div><span class="cc-label">Blue Sports</span></div>
-        <div class="car-combo" data-cidx="1" data-ctype="sports" style="--cc-glow:rgba(255,90,90,.55)" onclick="pickCar(this)"><span class="cc-emoji">🏎️</span><div class="cc-bar" style="background:#ff5a5a"></div><span class="cc-label">Red Sports</span></div>
-        <div class="car-combo" data-cidx="3" data-ctype="sports" style="--cc-glow:rgba(255,204,0,.55)" onclick="pickCar(this)"><span class="cc-emoji">🏎️</span><div class="cc-bar" style="background:#ffcc00"></div><span class="cc-label">Gold Sports</span></div>
-        <div class="car-combo" data-cidx="2" data-ctype="suv" style="--cc-glow:rgba(58,255,154,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚙</span><div class="cc-bar" style="background:#3aff9a"></div><span class="cc-label">Green SUV</span></div>
-        <div class="car-combo" data-cidx="4" data-ctype="suv" style="--cc-glow:rgba(204,85,255,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚙</span><div class="cc-bar" style="background:#cc55ff"></div><span class="cc-label">Purple SUV</span></div>
-        <div class="car-combo" data-cidx="0" data-ctype="suv" style="--cc-glow:rgba(58,127,255,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚙</span><div class="cc-bar" style="background:#3a7fff"></div><span class="cc-label">Blue SUV</span></div>
-        <div class="car-combo" data-cidx="1" data-ctype="classic" style="--cc-glow:rgba(255,90,90,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚗</span><div class="cc-bar" style="background:#ff5a5a"></div><span class="cc-label">Red Classic</span></div>
-        <div class="car-combo" data-cidx="3" data-ctype="classic" style="--cc-glow:rgba(255,204,0,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚗</span><div class="cc-bar" style="background:#ffcc00"></div><span class="cc-label">Gold Classic</span></div>
-        <div class="car-combo" data-cidx="4" data-ctype="classic" style="--cc-glow:rgba(204,85,255,.55)" onclick="pickCar(this)"><span class="cc-emoji">🚗</span><div class="cc-bar" style="background:#cc55ff"></div><span class="cc-label">Purple Classic</span></div>
+        <!-- SUPERCAR row (Lamborghini-style) -->
+        <div class="car-combo selected" data-cidx="0" data-ctype="supercar" style="--cc-glow:rgba(58,127,255,.6);border-color:#3a7fff" onclick="pickCar(this)"><span class="cc-emoji">⚡</span><div class="cc-bar" style="background:#3a7fff"></div><span class="cc-label">PHANTOM</span></div>
+        <div class="car-combo" data-cidx="1" data-ctype="supercar" style="--cc-glow:rgba(255,90,90,.6)" onclick="pickCar(this)"><span class="cc-emoji">🔥</span><div class="cc-bar" style="background:#ff5a5a"></div><span class="cc-label">BLAZE</span></div>
+        <div class="car-combo" data-cidx="3" data-ctype="supercar" style="--cc-glow:rgba(255,204,0,.6)" onclick="pickCar(this)"><span class="cc-emoji">☀️</span><div class="cc-bar" style="background:#ffcc00"></div><span class="cc-label">SOLAR</span></div>
+        <!-- TOUGE row (AE86 / Initial D style) -->
+        <div class="car-combo" data-cidx="2" data-ctype="touge" style="--cc-glow:rgba(58,255,154,.6)" onclick="pickCar(this)"><span class="cc-emoji">🐼</span><div class="cc-bar" style="background:#3aff9a"></div><span class="cc-label">PANDA</span></div>
+        <div class="car-combo" data-cidx="4" data-ctype="touge" style="--cc-glow:rgba(204,85,255,.6)" onclick="pickCar(this)"><span class="cc-emoji">👻</span><div class="cc-bar" style="background:#cc55ff"></div><span class="cc-label">GHOST</span></div>
+        <div class="car-combo" data-cidx="0" data-ctype="touge" style="--cc-glow:rgba(58,127,255,.6)" onclick="pickCar(this)"><span class="cc-emoji">🌀</span><div class="cc-bar" style="background:#3a7fff"></div><span class="cc-label">STRIKER</span></div>
+        <!-- MUSCLE row (BMW / muscle car style) -->
+        <div class="car-combo" data-cidx="1" data-ctype="muscle" style="--cc-glow:rgba(255,90,90,.6)" onclick="pickCar(this)"><span class="cc-emoji">💥</span><div class="cc-bar" style="background:#ff5a5a"></div><span class="cc-label">THUNDER</span></div>
+        <div class="car-combo" data-cidx="3" data-ctype="muscle" style="--cc-glow:rgba(255,204,0,.6)" onclick="pickCar(this)"><span class="cc-emoji">👑</span><div class="cc-bar" style="background:#ffcc00"></div><span class="cc-label">CROWN</span></div>
+        <div class="car-combo" data-cidx="4" data-ctype="muscle" style="--cc-glow:rgba(204,85,255,.6)" onclick="pickCar(this)"><span class="cc-emoji">🌑</span><div class="cc-bar" style="background:#cc55ff"></div><span class="cc-label">SHADOW</span></div>
       </div>
     </div>
     <div>
@@ -675,7 +678,8 @@ function startRace(){
     aiNames.forEach((n,i)=>{
       others['ai_'+i]={x:TK[0][0]+NRM[0][0]*TRACK_W*.3*(i+1)*(-1),y:TK[0][1]+NRM[0][1]*TRACK_W*.3*(i+1)*(-1),
         angle:player.angle,laps:0,progress:0,speed:2.5+Math.random()*.8,
-        name:n,color:KART_COLORS[i+1],colorIdx:i+1,finished:false,isAI:true,aiTimer:0,aiLook:0};
+        name:n,color:KART_COLORS[i+1],colorIdx:i+1,finished:false,isAI:true,aiTimer:0,aiLook:0,
+        carType:['touge','muscle','supercar'][i%3]};
     });
   }
   loop();
@@ -1060,7 +1064,7 @@ function render(){
   }
   // Other players
   Object.values(others).forEach(o=>{
-    drawKart(o.x||TK[0][0],o.y||TK[0][1],o.angle||0,o.color||'#aaa',o.name||'?',false,o.boosting>0,o.spinning>0,o.shielded,o.carType||'sports');
+    drawKart(o.x||TK[0][0],o.y||TK[0][1],o.angle||0,o.color||'#aaa',o.name||'?',false,o.boosting>0,o.spinning>0,o.shielded,o.carType||'supercar');
   });
   // My player
   drawKart(player.x,player.y,player.angle,myColor,myName,true,player.boosting>0,player.spinning>0,player.shielded,myCarType);
@@ -1104,104 +1108,152 @@ function drawKart(x,y,angle,color,name,isMe,boosting,spinning,shielded,carType){
   }
   // Neon underglow
   ctx.shadowColor=shielded?'#3aff9a':color;
-  ctx.shadowBlur=boosting?28:shielded?18:10;
+  ctx.shadowBlur=boosting?32:shielded?20:12;
 
-  const ct=carType||'sports';
+  const ct=carType||'supercar';
 
-  // ── SPORTS ─────────────────────────────────────────────────────
-  if(ct==='sports'){
-    // Underglow strip
-    ctx.fillStyle=color+'44'; ctx.fillRect(-16,-12,32,2);
-    ctx.fillStyle=color+'44'; ctx.fillRect(-16,10,32,2);
-    // Body gradient
-    const gBody=ctx.createLinearGradient(-15,-7,0,7);
-    gBody.addColorStop(0,'#fff3'); gBody.addColorStop(.3,color); gBody.addColorStop(1,'#0006');
-    ctx.fillStyle=gBody; rr(-15,-7,30,14,5); ctx.fill();
-    // Racing stripe
-    ctx.fillStyle='rgba(255,255,255,.18)';
-    ctx.beginPath();ctx.moveTo(-8,-7);ctx.lineTo(2,-7);ctx.lineTo(4,7);ctx.lineTo(-6,7);ctx.closePath();ctx.fill();
-    // Windshield
-    const gWind=ctx.createLinearGradient(-5,-5,8,1);
-    gWind.addColorStop(0,'rgba(180,230,255,.55)');gWind.addColorStop(1,'rgba(80,160,255,.25)');
-    ctx.fillStyle=gWind; rr(-5,-5,13,6,2); ctx.fill();
-    // Glare
-    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.fillRect(-4,-4,4,1);
-    // Spoiler
-    ctx.fillStyle=color;
-    ctx.fillRect(-13,-9,4,2); ctx.fillRect(9,-9,4,2);
-    ctx.shadowBlur=0; ctx.fillRect(-13,-9,26,1.5);
-    // Exhaust pipes
-    ctx.fillStyle='#333'; ctx.fillRect(-16,-3,3,2); ctx.fillRect(-16,1,3,2);
-    // Wheels
-    [[11,-10],[11,3],[-11,-10],[-11,3]].forEach(([wx,wy])=>{
-      ctx.fillStyle='#1a1a1a'; ctx.beginPath();ctx.rect(wx,wy,6,7);ctx.fill();
-      const wg=ctx.createRadialGradient(wx+3,wy+3.5,0,wx+3,wy+3.5,3.5);
-      wg.addColorStop(0,color+'cc');wg.addColorStop(.5,'#333');wg.addColorStop(1,'#111');
-      ctx.fillStyle=wg; ctx.beginPath();ctx.arc(wx+3,wy+3.5,3,0,Math.PI*2);ctx.fill();
+  // ── SUPERCAR (Lamborghini Aventador top-down) ───────────────────
+  if(ct==='supercar'){
+    // Rear diffuser fins
+    ctx.fillStyle='#0a0a0a';
+    ctx.beginPath();ctx.moveTo(-15,-8);ctx.lineTo(-20,-5);ctx.lineTo(-20,5);ctx.lineTo(-15,8);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(255,80,0,.55)';ctx.lineWidth=.9;
+    [-3.5,-1.5,1.5,3.5].forEach(fy=>{ctx.beginPath();ctx.moveTo(-15,fy);ctx.lineTo(-20,fy);ctx.stroke();});
+    // Main body — angular hexagon (wide front, tapered)
+    const bg=ctx.createLinearGradient(0,-11,0,11);
+    bg.addColorStop(0,'rgba(255,255,255,.22)');bg.addColorStop(.25,color);bg.addColorStop(1,'rgba(0,0,0,.5)');
+    ctx.fillStyle=bg;
+    ctx.beginPath();
+    ctx.moveTo(18,-4);ctx.lineTo(18,4);          // pointy nose
+    ctx.lineTo(13,11);ctx.lineTo(-12,11);         // right flare
+    ctx.lineTo(-15,8);ctx.lineTo(-15,-8);         // rear
+    ctx.lineTo(-12,-11);ctx.lineTo(13,-11);       // left flare
+    ctx.closePath();ctx.fill();
+    // Side air intakes
+    ctx.fillStyle='rgba(0,0,0,.6)';
+    ctx.beginPath();ctx.rect(2,-13,10,4);ctx.fill();  // left intake
+    ctx.beginPath();ctx.rect(2,9,10,4);ctx.fill();    // right intake
+    // Roof/cabin pod (dark centre)
+    ctx.fillStyle='rgba(0,0,0,.38)';
+    ctx.beginPath();ctx.ellipse(1,0,6.5,5,0,0,Math.PI*2);ctx.fill();
+    // Windshield (angled rake)
+    const wg=ctx.createLinearGradient(7,-5,16,0);
+    wg.addColorStop(0,'rgba(160,230,255,.65)');wg.addColorStop(1,'rgba(60,130,220,.18)');
+    ctx.fillStyle=wg;
+    ctx.beginPath();ctx.moveTo(16,-3);ctx.lineTo(16,3);ctx.lineTo(9,5);ctx.lineTo(9,-5);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.45)';
+    ctx.beginPath();ctx.moveTo(16,-2.5);ctx.lineTo(14,-2.5);ctx.lineTo(10,-4.5);ctx.lineTo(13,-4.5);ctx.closePath();ctx.fill();
+    // LED headlights (angular slits)
+    ctx.fillStyle='rgba(255,245,190,.95)';
+    ctx.shadowColor='#fffbe0';ctx.shadowBlur=10;
+    ctx.fillRect(16,-3.5,3,2);ctx.fillRect(16,1.5,3,2);
+    ctx.shadowColor=shielded?'#3aff9a':color;ctx.shadowBlur=boosting?32:12;
+    // Rear wing
+    ctx.fillStyle=color;ctx.fillRect(-19,-13,7,2.5);ctx.fillRect(-19,10.5,7,2.5);
+    ctx.fillStyle='#111';ctx.fillRect(-17,-11,2,22);   // wing pillar
+    // Wheels — low profile racing slicks
+    [[-8,-14],[-8,10],[7,-14],[7,10]].forEach(([wx,wy])=>{
+      ctx.fillStyle='#0f0f0f';ctx.beginPath();ctx.rect(wx,wy,8,6);ctx.fill();
+      const wg2=ctx.createLinearGradient(wx,wy+3,wx+8,wy+3);
+      wg2.addColorStop(0,'rgba(255,255,255,.15)');wg2.addColorStop(.4,color+'99');wg2.addColorStop(1,'#111');
+      ctx.fillStyle=wg2;ctx.beginPath();ctx.rect(wx+1,wy+1,6,4);ctx.fill();
     });
 
-  // ── SUV ────────────────────────────────────────────────────────
-  } else if(ct==='suv'){
-    // Body gradient
-    const gBody=ctx.createLinearGradient(-16,-11,0,11);
-    gBody.addColorStop(0,'#fff4');gBody.addColorStop(.25,color);gBody.addColorStop(1,'#0007');
-    ctx.fillStyle=gBody; rr(-16,-11,32,22,4); ctx.fill();
-    // Side stripe
-    ctx.fillStyle='rgba(255,255,255,.12)';
-    ctx.fillRect(-14,-2,28,4);
-    // Windshield
-    const gWind=ctx.createLinearGradient(-10,-9,10,-1);
-    gWind.addColorStop(0,'rgba(180,230,255,.5)');gWind.addColorStop(1,'rgba(80,140,255,.2)');
-    ctx.fillStyle=gWind; rr(-10,-9,20,9,3); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(-9,-8,7,2);
-    // Rear window
-    ctx.fillStyle='rgba(100,180,255,.3)'; rr(-10,1,9,7,2); ctx.fill();
-    // Roof rack
-    ctx.fillStyle='rgba(0,0,0,.4)';
-    ctx.fillRect(-10,-12,20,2);
-    ctx.strokeStyle='rgba(180,180,180,.5)';ctx.lineWidth=.8;
-    [-6,0,6].forEach(rx=>{ ctx.beginPath();ctx.moveTo(rx,-11);ctx.lineTo(rx,-13);ctx.stroke(); });
-    // Wheels
-    [[-13,-14],[-13,6],[10,-14],[10,6]].forEach(([wx,wy])=>{
-      ctx.fillStyle='#1a1a1a'; ctx.beginPath();ctx.rect(wx,wy,8,10);ctx.fill();
-      const wg=ctx.createRadialGradient(wx+4,wy+5,0,wx+4,wy+5,4);
-      wg.addColorStop(0,color+'bb');wg.addColorStop(.4,'#333');wg.addColorStop(1,'#111');
-      ctx.fillStyle=wg; ctx.beginPath();ctx.arc(wx+4,wy+5,3.5,0,Math.PI*2);ctx.fill();
+  // ── TOUGE (Toyota AE86 / Initial D top-down) ───────────────────
+  } else if(ct==='touge'){
+    // Body — boxy hatchback profile
+    const bg=ctx.createLinearGradient(0,-9,0,9);
+    bg.addColorStop(0,'rgba(255,255,255,.22)');bg.addColorStop(.2,color);bg.addColorStop(1,'rgba(0,0,0,.45)');
+    ctx.fillStyle=bg; rr(-15,-9,30,18,2); ctx.fill();
+    // Panda stripe / racing stripe (Initial D style white band)
+    ctx.fillStyle='rgba(255,255,255,.2)';
+    ctx.fillRect(-15,-9,30,3.5);       // top white band
+    ctx.fillStyle='rgba(0,0,0,.18)';
+    ctx.fillRect(-15,5.5,30,3.5);      // bottom dark trim
+    // Roof panel (visible from above, slightly darker)
+    ctx.fillStyle='rgba(0,0,0,.28)';
+    rr(-7,-7,19,14,2);ctx.fill();
+    // C-pillar edge lines
+    ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(5,-9);ctx.lineTo(5,-7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(5,7);ctx.lineTo(5,9);ctx.stroke();
+    // Windshield (AE86 upright glass)
+    const wg=ctx.createLinearGradient(5,-6,13,0);
+    wg.addColorStop(0,'rgba(160,225,255,.6)');wg.addColorStop(1,'rgba(60,140,220,.2)');
+    ctx.fillStyle=wg;
+    ctx.beginPath();ctx.moveTo(13,-7.5);ctx.lineTo(13,7.5);ctx.lineTo(5.5,6);ctx.lineTo(5.5,-6);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.42)';ctx.fillRect(6,-6.5,5,2);  // glare
+    // AE86 pop-up headlights (two rectangular squares)
+    ctx.fillStyle='rgba(255,245,160,.9)';
+    ctx.shadowColor='#fffaaa';ctx.shadowBlur=10;
+    ctx.fillRect(13,-8.5,4,4.5);   // left headlight
+    ctx.fillRect(13,4,4,4.5);      // right headlight
+    ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(14,-3.5,3,7); // divider between headlights
+    ctx.shadowColor=shielded?'#3aff9a':color;ctx.shadowBlur=boosting?32:12;
+    // Rear hatch spoiler
+    ctx.fillStyle=color;ctx.fillRect(-16,-9,3.5,18);
+    ctx.fillStyle='rgba(0,0,0,.5)';
+    ctx.fillRect(-16,-11.5,5,3);   // wing L
+    ctx.fillRect(-16,8.5,5,3);     // wing R
+    ctx.fillStyle='rgba(200,200,200,.3)';ctx.fillRect(-17,-10,1.5,20); // chrome edge
+    // AE86 tail lights (red slits)
+    ctx.fillStyle='rgba(255,50,50,.8)';
+    ctx.fillRect(-15,-8,3,3);ctx.fillRect(-15,5,3,3);
+    // Wheels — 14-inch steel rims (AE86 period correct)
+    [[-9,-13],[-9,7],[7,-13],[7,7]].forEach(([wx,wy])=>{
+      ctx.fillStyle='#151515';rr(wx,wy,7,8,1);ctx.fill();
+      const wg2=ctx.createRadialGradient(wx+3.5,wy+4,0,wx+3.5,wy+4,3.5);
+      wg2.addColorStop(0,'rgba(255,255,255,.85)');wg2.addColorStop(.3,color+'cc');wg2.addColorStop(.65,'#444');wg2.addColorStop(1,'#111');
+      ctx.fillStyle=wg2;ctx.beginPath();ctx.arc(wx+3.5,wy+4,3,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=.6;
+      [0,72,144,216,288].forEach(a=>{const ar=a*Math.PI/180;ctx.beginPath();ctx.moveTo(wx+3.5,wy+4);ctx.lineTo(wx+3.5+Math.cos(ar)*2.6,wy+4+Math.sin(ar)*2.6);ctx.stroke();});
     });
 
-  // ── CLASSIC ────────────────────────────────────────────────────
+  // ── MUSCLE / BMW (E30 M3 inspired top-down) ────────────────────
   } else {
+    // Flared wheel arches
+    ctx.fillStyle=color+'77';
+    ctx.beginPath();ctx.ellipse(-5,-11,5,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(-5,11,5,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(7,-11,5,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(7,11,5,2.5,0,0,Math.PI*2);ctx.fill();
     // Body gradient
-    const gBody=ctx.createLinearGradient(-13,-8,0,8);
-    gBody.addColorStop(0,'#fff5');gBody.addColorStop(.35,color);gBody.addColorStop(1,'#0006');
-    ctx.fillStyle=gBody; rr(-13,-8,26,16,7); ctx.fill();
-    // Pin stripe
-    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(12,0);ctx.stroke();
-    // Windshield
-    const gWind=ctx.createLinearGradient(-7,-6,7,1);
-    gWind.addColorStop(0,'rgba(180,220,255,.5)');gWind.addColorStop(1,'rgba(80,140,255,.2)');
-    ctx.fillStyle=gWind; rr(-7,-6,14,7,3); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.fillRect(-6,-5,5,1.5);
-    // Chrome bumpers
-    const cg1=ctx.createLinearGradient(12,-8,16,-8);
-    cg1.addColorStop(0,'rgba(200,200,200,.2)');cg1.addColorStop(.5,'rgba(255,255,255,.7)');cg1.addColorStop(1,'rgba(180,180,180,.2)');
-    ctx.fillStyle=cg1; ctx.fillRect(12,-8,4,16);
-    const cg2=ctx.createLinearGradient(-16,-8,-12,-8);
-    cg2.addColorStop(0,'rgba(180,180,180,.2)');cg2.addColorStop(.5,'rgba(255,255,255,.7)');cg2.addColorStop(1,'rgba(200,200,200,.2)');
-    ctx.fillStyle=cg2; ctx.fillRect(-16,-8,4,16);
-    // Round wheels with rims
-    [[-11,-11],[-11,3],[8,-11],[8,3]].forEach(([wx,wy])=>{
-      ctx.fillStyle='#1a1a1a'; ctx.beginPath();ctx.arc(wx+3,wy+4,5,0,Math.PI*2);ctx.fill();
-      const wg=ctx.createRadialGradient(wx+3,wy+4,0,wx+3,wy+4,4);
-      wg.addColorStop(0,'rgba(255,255,255,.9)');wg.addColorStop(.3,color+'dd');wg.addColorStop(.7,'#333');wg.addColorStop(1,'#111');
-      ctx.fillStyle=wg; ctx.beginPath();ctx.arc(wx+3,wy+4,3.5,0,Math.PI*2);ctx.fill();
-      // Spoke lines
-      ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=.7;
-      [0,60,120].forEach(a=>{
-        const ar=a*Math.PI/180;
-        ctx.beginPath();ctx.moveTo(wx+3,wy+4);ctx.lineTo(wx+3+Math.cos(ar)*3,wy+4+Math.sin(ar)*3);ctx.stroke();
-      });
+    const bg=ctx.createLinearGradient(0,-9,0,9);
+    bg.addColorStop(0,'rgba(255,255,255,.22)');bg.addColorStop(.3,color);bg.addColorStop(1,'rgba(0,0,0,.45)');
+    ctx.fillStyle=bg; rr(-14,-8,28,16,5); ctx.fill();
+    // Long hood highlight
+    ctx.fillStyle='rgba(255,255,255,.12)';rr(2,-6,10,12,3);ctx.fill();
+    // M3 hood power dome
+    ctx.fillStyle='rgba(0,0,0,.35)';rr(4,-3,7,6,2);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.55)';rr(5.5,-2,4,4,1);ctx.fill();
+    // Windshield (upright E30 style glass)
+    const wg=ctx.createLinearGradient(3,-6,13,0);
+    wg.addColorStop(0,'rgba(160,225,255,.55)');wg.addColorStop(1,'rgba(80,155,255,.18)');
+    ctx.fillStyle=wg; rr(2.5,-5.5,11,11,2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.38)';ctx.fillRect(3.5,-4.5,7,2);
+    // BMW kidney grille (signature double nostril)
+    const grillC=ctx.createLinearGradient(13,0,17,0);
+    grillC.addColorStop(0,'#222');grillC.addColorStop(.5,color+'88');grillC.addColorStop(1,'#222');
+    ctx.fillStyle=grillC;rr(13,-5.5,3.5,4.5,1);ctx.fill();rr(13,1,3.5,4.5,1);ctx.fill();
+    ctx.strokeStyle=color+'cc';ctx.lineWidth=.8;
+    ctx.strokeRect(13,-5.5,3.5,4.5);ctx.strokeRect(13,1,3.5,4.5);
+    // Chrome grille surround
+    ctx.strokeStyle='rgba(210,210,210,.45)';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.rect(12.5,-6.5,5,13);ctx.stroke();
+    // Rear lip spoiler
+    ctx.fillStyle=color;ctx.fillRect(-15,-9,3,18);
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(-16,-9,2,18);
+    // Tail lights (BMW style)
+    ctx.fillStyle='rgba(255,60,60,.75)';
+    ctx.fillRect(-14,-7.5,3.5,3.5);ctx.fillRect(-14,4,3.5,3.5);
+    // Wheels — large 17-inch staggered (M3 style)
+    [[-8,-12],[-8,7],[6,-12],[6,7]].forEach(([wx,wy])=>{
+      ctx.fillStyle='#0f0f0f';ctx.beginPath();ctx.arc(wx+4,wy+4.5,5.5,0,Math.PI*2);ctx.fill();
+      const wg2=ctx.createRadialGradient(wx+4,wy+4.5,0,wx+4,wy+4.5,5.5);
+      wg2.addColorStop(0,'rgba(255,255,255,.9)');wg2.addColorStop(.25,color+'ee');wg2.addColorStop(.55,'#3a3a3a');wg2.addColorStop(1,'#0f0f0f');
+      ctx.fillStyle=wg2;ctx.beginPath();ctx.arc(wx+4,wy+4.5,4.5,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=.7;
+      [0,40,80,120,160,200,240,280,320].forEach(a=>{const ar=a*Math.PI/180;ctx.beginPath();ctx.moveTo(wx+4,wy+4.5);ctx.lineTo(wx+4+Math.cos(ar)*4,wy+4.5+Math.sin(ar)*4);ctx.stroke();});
     });
   }
 
