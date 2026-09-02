@@ -177,13 +177,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .throw-btn:hover:not(:disabled){background:rgba(255,204,0,.25);transform:translateY(-1px)}
 .throw-btn:disabled{opacity:.3;cursor:default}
 /* Backpack floating button */
-#backpack-btn{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ffcc00;display:none;backdrop-filter:blur(6px);gap:6px;align-items:center}
+#backpack-btn{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,.75);border:1px solid rgba(255,204,0,.35);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;color:#ffcc00;display:none;backdrop-filter:blur(8px);gap:6px;align-items:center;white-space:nowrap}
 #backpack-btn:hover{background:rgba(255,204,0,.15)}
 /* ── CATCH WOBBLE ANIMATION ── */
+@keyframes bossPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,68,.0)}50%{box-shadow:0 0 18px 4px rgba(255,0,68,.5)}}
 @keyframes wobble1{0%{transform:translate(-50%,-50%) rotate(0deg)}25%{transform:translate(-50%,-50%) rotate(-18deg)}75%{transform:translate(-50%,-50%) rotate(18deg)}100%{transform:translate(-50%,-50%) rotate(0deg)}}
 /* ── EXODIA BOSS SPECIAL ── */
-#exodia-video{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:10px;background:#000;display:none}
-.exodia-battle{background:radial-gradient(ellipse 100% 80% at 50% 50%,#1a0028 0%,#05080f 100%)!important}
+#exodia-video{width:100%;max-height:140px;object-fit:contain;border-radius:10px;margin-bottom:6px;background:#000;display:none}
+#exodia-scenario-text{display:none;background:rgba(255,0,255,.07);border:1px solid rgba(255,0,255,.25);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.5;margin-bottom:6px;color:#ffaaff}
+.exodia-battle{background:radial-gradient(ellipse 100% 80% at 50% 50%,#1a0028 0%,#05080f 100%)!important;overflow-y:auto}
+.exodia-battle #battle-sprites{height:30%}
 .exodia-name{background:linear-gradient(135deg,#ff00ff,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* ── WORLD 2 TEASER ── */
 #world2-screen{background:linear-gradient(135deg,#0a001a,#1a0030)}
@@ -268,6 +271,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     </div>
   </div>
   <video id="exodia-video" autoplay muted playsinline webkit-playsinline></video>
+  <div id="exodia-scenario-text"></div>
   <div id="battle-textbox">
     <div class="pillar-label" id="battle-pillar" style="color:#3a7fff">🗂️ ASSETS</div>
     <div id="battle-question">Loading…</div>
@@ -291,13 +295,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- BACKPACK / CYBERDEX PANEL -->
 <div id="backpack-panel" style="position:fixed;inset:0;z-index:95;background:rgba(5,8,18,.97);display:none;flex-direction:column;overflow:hidden">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.1)">
-    <div style="display:flex;gap:0">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.1)">
+    <button onclick="closeBackpack()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:#fff;cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0">✕ Close</button>
+    <div style="display:flex;gap:0;flex:1;overflow:hidden">
       <button class="bp-tab active" id="bp-tab-balls" onclick="switchBpTab('balls')">🎒 Backpack</button>
       <button class="bp-tab" id="bp-tab-dex" onclick="switchBpTab('dex')">📡 CyberDex</button>
       <button class="bp-tab" id="bp-tab-captured" onclick="switchBpTab('captured')">🧬 Captured</button>
     </div>
-    <button onclick="closeBackpack()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:#fff;cursor:pointer;font-size:13px;font-weight:700">✕ Close</button>
   </div>
   <div id="bp-content" style="flex:1;overflow-y:auto;padding:16px 18px"></div>
 </div>
@@ -378,7 +382,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
 
 <!-- BACKPACK BUTTON -->
-<button id="backpack-btn" onclick="openBackpack()">🎒 <span id="bp-ball-summary">Bag</span></button>
+<button id="backpack-btn" onclick="openBackpack()">🎒 CyberDex / Backpack <span id="bp-ball-summary"></span></button>
 
 <!-- DEV: SKIP TO FINAL BOSS (testing only) -->
 <button id="dev-boss-btn" onclick="devSkipToExodia()" title="TEST: Skip to Final Boss (Exodia)" style="position:fixed;bottom:52px;left:12px;z-index:30;background:rgba(255,0,68,.18);border:1px dashed rgba(255,0,68,.5);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#ff4466;display:none;backdrop-filter:blur(6px);letter-spacing:.5px">☠️ TEST BOSS</button>
@@ -436,6 +440,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   </div>
   <div style="margin-top:8px;font-size:13px;opacity:.5">WASD / Arrow keys or D-Pad to move. Enter grass to encounter viruses!</div>
   <button class="btn" onclick="showCharSelect()">▶ Choose Your Character</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:8px;width:100%;max-width:360px">
+    <div style="flex:1;height:1px;background:rgba(255,255,255,.12)"></div>
+    <span style="font-size:11px;opacity:.4;letter-spacing:1px">OR</span>
+    <div style="flex:1;height:1px;background:rgba(255,255,255,.12)"></div>
+  </div>
+  <button class="btn" style="background:linear-gradient(135deg,#ff0044,#ff8800);margin-top:4px;animation:bossPulse 2.5s ease-in-out infinite" onclick="launchFinalBossFromTitle()">☠️ Final Boss Mode</button>
 </div>
 
 <!-- CHARACTER SELECT SCREEN -->
@@ -604,7 +614,7 @@ const ZONES = [
   {pillar:'secure',  xMin:21,xMax:39,yMin:1,yMax:9,  color:'#3aff9a',name:'Secured Sanctum',boss:{name:'Ransomware Dragon',sprite:'🐲',hp:80,xpR:150,badge:'🛡️ Shield Badge'}},
   {pillar:'update',  xMin:2,xMax:19,yMin:11,yMax:29, color:'#ffcc00',name:'Patch Plains',     boss:{name:'Zero-Day Phantom',sprite:'👻',hp:70,xpR:120,badge:'🔄 Update Badge'}},
   {pillar:'backup',  xMin:21,xMax:32,yMin:11,yMax:29,color:'#ff7a3c',name:'Backup Bastion',   boss:{name:'Data Void Wraith',sprite:'💀',hp:90,xpR:180,badge:'💾 Backup Badge'}},
-  {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Response HQ',      boss:{name:'APT Commander',sprite:'☠️',hp:85,xpR:160,badge:'🚨 Respond Badge'}},
+  {pillar:'respond', xMin:33,xMax:39,yMin:14,yMax:29,color:'#ff5a5a',name:'Rapid Response Realm',      boss:{name:'APT Commander',sprite:'☠️',hp:85,xpR:160,badge:'🚨 Respond Badge'}},
 ];
 
 // ─── WORLD 2 — CYBER TRUST REALM ────────────────────────────────
@@ -886,7 +896,7 @@ function tryMove(now){
   const nx=player.tx+dx, ny=player.ty+dy;
   if(!canMove(nx,ny)){
     // Boss zone lock message
-    if(nx>=33&&ny>=14&&player.level<3){ showZoneHint(`⚠️ Response HQ locked! Need Lv.3 — you're Lv.${player.level}. Keep battling to level up!`); }
+    if(nx>=33&&ny>=14&&player.level<3){ showZoneHint(`⚠️ Rapid Response Realm locked! Need Lv.3 — you're Lv.${player.level}. Keep battling to level up!`); }
     return;
   }
   player.tx=nx; player.ty=ny; lastMove=now;
@@ -1541,11 +1551,28 @@ function startExodiaRound(){
   document.getElementById('enemy-hp-text').textContent=exodiaHp+'/'+EXODIA_MAX_HP+' HP';
   document.getElementById('player-hp-fill').style.width=(player.hp/player.maxHp*100)+'%';
   document.getElementById('player-hp-text').textContent=player.hp+'/'+player.maxHp+' HP';
-  // Show video
+  // Show video + scenario text fallback
   const vid=document.getElementById('exodia-video');
+  const scenTxt=document.getElementById('exodia-scenario-text');
+  // Derive mp4 path as fallback (replace .mov with .mp4 if browser can't play mov)
+  const mp4src=eq.video.replace(/\.mov$/,'.mp4');
+  vid.innerHTML='';
+  const src1=document.createElement('source'); src1.src=eq.video; vid.appendChild(src1);
+  if(mp4src!==eq.video){const src2=document.createElement('source'); src2.src=mp4src; vid.appendChild(src2);}
   vid.style.display='block';
-  vid.src=eq.video;
-  vid.load(); vid.play().catch(()=>{});
+  scenTxt.style.display='none';
+  vid.load();
+  vid.play().catch(()=>{
+    // Autoplay blocked or format unsupported — show text scenario
+    vid.style.display='none';
+    scenTxt.style.display='block';
+    scenTxt.textContent='📋 Scenario: '+eq.q.split('What')[0].split('The simulation shows').slice(-1)[0].trim();
+  });
+  vid.onerror=()=>{
+    vid.style.display='none';
+    scenTxt.style.display='block';
+    scenTxt.textContent='📋 Scenario: '+eq.q.split('What')[0].split('The simulation shows').slice(-1)[0].trim();
+  };
   // Show question
   document.getElementById('battle-pillar').textContent=eq.pillar;
   document.getElementById('battle-pillar').style.color='#ff55ff';
@@ -1602,6 +1629,7 @@ function exodiaVictory(){
   player.bossesDefeated.add('exodia');
   document.getElementById('battle-overlay').style.display='none';
   document.getElementById('exodia-video').style.display='none';
+  document.getElementById('exodia-scenario-text').style.display='none';
   document.getElementById('battle-overlay').classList.remove('exodia-battle');
   inBattle=false;
   gainXp(500); player.score+=2000;
@@ -2085,6 +2113,19 @@ function giveGachaBalls(){
   updateBallSummary();
 }
 
+function launchFinalBossFromTitle(){
+  // Pick default avatar+name silently then start game in boss mode
+  playerAvatar='🦁'; playerName='Hunter';
+  document.getElementById('title-screen').style.display='none';
+  startGame();
+  // After game init, trigger Exodia
+  setTimeout(()=>{
+    player.level=5; player.hp=player.maxHp;
+    ['assets','secure','update','backup','respond'].forEach(p=>player.bossesDefeated.add(p));
+    showZoneHint('☠️ FINAL BOSS MODE — EXODIA AWAKENS!');
+    setTimeout(triggerExodia,1500);
+  },600);
+}
 function devSkipToExodia(){
   if(exodiaActive)return;
   document.getElementById('dev-boss-btn').style.display='none';
