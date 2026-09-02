@@ -169,22 +169,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
 
 <script>
 function launchMode(mode){
-  if(mode==='racers'){
-    // Tournament mode: open in new tab so Supabase WebSocket works unrestricted
-    window.open('cyber-racers.html','_blank','noopener');
-    return;
-  }
-  // Story mode: load inline as iframe (solo, no WebSocket needed)
   document.getElementById('landing').style.display='none';
   document.getElementById('back-btn').style.display='block';
-  const frame=document.getElementById('hunters-frame');
-  frame.style.display='block';
+  const src=mode==='racers'?'cyber-racers.html':'cyber-hunters.html';
+  const frameId=mode==='racers'?'racers-frame':'hunters-frame';
+  document.getElementById(frameId).style.display='block';
+  const frame=document.getElementById(frameId);
   if(!frame.dataset.loaded){
     frame.dataset.loaded='1';
     const iframe=document.createElement('iframe');
-    iframe.src='cyber-hunters.html';
+    iframe.src=src;
     iframe.style.cssText='width:100%;height:100%;border:none;display:block';
-    iframe.allow='fullscreen';
+    iframe.allow='fullscreen;autoplay';
     frame.appendChild(iframe);
   }
 }
@@ -195,6 +191,7 @@ function toggleCsaFloat(){
 }
 function goBack(){
   document.getElementById('hunters-frame').style.display='none';
+  document.getElementById('racers-frame').style.display='none';
   document.getElementById('back-btn').style.display='none';
   document.getElementById('landing').style.display='flex';
 }

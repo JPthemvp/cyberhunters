@@ -379,16 +379,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   <h1 style="font-size:clamp(24px,6vw,36px)">Choose Your Hunter</h1>
   <p style="margin-bottom:4px">Pick your avatar and enter your name</p>
   <div class="avatar-grid" id="avatar-grid">
-    <div class="avatar-opt selected" data-avatar="🧑‍💻" onclick="selectAvatar(this)">🧑‍💻</div>
-    <div class="avatar-opt" data-avatar="👨‍💼" onclick="selectAvatar(this)">👨‍💼</div>
-    <div class="avatar-opt" data-avatar="👩‍💼" onclick="selectAvatar(this)">👩‍💼</div>
+    <div class="avatar-opt selected" data-avatar="🐉" onclick="selectAvatar(this)">🐉</div>
+    <div class="avatar-opt" data-avatar="🧙" onclick="selectAvatar(this)">🧙</div>
+    <div class="avatar-opt" data-avatar="🦄" onclick="selectAvatar(this)">🦄</div>
+    <div class="avatar-opt" data-avatar="⚔️" onclick="selectAvatar(this)">⚔️</div>
     <div class="avatar-opt" data-avatar="🦸" onclick="selectAvatar(this)">🦸</div>
-    <div class="avatar-opt" data-avatar="🦸‍♀️" onclick="selectAvatar(this)">🦸‍♀️</div>
     <div class="avatar-opt" data-avatar="🥷" onclick="selectAvatar(this)">🥷</div>
-    <div class="avatar-opt" data-avatar="🧑‍🔬" onclick="selectAvatar(this)">🧑‍🔬</div>
-    <div class="avatar-opt" data-avatar="🕵️" onclick="selectAvatar(this)">🕵️</div>
-    <div class="avatar-opt" data-avatar="🤖" onclick="selectAvatar(this)">🤖</div>
-    <div class="avatar-opt" data-avatar="🐱‍💻" onclick="selectAvatar(this)">😺</div>
+    <div class="avatar-opt" data-avatar="🦊" onclick="selectAvatar(this)">🦊</div>
+    <div class="avatar-opt" data-avatar="🐯" onclick="selectAvatar(this)">🐯</div>
+    <div class="avatar-opt" data-avatar="🚀" onclick="selectAvatar(this)">🚀</div>
+    <div class="avatar-opt" data-avatar="🛸" onclick="selectAvatar(this)">🛸</div>
+    <div class="avatar-opt" data-avatar="🦅" onclick="selectAvatar(this)">🦅</div>
+    <div class="avatar-opt" data-avatar="🧝" onclick="selectAvatar(this)">🧝</div>
   </div>
   <div class="name-in-wrap">
     <div style="font-size:12px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Your Name</div>
@@ -1559,7 +1561,7 @@ function showBattleResultBar(correct,msg,tip){
 }
 
 // ── CHARACTER SELECTION ──────────────────────────────────────────
-let playerName='Hunter', playerAvatar='🧑‍💻';
+let playerName='Hunter', playerAvatar='🐉';
 function showCharSelect(){
   document.getElementById('title-screen').style.display='none';
   document.getElementById('char-select').style.display='flex';
