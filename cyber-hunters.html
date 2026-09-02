@@ -784,7 +784,7 @@ const player = {tx:5,ty:5,face:'down',moving:false,moveT:0,px:5,py:5,
   shield:false, doubleXp:false, hintUsed:false,
   bossesDefeated: new Set(),
   // ── CATCH SYSTEM ──
-  balls:{byteTrap:5,cipherNet:2,quantumSnare:0,coreExploit:0},
+  balls:{byteTrap:5,cipherNet:2,quantumSnare:1,coreExploit:0},
   captured:[], // [{dexId,name,sprite,pillar,ball,caughtAt}]
 };
 const XP_PER_LEVEL=[0,100,250,450,700,1000,1400,1900,2500,3200,4000,5000,6200,7500,9000,12000];
@@ -1930,6 +1930,7 @@ function showThrowBallRow(monster){
     const qty=player.balls[ball.id]||0;
     const btn=document.createElement('button');
     btn.className='throw-btn';
+    btn.dataset.ballId=ball.id; // store id for reliable re-enable
     btn.disabled=qty===0;
     btn.innerHTML=`${ball.icon} ${ball.name} <span style="opacity:.6">(${qty})</span>`;
     btn.onclick=()=>throwBall(ball.id,monster,btn);
@@ -1947,9 +1948,9 @@ function hideThrowBallRow(){
 let catchInProgress=false;
 function throwBall(ballId, monster, btn){
   if(catchInProgress)return;
-  catchInProgress=true;
   const ball=BALLS.find(b=>b.id===ballId);
-  if(!ball||!player.balls[ballId])return;
+  if(!ball||(player.balls[ballId]||0)<=0)return; // guard before setting flag
+  catchInProgress=true;
   player.balls[ballId]--;
   updateBallSummary();
   stopBattleTimer();
@@ -2062,16 +2063,17 @@ function endCatchSequence(overlay, success){
     updateBallSummary();
     showItemToast('🎉 Captured! Check your CyberDex','#3aff9a');
   } else {
-    // Re-enable buttons
+    // Re-enable answer buttons
     document.querySelectorAll('.battle-opt').forEach(b=>b.disabled=false);
+    // Re-enable throw buttons using stored ballId data attribute
     document.querySelectorAll('.throw-btn').forEach(b=>{
-      const bid=b.textContent.trim().split(' ')[1]; // rough parse
-      BALLS.forEach(ball=>{
-        if(b.innerHTML.includes(ball.name)) b.disabled=(player.balls[ball.id]||0)===0;
-      });
+      const bid=b.dataset.ballId;
+      b.disabled=!bid||(player.balls[bid]||0)===0;
     });
-    // Restart timer
-    if(currentBattle) startBattleTimer(currentBattle.q||30,()=>{});
+    // Update displayed quantities
+    showThrowBallRow(currentBattle.monster);
+    // Restart timer for current question
+    if(currentBattle&&currentBattle.q) startBattleTimer(currentBattle.q);
   }
 }
 
