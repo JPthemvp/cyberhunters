@@ -87,6 +87,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .badge-chip.earned{background:rgba(58,255,154,.15);border-color:rgba(58,255,154,.4);color:#3aff9a}
 /* title screen */
 #title-screen{background:linear-gradient(135deg,#0a0e1a,#0f1a30)}
+/* ── CHARACTER SELECT ── */
+#char-select{background:linear-gradient(135deg,#0a0e1a,#0f1a30)}
+.avatar-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:16px 0}
+.avatar-opt{font-size:36px;width:60px;height:60px;border-radius:14px;border:2.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;user-select:none}
+.avatar-opt:hover{border-color:rgba(58,127,255,.6);background:rgba(58,127,255,.12)}
+.avatar-opt.selected{border-color:#3a7fff;background:rgba(58,127,255,.2);box-shadow:0 0 12px rgba(58,127,255,.4)}
+.name-in-wrap{width:100%;max-width:320px;margin:8px auto 0}
+.name-field{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;font-size:16px;color:#fff;outline:none;transition:.2s;text-align:center}
+.name-field:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 #title-screen h1{font-size:clamp(32px,8vw,56px);background:linear-gradient(135deg,#3a7fff,#00d4ff,#3aff9a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
 .title-sub{font-size:14px;opacity:.6;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
 .pillar-preview{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0}
@@ -101,6 +110,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 /* map legend popup */
 #zone-hint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;background:rgba(15,21,40,.95);border:1.5px solid rgba(58,127,255,.3);border-radius:12px;padding:12px 18px;font-size:13px;pointer-events:none;opacity:0;transition:opacity .3s;text-align:center}
 #zone-hint.show{opacity:1}
+/* item pickup toast */
+#item-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;background:linear-gradient(135deg,rgba(15,21,40,.95),rgba(30,40,80,.95));border:1.5px solid rgba(255,204,0,.4);border-radius:14px;padding:10px 20px;font-size:14px;font-weight:700;color:#ffcc00;pointer-events:none;opacity:0;transition:opacity .3s;text-align:center;white-space:nowrap}
+#item-toast.show{opacity:1}
+/* active buffs bar */
+#buff-bar{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;pointer-events:none}
+.buff-chip{background:rgba(0,0,0,.7);border:1px solid rgba(255,204,0,.5);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#ffcc00;animation:buffPulse 1.5s ease-in-out infinite}
+@keyframes buffPulse{0%,100%{opacity:1}50%{opacity:.6}}
 </style>
 </head>
 <body>
@@ -127,6 +143,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- Zone hint -->
 <div id="zone-hint"></div>
+
+<!-- Item pickup toast -->
+<div id="item-toast"></div>
+
+<!-- Active buffs bar -->
+<div id="buff-bar"></div>
 
 <!-- Touch D-Pad -->
 <div id="dpad">
@@ -211,7 +233,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="pillar-chip" style="background:rgba(255,90,90,.1);color:#ff5a5a">🚨 Respond</div>
   </div>
   <div style="margin-top:8px;font-size:13px;opacity:.5">WASD / Arrow keys or D-Pad to move. Enter grass to encounter viruses!</div>
-  <button class="btn" onclick="startGame()">▶ Start Adventure</button>
+  <button class="btn" onclick="showCharSelect()">▶ Choose Your Character</button>
+</div>
+
+<!-- CHARACTER SELECT SCREEN -->
+<div class="overlay" id="char-select" style="display:none">
+  <h1 style="font-size:clamp(24px,6vw,36px)">Choose Your Hunter</h1>
+  <p style="margin-bottom:4px">Pick your avatar and enter your name</p>
+  <div class="avatar-grid" id="avatar-grid">
+    <div class="avatar-opt selected" data-avatar="🧑‍💻" onclick="selectAvatar(this)">🧑‍💻</div>
+    <div class="avatar-opt" data-avatar="👨‍💼" onclick="selectAvatar(this)">👨‍💼</div>
+    <div class="avatar-opt" data-avatar="👩‍💼" onclick="selectAvatar(this)">👩‍💼</div>
+    <div class="avatar-opt" data-avatar="🦸" onclick="selectAvatar(this)">🦸</div>
+    <div class="avatar-opt" data-avatar="🦸‍♀️" onclick="selectAvatar(this)">🦸‍♀️</div>
+    <div class="avatar-opt" data-avatar="🥷" onclick="selectAvatar(this)">🥷</div>
+    <div class="avatar-opt" data-avatar="🧑‍🔬" onclick="selectAvatar(this)">🧑‍🔬</div>
+    <div class="avatar-opt" data-avatar="🕵️" onclick="selectAvatar(this)">🕵️</div>
+    <div class="avatar-opt" data-avatar="🤖" onclick="selectAvatar(this)">🤖</div>
+    <div class="avatar-opt" data-avatar="🐱‍💻" onclick="selectAvatar(this)">😺</div>
+  </div>
+  <div class="name-in-wrap">
+    <div style="font-size:12px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Your Name</div>
+    <input class="name-field" id="player-name-field" placeholder="Enter your hunter name" maxlength="16" value="">
+  </div>
+  <button class="btn" style="margin-top:20px" onclick="startGame()">▶ Start Adventure</button>
+  <button class="btn" style="background:rgba(255,255,255,.08);margin-top:8px" onclick="backToTitle()">← Back</button>
 </div>
 
 <!-- WIN SCREEN -->
@@ -407,13 +453,111 @@ canvas.addEventListener('touchend',e=>{
   setTimeout(()=>{delete keys['ArrowRight'];delete keys['ArrowLeft'];delete keys['ArrowUp'];delete keys['ArrowDown']},100);
 },{passive:true});
 
+// ─── GROUND PICKUP ITEMS ─────────────────────────────────────────
+const GROUND_ITEM_DEFS=[
+  {id:'speed',icon:'⚡',name:'Speed Boots',desc:'Move 2× faster for 20s',rarity:'rare',color:'#3aff9a'},
+  {id:'easyq',icon:'🎯',name:'Easy Question',desc:'Next battle: difficulty 1 only',rarity:'uncommon',color:'#7ab0ff'},
+  {id:'xpboost',icon:'⭐',name:'XP Surge',desc:'Double XP for next 3 battles',rarity:'uncommon',color:'#ffcc00'},
+  {id:'levelup',icon:'🎖️',name:'Free Level Up',desc:'Instant level up!',rarity:'epic',color:'#cc55ff'},
+  {id:'potion',icon:'💊',name:'Cyber Potion',desc:'Restore 1 HP',rarity:'common',color:'#ff7a3c'},
+  {id:'boat',icon:'🚤',name:'Cyber Boat',desc:'Cross water tiles freely!',rarity:'rare',color:'#00d4ff'},
+  {id:'shield',icon:'🛡️',name:'Shield Pack',desc:'Resist next wrong answer',rarity:'uncommon',color:'#3aff9a'},
+];
+const GROUND_ITEMS=[]; // {tx,ty,def,collected}
+
+function spawnGroundItems(){
+  const walkable=[];
+  for(let r=1;r<ROWS-1;r++) for(let c=1;c<COLS-1;c++){
+    const t=MAP_DATA[r][c];
+    if(t===T.PATH||t===T.SAND||t===T.GRASS) walkable.push([c,r]);
+  }
+  // Shuffle and pick 18 spots
+  walkable.sort(()=>Math.random()-.5);
+  const picks=walkable.slice(0,18);
+  picks.forEach(([c,r])=>{
+    const def=GROUND_ITEM_DEFS[Math.floor(Math.random()*GROUND_ITEM_DEFS.length)];
+    GROUND_ITEMS.push({tx:c,ty:r,def,collected:false});
+  });
+}
+
+// Player buffs state
+const buffs={speedBoost:0,easyQ:false,xpBoost:0,hasBoat:false};
+
+function checkGroundItemPickup(){
+  for(const item of GROUND_ITEMS){
+    if(item.collected)continue;
+    if(item.tx===player.tx&&item.ty===player.ty){
+      item.collected=true;
+      applyGroundItem(item.def);
+    }
+  }
+}
+
+let itemToastTimer;
+function showItemToast(icon,name,desc){
+  const el=document.getElementById('item-toast');
+  el.textContent=icon+' '+name+' — '+desc;
+  el.classList.add('show');
+  clearTimeout(itemToastTimer);
+  itemToastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+function applyGroundItem(def){
+  showItemToast(def.icon,def.name,def.desc);
+  switch(def.id){
+    case 'speed':
+      buffs.speedBoost=Date.now()+20000;
+      updateBuffBar();
+      break;
+    case 'easyq':
+      buffs.easyQ=true;
+      updateBuffBar();
+      break;
+    case 'xpboost':
+      buffs.xpBoost=3;
+      updateBuffBar();
+      break;
+    case 'levelup':
+      player.level=Math.min(5,player.level+1);
+      showLevelUp();
+      gainXp(0);
+      break;
+    case 'potion':
+      player.hp=Math.min(player.maxHp,player.hp+1);
+      updateHpHearts();
+      break;
+    case 'boat':
+      buffs.hasBoat=true;
+      updateBuffBar();
+      break;
+    case 'shield':
+      player.shield=true;
+      updateBuffBar();
+      break;
+  }
+  player.score+=25;
+  updateScoreDisplay();
+}
+
+function updateBuffBar(){
+  const bar=document.getElementById('buff-bar');
+  bar.innerHTML='';
+  if(buffs.hasBoat) bar.innerHTML+='<div class="buff-chip">🚤 Boat</div>';
+  if(buffs.speedBoost>Date.now()) bar.innerHTML+='<div class="buff-chip">⚡ Fast</div>';
+  if(buffs.easyQ) bar.innerHTML+='<div class="buff-chip">🎯 Easy Q</div>';
+  if(buffs.xpBoost>0) bar.innerHTML+=`<div class="buff-chip">⭐ ×2 XP ×${buffs.xpBoost}</div>`;
+  if(player.shield) bar.innerHTML+='<div class="buff-chip">🛡️ Shield</div>';
+}
+
 // ─── MOVEMENT ───────────────────────────────────────────────────
-const MOVE_SPEED=150; // ms per tile
+const MOVE_SPEED_BASE=150; // ms per tile
 let lastMove=0;
+function getMoveSpeed(){ return buffs.speedBoost>Date.now()?75:MOVE_SPEED_BASE; }
 function canMove(c,r){
   if(c<0||c>=COLS||r<0||r>=ROWS)return false;
   const t=MAP_DATA[r][c];
-  if(t===T.WALL||t===T.TREE||t===T.WATER)return false;
+  if(t===T.WALL||t===T.TREE)return false;
+  if(t===T.WATER&&!buffs.hasBoat)return false;
   // Boss zone requires level 5+
   const inBoss=c>=33&&r>=14;
   if(inBoss&&player.level<5)return false;
@@ -421,7 +565,7 @@ function canMove(c,r){
 }
 
 function tryMove(now){
-  if(now-lastMove<MOVE_SPEED)return;
+  if(now-lastMove<getMoveSpeed())return;
   let dx=0,dy=0;
   if(keys['ArrowLeft']||keys['a']||keys['A']||keys['dpad_left'])dx=-1;
   else if(keys['ArrowRight']||keys['d']||keys['D']||keys['dpad_right'])dx=1;
@@ -437,6 +581,7 @@ function tryMove(now){
   player.tx=nx; player.ty=ny; lastMove=now;
   if(dx===-1)player.face='left'; if(dx===1)player.face='right';
   if(dy===-1)player.face='up'; if(dy===1)player.face='down';
+  checkGroundItemPickup();
   const tile=MAP_DATA[ny][nx];
   if(tile===T.TALL||tile===T.SAND){
     player.steps++;
@@ -492,7 +637,14 @@ let battleTimer,battleCountdown,currentBattle={};
 
 function startBattle(monster,zone){
   inBattle=true;
-  const qs=window.CyberQB.getQuestionsByPillar(monster.pillar,1);
+  let qs=window.CyberQB.getQuestionsByPillar(monster.pillar,8);
+  // Easy Question buff: filter to difficulty 1 only
+  if(buffs.easyQ){
+    const easy=qs.filter(q=>q.difficulty===1);
+    if(easy.length>0) qs=easy;
+    buffs.easyQ=false; updateBuffBar();
+    showItemToast('🎯','Easy Mode','Difficulty 1 question selected!');
+  }
   const q=qs.find(q=>!player.usedQIds.has(q.id))||qs[0];
   player.usedQIds.add(q.id);
   const monHp=monster.hp||30;
@@ -508,9 +660,9 @@ function showBattleQuestion(q,monster,zone){
   document.getElementById('battle-question').textContent=q.q;
   document.getElementById('enemy-name').textContent=monster.name;
   document.getElementById('enemy-sprite').textContent=monster.sprite||(monster.isBoss?'👾':'🦠');
-  document.getElementById('player-battle-name').textContent='Hunter';
+  document.getElementById('player-battle-name').textContent=playerName;
   document.getElementById('player-battle-lvl').textContent='Lv.'+player.level;
-  document.getElementById('player-battle-sprite').textContent='🧑‍💻';
+  document.getElementById('player-battle-sprite').textContent=playerAvatar;
   updateBattleHpBars();
   // Options
   const opts=document.getElementById('battle-opts');
@@ -579,7 +731,9 @@ function showBattleResult(correct,label,q){
   if(correct){
     const dmg=Math.floor(mb.monsterMaxHp/( mb.monster.isBoss?mb.maxQ:1 ));
     mb.monsterHp=Math.max(0,mb.monsterHp-dmg);
-    const xpGain=(player.doubleXp?2:1)*(q.difficulty||1)*20;
+    const xpMult=(player.doubleXp?2:1)*(buffs.xpBoost>0?2:1);
+    if(buffs.xpBoost>0){buffs.xpBoost--;updateBuffBar();}
+    const xpGain=xpMult*(q.difficulty||1)*20;
     gainXp(xpGain);
     player.score+=100;
     document.getElementById('enemy-sprite').classList.add('sprite-shake');
@@ -637,6 +791,7 @@ function gainXp(amt){
   if(player.xp>=next&&player.level<8){ player.level++; player.xp=0; showLevelUp(); }
   updateXpBar();
 }
+function updateScoreDisplay(){ document.getElementById('score-display').textContent=player.score+' pts'; }
 function updateXpBar(){
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
   const pct=Math.min(100,player.xp/next*100);
@@ -804,6 +959,23 @@ function drawWorld(){
     ctx.fillText(z.name,cx,cy);
     ctx.restore();
   });
+  // Draw ground items
+  GROUND_ITEMS.forEach(item=>{
+    if(item.collected)return;
+    const ix=item.tx*TILE+TILE/2, iy=item.ty*TILE+TILE/2;
+    // Skip if off screen
+    if(ix<camX-TILE||ix>camX+W+TILE||iy<camY-TILE||iy>camY+H+TILE)return;
+    // Glow ring
+    const pulse=0.5+0.5*Math.sin(frame*.07+item.tx+item.ty);
+    ctx.save();
+    ctx.shadowColor=item.def.color||'#ffcc00';
+    ctx.shadowBlur=8+pulse*6;
+    ctx.font=TILE*.55+'px serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(item.def.icon,ix,iy+Math.sin(frame*.08+item.tx)*2);
+    ctx.restore();
+  });
   // Draw player
   const px=player.tx*TILE+TILE/2, py=player.ty*TILE+TILE/2;
   const bob=Math.sin(frame*.1)*2;
@@ -816,7 +988,16 @@ function drawWorld(){
   ctx.font=TILE*.7+'px serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
-  ctx.fillText('🧑‍💻',px,py+bob-2);
+  // Show boat under player if on water
+  const onWater=MAP_DATA[player.ty]&&MAP_DATA[player.ty][player.tx]===T.WATER;
+  if(onWater&&buffs.hasBoat){
+    ctx.font=TILE*.6+'px serif';
+    ctx.fillText('🚤',px,py+bob+4);
+    ctx.font=TILE*.45+'px serif';
+    ctx.fillText(playerAvatar,px,py+bob-6);
+  } else {
+    ctx.fillText(playerAvatar,px,py+bob-2);
+  }
   ctx.restore();
 }
 
@@ -845,9 +1026,32 @@ function loop(now){
   drawWorld();
 }
 
+// ── CHARACTER SELECTION ──────────────────────────────────────────
+let playerName='Hunter', playerAvatar='🧑‍💻';
+function showCharSelect(){
+  document.getElementById('title-screen').style.display='none';
+  document.getElementById('char-select').style.display='flex';
+}
+function backToTitle(){
+  document.getElementById('char-select').style.display='none';
+  document.getElementById('title-screen').style.display='flex';
+}
+function selectAvatar(el){
+  document.querySelectorAll('.avatar-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  playerAvatar=el.dataset.avatar;
+}
 function startGame(){
+  // Capture name from char-select screen if visible
+  const nameField=document.getElementById('player-name-field');
+  if(nameField&&nameField.value.trim()) playerName=nameField.value.trim();
+  // Also capture selected avatar
+  const sel=document.querySelector('.avatar-opt.selected');
+  if(sel) playerAvatar=sel.dataset.avatar;
+  document.getElementById('char-select').style.display='none';
   document.getElementById('title-screen').style.display='none';
   gameRunning=true;
+  spawnGroundItems();
   updateXpBar();
   updateHpHearts();
   updateZoneHUD();
