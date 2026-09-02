@@ -1586,29 +1586,42 @@ function startExodiaRound(){
   // Show video + scenario text fallback
   const vid=document.getElementById('exodia-video');
   const scenTxt=document.getElementById('exodia-scenario-text');
+  let vidShownText=false;
   function showScenarioText(){
+    if(vidShownText)return; vidShownText=true;
     vid.style.display='none';
     scenTxt.style.display='block';
     const raw=eq.q||'';
     const snippet=raw.split('What')[0].replace(/^The simulation shows\s*/i,'').trim();
     scenTxt.textContent='📋 Scenario: '+(snippet||raw.slice(0,120));
   }
-  // Always prefer .mp4; .mov only plays on Safari
-  const mp4src=eq.video.replace(/\.mov$/,'.mp4');
+  // Always use .mp4; strip any .mov suffix
+  const mp4src=eq.video.replace(/\.mov$/i,'.mp4');
+  // Reset video element fully — use src attribute directly (more reliable than <source> nodes)
+  vid.removeEventListener('canplay',vid._cpHandler||null);
+  vid.removeEventListener('error',vid._errHandler||null);
+  vid.pause();
+  vid.removeAttribute('src');
   vid.innerHTML='';
-  // Put .mp4 first so Chrome/Edge picks it; also add original as fallback
-  const s1=document.createElement('source'); s1.src=mp4src; s1.type='video/mp4'; vid.appendChild(s1);
-  if(mp4src!==eq.video){const s2=document.createElement('source'); s2.src=eq.video; s2.type='video/mp4'; vid.appendChild(s2);}
+  vid.muted=true;
+  vid.autoplay=true;
+  vid.playsInline=true;
   vid.style.display='block';
   scenTxt.style.display='none';
-  vid.onerror=showScenarioText;
-  // Wait for canplay before calling play() so browser has buffered enough
-  vid.oncanplay=null;
-  const onCanPlay=()=>{ vid.oncanplay=null; vid.play().catch(showScenarioText); };
-  vid.oncanplay=onCanPlay;
+  // Attach handlers before setting src so no events are missed
+  const onCanPlay=()=>{
+    clearTimeout(vid._autoplayTimeout);
+    vid.removeEventListener('canplay',onCanPlay);
+    vid.play().catch(showScenarioText);
+  };
+  const onErr=()=>{ clearTimeout(vid._autoplayTimeout); showScenarioText(); };
+  vid.addEventListener('canplay',onCanPlay);
+  vid.addEventListener('error',onErr);
+  vid._cpHandler=onCanPlay; vid._errHandler=onErr;
+  vid.src=mp4src;
   vid.load();
-  // Timeout fallback: if no canplay in 4s, show text
-  const vidTimeout=setTimeout(()=>{ if(vid.paused&&vid.readyState<2){ vid.oncanplay=null; showScenarioText(); }},4000);
+  // Timeout fallback: if no canplay within 5s, show text
+  vid._autoplayTimeout=setTimeout(()=>{ vid.removeEventListener('canplay',onCanPlay); showScenarioText(); },5000);
   // Show question
   document.getElementById('battle-pillar').textContent=eq.pillar;
   document.getElementById('battle-pillar').style.color='#ff55ff';
@@ -1637,6 +1650,9 @@ function answerExodia(chosen,eq){
     else if(i===chosen)b.classList.add('wrong');
   });
   const vid=document.getElementById('exodia-video');
+  clearTimeout(vid._autoplayTimeout);
+  vid.removeEventListener('canplay',vid._cpHandler||null);
+  vid.removeEventListener('error',vid._errHandler||null);
   vid.pause();
   if(correct){
     const dmg=100;
