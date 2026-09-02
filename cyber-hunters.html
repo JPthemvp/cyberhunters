@@ -319,6 +319,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
 
+<!-- DEV: SKIP TO FINAL BOSS (testing only) -->
+<button id="dev-boss-btn" onclick="devSkipToExodia()" title="TEST: Skip to Final Boss (Exodia)" style="position:fixed;bottom:52px;left:12px;z-index:30;background:rgba(255,0,68,.18);border:1px dashed rgba(255,0,68,.5);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#ff4466;display:none;backdrop-filter:blur(6px);letter-spacing:.5px">☠️ TEST BOSS</button>
+
 <!-- WORLD 2 WIN SCREEN -->
 <div class="overlay" id="w2-win-screen" style="display:none;background:radial-gradient(ellipse at 50% 30%,#2a0040 0%,#05080f 100%)">
   <div style="font-size:72px;animation:float 2s ease-in-out infinite">🏆</div>
@@ -1602,8 +1605,9 @@ function startGame(){
   gameRunning=true;
   spawnGroundItems();
   updateXpBar();
-  // Show quit button
+  // Show quit button + dev test button
   document.getElementById('quit-btn').style.display='block';
+  document.getElementById('dev-boss-btn').style.display='block';
   // Show CSA panel
   document.getElementById('csa-panel').style.display='flex';
   // Mobile orientation check
@@ -1611,6 +1615,17 @@ function startGame(){
   updateHpHearts();
   updateZoneHUD();
   requestAnimationFrame(loop);
+}
+
+function devSkipToExodia(){
+  if(exodiaActive)return;
+  document.getElementById('dev-boss-btn').style.display='none';
+  player.level=5; player.hp=player.maxHp;
+  ['assets','secure','update','backup','respond'].forEach(p=>player.bossesDefeated.add(p));
+  showZoneHint('🧪 DEV MODE — Triggering Exodia now!');
+  setTimeout(triggerExodia,1000);
+}
+
   // ── FINAL BOSS MODE: skip story, go straight to Exodia ──────────
   if(new URLSearchParams(window.location.search).get('boss')==='1'){
     // Max out level so Exodia trigger fires immediately
