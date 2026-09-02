@@ -52,7 +52,8 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 #countdown-num{font-size:clamp(80px,20vw,140px);font-weight:900;color:#3a7fff;text-shadow:0 0 40px rgba(58,127,255,.8);animation:cdPulse .9s ease-out}
 @keyframes cdPulse{from{transform:scale(1.5);opacity:0}to{transform:scale(1);opacity:1}}
 /* ─── QUIZ MODAL ─── */
-#quiz-modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;padding:0 10px 20px}
+#quiz-modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;padding:0 10px 20px;pointer-events:none}
+#quiz-box{pointer-events:all;max-height:80vh;overflow-y:auto}
 #quiz-box{background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(58,127,255,.3);border-radius:20px;padding:20px 20px 16px;width:100%;max-width:540px;backdrop-filter:blur(12px)}
 #quiz-pillar{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px;color:#3a7fff}
 #quiz-q{font-size:clamp(13px,3vw,16px);font-weight:500;line-height:1.5;margin-bottom:12px}
@@ -125,7 +126,7 @@ input.text-in:focus{border-color:#3a7fff;background:rgba(58,127,255,.1)}
 #fire-btn{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#ff4400,#aa0000);border:3px solid #ff6;font-size:22px;cursor:pointer;box-shadow:0 0 20px rgba(255,80,0,.6);transition:.15s;display:flex;align-items:center;justify-content:center}
 #fire-btn:active{transform:scale(.92);box-shadow:0 0 30px rgba(255,100,0,.9)}
 /* ─── QUIT BUTTON (IN-RACE) — bottom-left above solo-back ─── */
-#quit-race-btn{position:fixed;bottom:60px;left:16px;z-index:9990;background:rgba(160,0,0,.6);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
+#quit-race-btn{position:fixed;top:50px;right:14px;z-index:9990;background:rgba(160,0,0,.6);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;display:none;backdrop-filter:blur(8px)}
 #quit-race-btn:hover{background:rgba(210,0,0,.8)}
 #quit-race-dialog{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center}
 #quit-race-box{background:#0d1120;border:1.5px solid rgba(255,255,255,.15);border-radius:18px;padding:32px 40px;text-align:center;max-width:340px}
@@ -912,9 +913,14 @@ function answerQuiz(idx,btn,q){
   if(!correct)btn.classList.add('wrong');
   document.getElementById('quiz-tip').style.display='block';
   document.getElementById('quiz-tip').textContent='💡 '+q.tip;
-  if(correct){ teleportAheadOfLeader(); addShell(1); player.score+=100; player.correctAnswers++; }
-  else { player.spinning=80; player.score=Math.max(0,player.score-20); player.wrongAnswers++; showToast('❌ Wrong! Spinning out!','wrong'); }
-  setTimeout(closeQuiz, 2800);
+  if(correct){
+    teleportAheadOfLeader(); addShell(1); player.score+=100; player.correctAnswers++;
+    setTimeout(closeQuiz, 700); // close quickly after green flash
+  } else {
+    player.spinning=80; player.score=Math.max(0,player.score-20); player.wrongAnswers++;
+    showToast('❌ Wrong! Spinning out!','wrong');
+    setTimeout(closeQuiz, 2500); // keep tip visible a bit longer on wrong
+  }
 }
 function timeoutQuiz(q){
   document.querySelectorAll('.quiz-opt').forEach(b=>b.disabled=true);
@@ -1280,67 +1286,126 @@ function broadcastPosition(){
   }});
 }
 
-// ─── RENDER ──────────────────────────────────────────────────────
+// ─── RENDER (Mario Kart car-POV) ─────────────────────────────────
 let lastLapText='',raceTime=0;
+const CAR_SCR_X=()=>W/2, CAR_SCR_Y=()=>H*0.72;
+const HORIZON=()=>H*0.42;
+
 function render(){
   ctx.clearRect(0,0,W,H);
+  const HZ=HORIZON(), CSX=CAR_SCR_X(), CSY=CAR_SCR_Y();
+
+  // ── SKY ──
+  const skyG=ctx.createLinearGradient(0,0,0,HZ);
+  skyG.addColorStop(0,'#020508'); skyG.addColorStop(1,'#0c1830');
+  ctx.fillStyle=skyG; ctx.fillRect(0,0,W,HZ);
+  // Stars (seeded, fixed pattern)
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  for(let s=0;s<70;s++){
+    const sx=((s*241+s*s*17)%997)/997*W;
+    const sy=((s*179+s*s*31)%997)/997*HZ;
+    const ss=s%7===0?2:1;
+    ctx.fillRect(sx,sy,ss,ss);
+  }
+  // Horizon neon glow
+  const hg=ctx.createLinearGradient(0,HZ-24,0,HZ+8);
+  hg.addColorStop(0,'rgba(58,127,255,0)');
+  hg.addColorStop(.5,'rgba(58,127,255,0.28)');
+  hg.addColorStop(1,'rgba(58,127,255,0)');
+  ctx.fillStyle=hg; ctx.fillRect(0,HZ-24,W,32);
+
+  // ── ROAD AREA (car-POV transform) ──
   ctx.save();
-  // Camera smooth follow
-  const tx=player.x-W/2,ty=player.y-H/2;
-  camX+=(tx-camX)*.1; camY+=(ty-camY)*.1;
-  ctx.translate(-camX,-camY);
-  // Sky / ground
-  ctx.fillStyle='#0d1a0d'; ctx.fillRect(camX-100,camY-100,W+200,H+200);
-  // Track base (wide)
+  // Clip to road area below horizon
+  ctx.beginPath(); ctx.rect(0,HZ,W,H-HZ); ctx.clip();
+  // Place car at fixed screen position, rotate world opposite to car heading
+  ctx.translate(CSX, CSY);
+  ctx.rotate(-player.angle - Math.PI/2);
+  // Perspective squish: world Y → screen Y shallower (far = small)
+  ctx.scale(1.15, 0.52);
+  ctx.translate(-player.x, -player.y);
+
+  // Ground / grass
+  ctx.fillStyle='#091509'; ctx.fillRect(player.x-5000,player.y-5000,10000,10000);
+  // Alternating grass stripes for depth feel
+  for(let s=0;s<12;s++){
+    ctx.fillStyle=s%2===0?'#0a180a':'#091209';
+    ctx.fillRect(player.x-5000,player.y-5000+s*833,10000,833);
+  }
+
+  // Track road
   ctx.beginPath();
   TK.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
   ctx.closePath();
-  ctx.strokeStyle='#2a2a40'; ctx.lineWidth=TRACK_W*2+8; ctx.stroke();
-  ctx.strokeStyle='#3a3a5a'; ctx.lineWidth=TRACK_W*2; ctx.stroke();
-  // Track surface
-  ctx.strokeStyle='#4a4a6a'; ctx.lineWidth=TRACK_W*2-8; ctx.stroke();
-  // Lane dashes
-  ctx.setLineDash([24,24]); ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=2;
+  ctx.strokeStyle='#252535'; ctx.lineWidth=TRACK_W*2+14; ctx.stroke(); // shadow
+  ctx.strokeStyle='#3a3a55'; ctx.lineWidth=TRACK_W*2+4; ctx.stroke(); // base
+  ctx.strokeStyle='#4a4a70'; ctx.lineWidth=TRACK_W*2-4; ctx.stroke(); // surface
+  // Red/white curbs at track edges
+  ctx.setLineDash([30,30]);
+  ctx.strokeStyle='rgba(255,60,60,0.55)'; ctx.lineWidth=5;
+  ctx.beginPath(); TK.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.stroke();
+  ctx.setLineDash([]);
+  // Centre lane dashes
+  ctx.setLineDash([28,28]); ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=3;
   ctx.beginPath(); TK.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.stroke();
   ctx.setLineDash([]);
   // Start/finish line
-  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.fillRect(TK[0][0]-4,TK[0][1]-TRACK_W,8,TRACK_W*2);
-  ctx.fillStyle='#3a7fff'; ctx.fillRect(TK[0][0]-4,TK[0][1]-TRACK_W,8,TRACK_W);
-  // Hazard blocks
+  for(let c=0;c<8;c++){
+    ctx.fillStyle=c%2===0?'#fff':'#000';
+    ctx.fillRect(TK[0][0]-TRACK_W+c*(TRACK_W/4)*2, TK[0][1]-6, TRACK_W/4*2, 12);
+  }
+
+  // Hazards
   HAZARDS.forEach(hz=>{
     if(hz.hit)return;
-    ctx.save();
-    ctx.shadowColor='#ff5050'; ctx.shadowBlur=12;
-    ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('❓',hz.x,hz.y);
-    ctx.restore();
+    ctx.save(); ctx.shadowColor='#ff5050'; ctx.shadowBlur=18;
+    ctx.font='28px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('❓',hz.x,hz.y); ctx.restore();
   });
   // Power-ups
   PUPS.forEach(pu=>{
     if(pu.hit)return;
-    ctx.save(); ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.save(); ctx.font='24px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(PU_ICONS[pu.type],pu.x,pu.y); ctx.restore();
   });
-  // Decorative grass/trees
+  // Trees / scenery (outside track)
   for(let g=0;g<80;g++){
-    const gx=((g*317+g*g*7)%2200)-100,gy=((g*211+g*g*13)%1400)-100;
-    // Only draw if far from track
+    const gx=((g*317+g*g*7)%2200)-100, gy=((g*211+g*g*13)%1400)-100;
     const ni=nearestIdx(gx,gy);
-    const ddx=gx-TK[ni][0],ddy=gy-TK[ni][1];
+    const ddx=gx-TK[ni][0], ddy=gy-TK[ni][1];
     if(ddx*ddx+ddy*ddy>TRACK_W*TRACK_W*1.8){
-      ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(g%4===0?'🌲':g%3===0?'🌳':'🌿',gx,gy);
     }
   }
-  // Other players
+  // Other players (in world space, clipped to road area)
   Object.values(others).forEach(o=>{
     drawKart(o.x||TK[0][0],o.y||TK[0][1],o.angle||0,o.color||'#aaa',o.name||'?',false,o.boosting>0,o.spinning>0,o.shielded,o.carType||'supercar');
   });
-  // My player
-  drawKart(player.x,player.y,player.angle,myColor,myName,true,player.boosting>0,player.spinning>0,player.shielded,myCarType);
-  // Draw shell projectiles in world space
+  // Shells
   drawShells(ctx);
   ctx.restore();
+
+  // ── PLAYER CAR (fixed screen position, POV) ──
+  ctx.save();
+  ctx.translate(CSX, CSY);
+  // Car always faces "forward" = up on screen
+  drawKart(0,0,Math.PI/2,myColor,myName,true,player.boosting>0,player.spinning>0,player.shielded,myCarType);
+  ctx.restore();
+
+  // ── SPEED LINES when boosting ──
+  if(player.boosting>0){
+    ctx.save();
+    ctx.strokeStyle='rgba(58,255,154,0.18)'; ctx.lineWidth=2;
+    for(let l=0;l<12;l++){
+      const lx=W*0.1+Math.random()*W*0.8;
+      const ly=HZ+Math.random()*(H-HZ);
+      const len=30+Math.random()*60;
+      ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx,ly+len); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   // Minimap
   renderMinimap();
   // HUD update

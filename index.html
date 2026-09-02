@@ -127,8 +127,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
     </div>
   </div>
 
-  <div class="footer-note">Powered by CSA Cyber Essentials · Built for Singapore SMEs · Questions sourced from CE AI Edition Facilitator Guide</div>
+  <div style="margin-top:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div style="font-size:11px;opacity:.45;letter-spacing:1px;text-transform:uppercase">📱 Scan to Play</div>
+    <div id="game-qr" style="background:#fff;border-radius:10px;padding:6px;display:inline-block"></div>
+    <div style="font-size:10px;opacity:.35">cyberhunters.vercel.app</div>
+  </div>
+  <div class="footer-note" style="margin-top:12px">Powered by CSA Cyber Essentials · Built for Singapore SMEs · Questions sourced from CE AI Edition Facilitator Guide</div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+if(typeof QRCode!=='undefined'){
+  new QRCode(document.getElementById('game-qr'),{
+    text:'https://cyberhunters.vercel.app',
+    width:110,height:110,
+    colorDark:'#05080f',colorLight:'#ffffff',
+    correctLevel:QRCode.CorrectLevel.M
+  });
+}
+</script>
 
 <!-- CSA SIDEBAR (landing page) -->
 <div id="csa-float">
@@ -136,33 +152,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080f;font-family:
   <div id="csa-float-panel">
     <div id="csa-float-inner">
       <h4>CSA RESOURCES</h4>
-      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🛡️ Cyber Essentials</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cybersecurity-certification-for-organisations/cyber-essentials/" target="_blank">🛡️ Cyber Essentials</a>
       <a class="csa-l" href="https://www.csa.gov.sg/cyber-trust" target="_blank">⭐ Cyber Trust Mark</a>
-      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cisoaas" target="_blank">👔 Find CISOaaS Provider</a>
-      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cyber-essentials" target="_blank">🔧 Free Toolkits (3 types)</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cybersecurity-certification-for-organisations/ciso-as-a-service-to-develop-cybersecurity-health-plan/" target="_blank">👔 CISOaaS Providers</a>
+      <a class="csa-l" href="https://www.csa.gov.sg/our-programmes/support-for-enterprises/sg-cyber-safe-programme/cybersecurity-resources-for-organisations/" target="_blank">🔧 Cybersecurity Toolkits</a>
       <a class="csa-l" href="https://ihp.csa.gov.sg" target="_blank">🌐 Internet Hygiene Portal</a>
-      <div class="csa-grant">💰 <strong>Up to 70% grant</strong> for eligible SMEs via Enterprise Development Grant (EDG). Check business.gov.sg</div>
-      <div class="csa-qr">
-        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="#000">
-          <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/>
-          <rect x="2" y="2" width="3" height="3"/><rect x="14" y="0" width="7" height="7"/>
-          <rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-          <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/>
-          <rect x="2" y="16" width="3" height="3"/><rect x="9" y="0" width="1" height="2"/>
-          <rect x="11" y="0" width="1" height="1"/><rect x="9" y="3" width="2" height="1"/>
-          <rect x="12" y="2" width="2" height="2"/><rect x="9" y="5" width="1" height="2"/>
-          <rect x="11" y="6" width="2" height="1"/><rect x="8" y="8" width="2" height="2"/>
-          <rect x="11" y="8" width="2" height="1"/><rect x="14" y="8" width="2" height="2"/>
-          <rect x="17" y="8" width="2" height="2"/><rect x="8" y="10" width="1" height="2"/>
-          <rect x="10" y="10" width="3" height="2"/><rect x="14" y="11" width="1" height="1"/>
-          <rect x="16" y="11" width="2" height="1"/><rect x="8" y="13" width="3" height="2"/>
-          <rect x="12" y="14" width="2" height="1"/><rect x="15" y="13" width="2" height="1"/>
-          <rect x="18" y="14" width="2" height="2"/><rect x="8" y="16" width="1" height="2"/>
-          <rect x="10" y="17" width="2" height="1"/><rect x="13" y="16" width="3" height="2"/>
-          <rect x="17" y="17" width="1" height="2"/>
-        </svg>
-        <div style="font-size:10px;opacity:.5;margin-top:4px">Scan → csa.gov.sg</div>
-      </div>
+      <div class="csa-grant">💰 <strong>Up to 70% grant</strong> for eligible SMEs via EDG · business.gov.sg</div>
     </div>
   </div>
 </div>
