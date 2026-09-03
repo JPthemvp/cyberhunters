@@ -199,6 +199,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .exodia-name{background:linear-gradient(135deg,#ff00ff,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* ── WORLD 2 TEASER ── */
 #world2-screen{background:linear-gradient(135deg,#0a001a,#1a0030)}
+/* ── ENCOUNTER SCREEN ── */
+@keyframes encBounce{from{transform:translateY(0) scale(1)}to{transform:translateY(-10px) scale(1.06)}}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes encFadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+#encounter-screen.show{animation:encFadeIn .25s ease-out}
 
 /* ════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
@@ -430,6 +435,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- Encounter flash -->
 <div id="encounter-flash"></div>
+
+<!-- Monster Encounter Loading Screen -->
+<div id="encounter-screen" style="position:fixed;inset:0;z-index:48;display:none;flex-direction:column;align-items:center;justify-content:center;background:#05080f;overflow:hidden">
+  <!-- scanline effect -->
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0px,rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);pointer-events:none;z-index:1"></div>
+  <!-- radial glow backdrop -->
+  <div id="enc-glow" style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(58,127,255,.18) 0%,transparent 70%);z-index:0;transition:background .4s"></div>
+  <div style="position:relative;z-index:2;text-align:center;padding:20px">
+    <div id="enc-sprite" style="font-size:clamp(72px,20vw,120px);line-height:1;animation:encBounce 0.6s ease-in-out infinite alternate;filter:drop-shadow(0 0 32px rgba(58,127,255,.7))">🦠</div>
+    <div id="enc-label" style="margin-top:18px;font-size:clamp(11px,2.5vw,14px);letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">A wild cyber threat appeared!</div>
+    <div id="enc-name" style="margin-top:8px;font-size:clamp(22px,6vw,36px);font-weight:900;color:#fff;letter-spacing:.5px">Loading…</div>
+    <div id="enc-boss-tag" style="display:none;margin-top:8px;background:linear-gradient(135deg,#ff0044,#ff8800);border-radius:20px;padding:4px 18px;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;display:inline-block">⚠️ ZONE BOSS</div>
+    <div id="enc-dots" style="margin-top:20px;display:flex;gap:8px;justify-content:center">
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out infinite"></span>
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out .2s infinite"></span>
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out .4s infinite"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Safari/iOS tip banner -->
+<div id="safari-tip" style="position:fixed;bottom:0;left:0;right:0;z-index:9000;display:none;background:rgba(10,14,26,.96);border-top:1.5px solid rgba(255,204,0,.4);padding:10px 16px;display:none;align-items:center;gap:10px">
+  <div style="flex:1;font-size:12px;line-height:1.5;opacity:.9">🌐 <strong>For the best experience</strong> on iPhone, open in <strong>Chrome</strong> — Safari hides the game behind its toolbar.</div>
+  <button onclick="document.getElementById('safari-tip').style.display='none'" style="background:rgba(255,204,0,.2);border:1px solid rgba(255,204,0,.5);border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer;flex-shrink:0;white-space:nowrap">Got it ✕</button>
+</div>
 
 <!-- Level-up banner -->
 <div id="levelup-banner"><h2>⬆️ LEVEL UP!</h2><p id="levelup-text"></p></div>
@@ -1169,13 +1199,36 @@ function tryEncounter(){
     const base=pool[Math.min(Math.floor(player.level/3),pool.length-1)];
     monster={...base,isBoss:false,pillar:z.pillar,zoneRef:z};
   }
-  flashEncounter(()=>startBattle(monster,z));
+  flashEncounter(monster,()=>startBattle(monster,z));
 }
 
-function flashEncounter(cb){
-  const el=document.getElementById('encounter-flash');
-  el.style.opacity=0.9;
-  setTimeout(()=>{el.style.opacity=0;cb()},200);
+function flashEncounter(monster, cb){
+  // Brief white flash first
+  const flash=document.getElementById('encounter-flash');
+  flash.style.opacity=0.85;
+  setTimeout(()=>flash.style.opacity=0, 180);
+
+  // Encounter loading screen
+  const scr=document.getElementById('encounter-screen');
+  document.getElementById('enc-sprite').textContent=monster.sprite||'🦠';
+  document.getElementById('enc-name').textContent=monster.name||'Unknown Threat';
+  const bossTag=document.getElementById('enc-boss-tag');
+  bossTag.style.display=monster.isBoss?'inline-block':'none';
+  // Boss = red glow, normal = blue glow
+  document.getElementById('enc-glow').style.background=monster.isBoss
+    ?'radial-gradient(ellipse 70% 60% at 50% 50%,rgba(255,0,68,.22) 0%,transparent 70%)'
+    :'radial-gradient(ellipse 70% 60% at 50% 50%,rgba(58,127,255,.18) 0%,transparent 70%)';
+  document.getElementById('enc-label').textContent=monster.isBoss
+    ?'⚠️ Zone Boss incoming — brace yourself!'
+    :'A wild cyber threat appeared!';
+  scr.classList.add('show');
+  scr.style.display='flex';
+  // Hold for 1.5s then launch battle
+  setTimeout(()=>{
+    scr.style.display='none';
+    scr.classList.remove('show');
+    cb();
+  }, 1500);
 }
 
 // ─── BATTLE SYSTEM ──────────────────────────────────────────────
@@ -1657,6 +1710,18 @@ function loop(now){
 
 // ── MOBILE ORIENTATION ──────────────────────────────────────────
 const isMobile='ontouchstart' in window||navigator.maxTouchPoints>0;
+// Detect iOS Safari (not Chrome/Firefox on iOS) and show browser tip
+(function(){
+  const ua=navigator.userAgent;
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSafari=/^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  if(isIOS&&isSafari){
+    // Show tip after a short delay so title screen loads first
+    setTimeout(()=>{
+      document.getElementById('safari-tip').style.display='flex';
+    },1800);
+  }
+})();
 function checkOrientation(){
   if(!isMobile)return;
   const isLandscape=window.innerWidth>window.innerHeight;
