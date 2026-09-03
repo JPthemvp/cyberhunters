@@ -1399,7 +1399,7 @@ function showBattleResult(correct,label,q){
     bar.innerHTML+=`<span id="tip-text">${q.tip}</span>`;
   }
   if(correct){
-    const dmg=Math.floor(mb.monsterMaxHp/( mb.monster.isBoss?mb.maxQ:1 ));
+    const dmg=Math.floor(mb.monsterMaxHp/( mb.monster.isBoss?mb.maxQ:2 ));
     mb.monsterHp=Math.max(0,mb.monsterHp-dmg);
     const xpMult=(player.doubleXp?2:1)*(buffs.xpBoost>0?2:1);
     if(buffs.xpBoost>0){buffs.xpBoost--;updateBuffBar();}
