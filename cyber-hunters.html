@@ -230,6 +230,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <!-- Item pickup toast -->
 <div id="item-toast"></div>
 
+<!-- Tutorial popup (shown once at game start) -->
+<div id="tutorial-popup" style="position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.82);padding:20px">
+  <div style="background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(58,127,255,.5);border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;position:relative">
+    <div style="font-size:42px;margin-bottom:10px">🗺️</div>
+    <div style="font-size:19px;font-weight:800;color:#3a7fff;margin-bottom:14px">How to Play</div>
+    <div style="text-align:left;font-size:13px;line-height:1.8;opacity:.88">
+      <div>🌿 <b>Walk into grass patches</b> to encounter cyber monsters</div>
+      <div>⚔️ <b>Answer questions</b> to deal damage and defeat them</div>
+      <div>⚡ <b>Weaken monsters</b> first — lower HP = easier to capture!</div>
+      <div>🎯 <b>Throw cyber balls</b> from your backpack to capture weakened foes</div>
+      <div>🏆 <b>Defeat zone bosses</b> to earn badges and unlock new areas</div>
+      <div>☠️ <b>Beat all bosses</b> to face the Final Boss — Exodia!</div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;opacity:.5">WASD / Arrow keys or D-Pad to move</div>
+    <button class="btn" style="margin-top:16px;padding:12px 36px" onclick="document.getElementById('tutorial-popup').style.display='none'">▶ Let's Go!</button>
+  </div>
+</div>
+
 <!-- Active buffs bar -->
 <div id="buff-bar"></div>
 
@@ -364,7 +382,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 </div>
 
 <!-- PET COMPANION HUD -->
-<div id="pet-hud" title="Your cyber pet companion"></div>
+<div id="pet-hud" title="Your cyber booster"></div>
 
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
@@ -457,7 +475,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
   <!-- PET COMPANION SELECT -->
   <div style="margin-top:12px;width:100%;max-width:500px">
-    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">🐾 Choose Your Cyber Pet</div>
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">⚡ Choose Your Cyber Booster</div>
     <div id="pet-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%">
       <div class="pet-opt selected" data-pet="antivirus" onclick="selectPet(this)" title="Anti-Virus Pup">
         <div style="font-size:28px">🛡️</div>
@@ -987,6 +1005,7 @@ function flashEncounter(cb){
 let battleTimer,battleCountdown,currentBattle={};
 
 function startBattle(monster,zone){
+  hideLevelUpBanner();
   inBattle=true;
   let qs;
   if(currentWorld===2){
@@ -1202,16 +1221,21 @@ function updateXpBar(){
   const title=LEVEL_TITLES[Math.min(player.level,LEVEL_TITLES.length-1)]||'Legend';
   document.getElementById('level-badge').textContent='Lv.'+player.level+' '+title+' · '+playerName;
 }
+let _levelUpTimer=null;
 function showLevelUp(){
   const banner=document.getElementById('levelup-banner');
-  document.getElementById('levelup-text').textContent='Now Level '+player.level+'!';
-  banner.classList.add('show');
-  let lvlMsg='Now Level '+player.level+'! '+title+'!';
+  let lvlMsg='Now Level '+player.level+'!';
   if(player.level===5)lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!';
   if(player.level===10)lvlMsg='⭐ Cyber Expert! New challenges unlocked!';
   if(player.level===15)lvlMsg='🏆 CYBER LEGEND! Cyber Trust World unlocked!';
   document.getElementById('levelup-text').textContent=lvlMsg;
-  setTimeout(()=>banner.classList.remove('show'),2500);
+  banner.classList.add('show');
+  clearTimeout(_levelUpTimer);
+  _levelUpTimer=setTimeout(()=>banner.classList.remove('show'),2500);
+}
+function hideLevelUpBanner(){
+  clearTimeout(_levelUpTimer);
+  document.getElementById('levelup-banner').classList.remove('show');
 }
 
 // ─── HP HEARTS ──────────────────────────────────────────────────
@@ -1276,6 +1300,10 @@ function showW2Win(){
   document.getElementById('w2-win-screen').style.display='flex';
 }
 function showGameOver(){
+  gameRunning=false;
+  if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
+  // Hide levelup banner if showing
+  document.getElementById('levelup-banner').classList.remove('show');
   document.getElementById('gameover-screen').style.display='flex';
 }
 
@@ -1407,7 +1435,8 @@ function drawWorld(){
   ctx.arc(px,py+bob-2,bgR,0,Math.PI*2);
   ctx.fillStyle=bgGrd;
   ctx.fill();
-  // Body
+  // Body — reset fillStyle to opaque before emoji so canvas doesn't tint them dark
+  ctx.fillStyle='rgba(255,255,255,1)';
   ctx.font=TILE*.7+'px serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
@@ -1742,6 +1771,27 @@ function selectAvatar(el){
   el.classList.add('selected');
   playerAvatar=el.dataset.avatar;
 }
+let _lootTimer=null;
+function spawnOneLoot(){
+  // Find uncollected walkable tiles not already holding an item
+  const occupied=new Set(GROUND_ITEMS.filter(i=>!i.collected).map(i=>i.tx+','+i.ty));
+  const walkable=[];
+  for(let r=1;r<ROWS-1;r++) for(let c=1;c<COLS-1;c++){
+    const t=MAP_DATA[r][c];
+    if((t===T.PATH||t===T.SAND||t===T.GRASS)&&!occupied.has(c+','+r)) walkable.push([c,r]);
+  }
+  if(!walkable.length)return;
+  const [c,r]=walkable[Math.floor(Math.random()*walkable.length)];
+  const def=GROUND_ITEM_DEFS[Math.floor(Math.random()*GROUND_ITEM_DEFS.length)];
+  GROUND_ITEMS.push({tx:c,ty:r,def,collected:false});
+}
+function startLootTimer(){
+  if(_lootTimer)clearInterval(_lootTimer);
+  // Drop 3 items immediately spread out, then one new item every 60s
+  for(let i=0;i<3;i++) spawnOneLoot();
+  _lootTimer=setInterval(()=>{ if(gameRunning) spawnOneLoot(); },60000);
+}
+
 function startGame(){
   // Capture name from char-select screen if visible
   const nameField=document.getElementById('player-name-field');
@@ -1753,7 +1803,8 @@ function startGame(){
   document.getElementById('title-screen').style.display='none';
   gameRunning=true;
   applyPetPerks();
-  spawnGroundItems();
+  GROUND_ITEMS.length=0; // clear any stale items
+  startLootTimer();
   updateXpBar();
   // Show quit button + dev test button + backpack
   document.getElementById('quit-btn').style.display='block';
@@ -1766,6 +1817,8 @@ function startGame(){
   if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
+  // Show tutorial popup
+  document.getElementById('tutorial-popup').style.display='flex';
   requestAnimationFrame(loop);
 }
 
@@ -2203,7 +2256,7 @@ function applyPetPerks(){
   // Show pet on HUD
   const hud=document.getElementById('pet-hud');
   hud.textContent=pet.icon; hud.style.display='block';
-  hud.title=pet.name+' — '+getPetPerkDesc(pet.perk);
+  hud.title='Booster: '+pet.name+' — '+getPetPerkDesc(pet.perk);
   // Apply stat perks
   if(pet.perk==='hpBonus'){ player.maxHp+=2; player.hp=player.maxHp; }
   if(pet.perk==='shield'){ player.petShieldReady=true; }
