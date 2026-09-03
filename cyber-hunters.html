@@ -215,6 +215,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 /* ── Desktop / laptop (≥ 1024px) ─────────────────── */
 @media (min-width:1024px){
+  #hint-box{bottom:64px;left:20px;max-width:260px}
   /* Hide touch D-pad on desktop — keyboard only */
   #dpad{display:none!important}
   /* Battle overlay: vertical scroll, centred content column */
@@ -301,6 +302,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 /* ── Mobile portrait (≤ 480px) ──────────────────── */
 @media (max-width:480px){
+  #hint-box{bottom:185px;left:8px;max-width:200px;padding:10px 12px 8px}
+  #hint-box>div:first-child>div{font-size:10px}
+  #hint-text{font-size:11px}
   /* Larger D-pad for thumbs */
   #dpad{bottom:14px;left:10px;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:4px;opacity:.9}
   .dpad-btn{font-size:20px;border-radius:12px}
@@ -459,6 +463,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <div id="safari-tip" style="position:fixed;bottom:0;left:0;right:0;z-index:9000;display:none;background:rgba(10,14,26,.96);border-top:1.5px solid rgba(255,204,0,.4);padding:10px 16px;display:none;align-items:center;gap:10px">
   <div style="flex:1;font-size:12px;line-height:1.5;opacity:.9">🌐 <strong>For the best experience</strong> on iPhone, open in <strong>Chrome</strong> — Safari hides the game behind its toolbar.</div>
   <button onclick="document.getElementById('safari-tip').style.display='none'" style="background:rgba(255,204,0,.2);border:1px solid rgba(255,204,0,.5);border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer;flex-shrink:0;white-space:nowrap">Got it ✕</button>
+</div>
+
+<!-- Hint Box (bottom-left, above quit button) -->
+<div id="hint-box" style="position:fixed;bottom:60px;left:12px;z-index:9980;display:none;max-width:230px;background:rgba(10,14,26,.94);border:1.5px solid rgba(58,127,255,.4);border-radius:14px;padding:12px 14px 10px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.5)">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#7ab0ff;text-transform:uppercase">💡 Hint</div>
+    <button onclick="closeHintBox()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0" title="Close hints">✕</button>
+  </div>
+  <div id="hint-text" style="font-size:12px;line-height:1.6;opacity:.88"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+    <div id="hint-dots" style="display:flex;gap:4px"></div>
+    <button id="hint-next-btn" onclick="nextHint()" style="background:rgba(58,127,255,.2);border:1px solid rgba(58,127,255,.4);border-radius:12px;padding:3px 10px;font-size:10px;font-weight:700;color:#7ab0ff;cursor:pointer">Next →</button>
+  </div>
 </div>
 
 <!-- Level-up banner -->
@@ -1459,7 +1476,7 @@ let _levelUpTimer=null;
 function showLevelUp(){
   const banner=document.getElementById('levelup-banner');
   let lvlMsg='Now Level '+player.level+'!';
-  if(player.level===5)lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!';
+  if(player.level===5){ lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!'; setTimeout(nudgeHintForLevel,2800); }
   if(player.level===10)lvlMsg='⭐ Cyber Expert! New challenges unlocked!';
   if(player.level===15)lvlMsg='🏆 CYBER LEGEND! Cyber Trust World unlocked!';
   document.getElementById('levelup-text').textContent=lvlMsg;
@@ -1536,6 +1553,8 @@ function showW2Win(){
 function showGameOver(){
   gameRunning=false;
   if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
+  clearTimeout(_hintAutoTimer);
+  document.getElementById('hint-box').style.display='none';
   // Hide levelup banner if showing
   document.getElementById('levelup-banner').classList.remove('show');
   document.getElementById('gameover-screen').style.display='flex';
@@ -2038,6 +2057,65 @@ function startLootTimer(){
   _lootTimer=setInterval(()=>{ if(gameRunning) spawnOneLoot(); },60000);
 }
 
+// ── HINT BOX SYSTEM ─────────────────────────────────────────────
+const HINTS=[
+  {icon:'🌿', text:'Walk into the <strong>tall green grass</strong> to encounter cyber monsters. They\'re hiding everywhere!'},
+  {icon:'⚔️', text:'Answer security questions correctly to <strong>deal damage</strong>. Wrong answers cost you HP — stay sharp!'},
+  {icon:'⚡', text:'<strong>Weaken a monster first</strong> before throwing a Cyber Ball — lower HP means higher catch chance!'},
+  {icon:'🎒', text:'Open your <strong>Backpack</strong> (top button) to throw Cyber Balls and capture weakened monsters.'},
+  {icon:'🏅', text:'Defeat the <strong>Zone Boss</strong> in each coloured area to earn a badge and unlock new zones.'},
+  {icon:'⬆️', text:'Battle monsters to earn XP and <strong>level up</strong>. Reach <strong>Level 5</strong> to unlock the boss zones!'},
+  {icon:'☠️', text:'Defeat <strong>all 5 Zone Bosses</strong> to awaken the Final Boss — Exodia. Good luck, Hunter!'},
+];
+let hintIndex=0, hintDismissed=false, _hintAutoTimer=null;
+
+function showHintBox(){
+  if(hintDismissed)return;
+  hintIndex=0;
+  renderHint();
+  document.getElementById('hint-box').style.display='block';
+}
+function closeHintBox(){
+  hintDismissed=true;
+  clearTimeout(_hintAutoTimer);
+  document.getElementById('hint-box').style.display='none';
+}
+function nextHint(){
+  clearTimeout(_hintAutoTimer);
+  hintIndex=(hintIndex+1)%HINTS.length;
+  renderHint();
+}
+function renderHint(){
+  if(hintDismissed)return;
+  const h=HINTS[hintIndex];
+  document.getElementById('hint-text').innerHTML=h.icon+' '+h.text;
+  // Dots
+  const dots=document.getElementById('hint-dots');
+  dots.innerHTML='';
+  HINTS.forEach((_,i)=>{
+    const d=document.createElement('span');
+    d.style.cssText=`width:6px;height:6px;border-radius:50%;background:${i===hintIndex?'#3a7fff':'rgba(255,255,255,.2)'};display:inline-block;transition:background .2s`;
+    dots.appendChild(d);
+  });
+  // Hide next button on last hint
+  const nb=document.getElementById('hint-next-btn');
+  if(hintIndex===HINTS.length-1){ nb.textContent='✓ Got it'; nb.onclick=closeHintBox; }
+  else { nb.textContent='Next →'; nb.onclick=nextHint; }
+  // Auto-advance after 8s
+  _hintAutoTimer=setTimeout(()=>{
+    if(hintIndex<HINTS.length-1){ hintIndex++; renderHint(); }
+  },8000);
+}
+// Update hint when player levels up to show boss hint
+function nudgeHintForLevel(){
+  if(hintDismissed||player.level<5)return;
+  clearTimeout(_hintAutoTimer);
+  hintIndex=HINTS.findIndex(h=>h.icon==='☠️');
+  if(hintIndex<0)hintIndex=HINTS.length-1;
+  renderHint();
+  document.getElementById('hint-box').style.display='block';
+}
+
 function startGame(){
   // Capture name from char-select screen if visible
   const nameField=document.getElementById('player-name-field');
@@ -2063,8 +2141,10 @@ function startGame(){
   if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
-  // Show tutorial popup
+  // Show tutorial popup, then hint box after player closes it
   document.getElementById('tutorial-popup').style.display='flex';
+  // Show hint box 2s after game starts (gives tutorial time to be read first)
+  setTimeout(showHintBox, 2000);
   requestAnimationFrame(loop);
 }
 
