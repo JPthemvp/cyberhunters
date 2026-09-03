@@ -763,8 +763,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <div class="overlay" id="gameover-screen" style="display:none">
   <div style="font-size:56px">💀</div>
   <h1>System Breach!</h1>
-  <p>The cyber threat was too much this time. Regroup and try again — every defeat is a learning opportunity!</p>
-  <button class="btn danger" onclick="location.reload()">Retry</button>
+  <p>The cyber threat overwhelmed you. All captured threats have been lost — regroup and start fresh!</p>
+  <p id="gameover-hint" style="font-size:13px;opacity:.6;margin-top:-6px"></p>
+  <button class="btn danger" onclick="location.reload()">🔄 Restart</button>
 </div>
 
 <script>
@@ -1303,7 +1304,7 @@ function startBattle(monster,zone){
   const q=qs.find(q=>!player.usedQIds.has(q.id))||qs[0];
   player.usedQIds.add(q.id);
   const monHp=monster.hp||30;
-  const minQ=monster.isBoss?5:2; // at least 2 questions for normal monsters
+  const minQ=monster.isBoss?5:2; // boss needs 5 correct answers; normal uses minQ for damage calc only
   currentBattle={monster,zone,q,monsterHp:monHp,monsterMaxHp:monHp,questionCount:0,maxQ:minQ};
   petBattleStart();
   document.getElementById('battle-overlay').style.display='flex';
@@ -1428,15 +1429,15 @@ function showBattleResult(correct,label,q){
   document.getElementById('score-display').textContent=player.score+' pts';
   setTimeout(()=>{
     mb.questionCount++;
+    // Player defeated → game over
     if(player.hp<=0){ endBattle(false); return; }
-    if(mb.monsterHp<=0 && mb.questionCount>=mb.maxQ){ endBattle(true); return; }
-    if(mb.questionCount<mb.maxQ){
-      // Continue battle — next question
-      const pool=window.CyberQB.QUESTION_BANK[mb.monster.pillar].questions;
-      const next=pool.find(q=>!player.usedQIds.has(q.id))||pool[Math.floor(Math.random()*pool.length)];
-      player.usedQIds.add(next.id);
-      showBattleQuestion(next,mb.monster,mb.zone);
-    } else { endBattle(mb.monsterHp<=0); }
+    // Monster defeated → win (needs at least minQ correct hits)
+    if(mb.monsterHp<=0){ endBattle(true); return; }
+    // Battle continues until one side falls — keep asking questions
+    const pool=window.CyberQB.QUESTION_BANK[mb.monster.pillar].questions;
+    const next=pool.find(q=>!player.usedQIds.has(q.id))||pool[Math.floor(Math.random()*pool.length)];
+    player.usedQIds.add(next.id);
+    showBattleQuestion(next,mb.monster,mb.zone);
   },2200);
 }
 
@@ -1614,11 +1615,19 @@ function showW2Win(){
 }
 function showGameOver(){
   gameRunning=false;
+  inBattle=false;
   if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
   clearTimeout(_hintAutoTimer);
+  clearTimeout(_hintReappearTimer);
   document.getElementById('hint-box').style.display='none';
-  // Hide levelup banner if showing
   document.getElementById('levelup-banner').classList.remove('show');
+  document.getElementById('battle-overlay').style.display='none';
+  // Show how many were lost
+  const lost=player.captured.length;
+  const hint=document.getElementById('gameover-hint');
+  if(hint) hint.textContent=lost>0?`You lost ${lost} captured threat${lost>1?'s':''} — answer correctly to protect your progress!`:'Tip: Weaken monsters before throwing balls to catch them!';
+  // Clear all captured monsters on defeat
+  player.captured=[];
   document.getElementById('gameover-screen').style.display='flex';
 }
 
@@ -2129,18 +2138,23 @@ const HINTS=[
   {icon:'⬆️', text:'Battle monsters to earn XP and <strong>level up</strong>. Reach <strong>Level 5</strong> to unlock the boss zones!'},
   {icon:'☠️', text:'Defeat <strong>all 5 Zone Bosses</strong> to awaken the Final Boss — Exodia. Good luck, Hunter!'},
 ];
-let hintIndex=0, hintDismissed=false, _hintAutoTimer=null;
+let hintIndex=0, hintHidden=false, _hintAutoTimer=null, _hintReappearTimer=null;
 
 function showHintBox(){
-  if(hintDismissed)return;
+  clearTimeout(_hintReappearTimer);
+  hintHidden=false;
   hintIndex=0;
   renderHint();
   document.getElementById('hint-box').style.display='block';
 }
 function closeHintBox(){
-  hintDismissed=true;
+  hintHidden=true;
   clearTimeout(_hintAutoTimer);
   document.getElementById('hint-box').style.display='none';
+  // Reappear after 20s if game is still running
+  _hintReappearTimer=setTimeout(()=>{
+    if(gameRunning&&hintHidden){ hintHidden=false; renderHint(); document.getElementById('hint-box').style.display='block'; }
+  },20000);
 }
 function nextHint(){
   clearTimeout(_hintAutoTimer);
@@ -2148,7 +2162,7 @@ function nextHint(){
   renderHint();
 }
 function renderHint(){
-  if(hintDismissed)return;
+  if(hintHidden)return;
   const h=HINTS[hintIndex];
   document.getElementById('hint-text').innerHTML=h.icon+' '+h.text;
   // Dots
@@ -2170,7 +2184,7 @@ function renderHint(){
 }
 // Update hint when player levels up to show boss hint
 function nudgeHintForLevel(){
-  if(hintDismissed||player.level<5)return;
+  if(player.level<5)return;
   clearTimeout(_hintAutoTimer);
   hintIndex=HINTS.findIndex(h=>h.icon==='☠️');
   if(hintIndex<0)hintIndex=HINTS.length-1;
