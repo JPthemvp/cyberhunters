@@ -204,6 +204,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 @keyframes dotPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
 @keyframes encFadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 #encounter-screen.show{animation:encFadeIn .25s ease-out}
+/* ── LEVEL BADGE ── */
+@keyframes badgeSpin{0%{transform:rotate(-20deg) scale(.5);opacity:0}60%{transform:rotate(8deg) scale(1.1)}100%{transform:rotate(0deg) scale(1);opacity:1}}
+@keyframes scrollTipBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+/* badge shelf chips inside popup */
+.lbp-chip{background:rgba(255,204,0,.12);border:1.5px solid rgba(255,204,0,.45);border-radius:14px;padding:6px 10px;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.lbp-chip span{font-size:9px;color:rgba(255,204,0,.7);font-weight:700;letter-spacing:.5px}
 
 /* ════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
@@ -478,6 +484,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   </div>
 </div>
 
+<!-- Level Badge Award Popup -->
+<div id="level-badge-popup" style="position:fixed;inset:0;z-index:75;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);padding:20px">
+  <div style="background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(255,204,0,.6);border-radius:22px;padding:32px 28px;max-width:340px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);position:relative">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,204,0,.7);margin-bottom:8px">🏅 Cyber Badge Earned!</div>
+    <div id="lbp-icon" style="font-size:72px;margin:8px 0;filter:drop-shadow(0 0 20px rgba(255,204,0,.6));animation:badgeSpin .6s ease-out">🏅</div>
+    <div id="lbp-name" style="font-size:22px;font-weight:900;color:#ffcc00;margin-bottom:6px">Badge Name</div>
+    <div id="lbp-desc" style="font-size:13px;opacity:.78;line-height:1.6;margin-bottom:20px">Description</div>
+    <div id="lbp-shelf" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px"></div>
+    <button onclick="closeLevelBadgePopup()" class="btn" style="margin-top:0;padding:10px 32px">Awesome! 🎉</button>
+  </div>
+</div>
+
 <!-- Level-up banner -->
 <div id="levelup-banner"><h2>⬆️ LEVEL UP!</h2><p id="levelup-text"></p></div>
 
@@ -517,6 +535,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="battle-opts" id="battle-opts"></div>
   </div>
   <div id="battle-result-bar"></div>
+  <!-- Scroll tip (shown first time balls appear) -->
+  <div id="scroll-tip" style="display:none;text-align:center;padding:4px 0 2px;animation:scrollTipBounce 1.2s ease-in-out infinite">
+    <span style="font-size:11px;color:rgba(255,204,0,.8);font-weight:700">👇 Scroll down to throw Cyber Balls &amp; catch the monster!</span>
+  </div>
   <!-- THROW BALL ROW (shown during normal battles) -->
   <div id="throw-ball-section" style="display:none;margin:0 10px 8px;background:rgba(255,204,0,.06);border:1.5px solid rgba(255,204,0,.3);border-radius:14px;padding:10px 12px">
     <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,204,0,.7);margin-bottom:8px;text-align:center">🎯 Throw a Cyber Ball to Capture</div>
@@ -1461,10 +1483,50 @@ function gainXp(amt){
   amt=Math.floor(amt*(player.petXpMult||1));
   player.xp+=amt;
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
-  if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); }
+  if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); checkLevelMilestoneBadge(); }
   updateXpBar();
 }
 function updateScoreDisplay(){ document.getElementById('score-display').textContent=player.score+' pts'; }
+
+// ── LEVEL MILESTONE BADGES ───────────────────────────────────────
+const LEVEL_MILESTONE_BADGES=[
+  {level:5,  icon:'🔰', name:'Cyber Novice',      desc:'You\'ve battled through the basics and earned your first Cyber Badge. Boss zones are now unlocked — take them on!', color:'#3aff9a'},
+  {level:10, icon:'⭐', name:'Cyber Expert',       desc:'10 levels of cyber wisdom! New advanced threats await. Your skills are growing sharper with every battle.', color:'#ffcc00'},
+  {level:15, icon:'🏆', name:'Cyber Legend',       desc:'The highest honour a Cyber Hunter can achieve. Cyber Trust World unlocked — you are a true defender!', color:'#cc55ff'},
+];
+// All level badges the player has earned — shown as a shelf in the popup
+const earnedLevelBadges=[];
+
+function checkLevelMilestoneBadge(){
+  const badge=LEVEL_MILESTONE_BADGES.find(b=>b.level===player.level);
+  if(!badge||earnedLevelBadges.some(b=>b.level===badge.level))return;
+  earnedLevelBadges.push(badge);
+  // Slight delay so level-up banner shows first
+  setTimeout(()=>showLevelBadgePopup(badge),2800);
+}
+function showLevelBadgePopup(badge){
+  document.getElementById('lbp-icon').textContent=badge.icon;
+  document.getElementById('lbp-name').textContent=badge.name+' Badge';
+  document.getElementById('lbp-desc').textContent=badge.desc;
+  // Shelf of all earned badges so far
+  const shelf=document.getElementById('lbp-shelf');
+  shelf.innerHTML='';
+  earnedLevelBadges.forEach(b=>{
+    const chip=document.createElement('div');
+    chip.className='lbp-chip';
+    chip.innerHTML=`<span style="font-size:28px">${b.icon}</span><span>${b.name}</span>`;
+    chip.style.borderColor=b.color+'99';
+    chip.style.background=b.color+'18';
+    shelf.appendChild(chip);
+  });
+  document.getElementById('level-badge-popup').style.display='flex';
+  // Re-trigger badge spin animation
+  const ico=document.getElementById('lbp-icon');
+  ico.style.animation='none'; requestAnimationFrame(()=>{ ico.style.animation='badgeSpin .6s ease-out'; });
+}
+function closeLevelBadgePopup(){
+  document.getElementById('level-badge-popup').style.display='none';
+}
 function updateXpBar(){
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
   const pct=Math.min(100,player.xp/next*100);
@@ -2291,12 +2353,24 @@ function calcCatchRate(ballId, monster){
 }
 
 // ── SHOW THROW BALL ROW ─────────────────────────────────────
+let _scrollTipShown=false, _scrollTipTimer=null;
+function showScrollTip(){
+  const tip=document.getElementById('scroll-tip');
+  tip.style.display='block';
+  clearTimeout(_scrollTipTimer);
+  // Auto-hide after 4s
+  _scrollTipTimer=setTimeout(()=>{ tip.style.display='none'; },4000);
+}
+function hideScrollTip(){ clearTimeout(_scrollTipTimer); document.getElementById('scroll-tip').style.display='none'; }
+
 function showThrowBallRow(monster){
   if(monster.isBoss){return;} // can't catch bosses
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
   document.getElementById('throw-ball-section').style.display='block';
   document.getElementById('battle-bp-row').style.display='flex';
+  // Show scroll tip first 3 times so player knows to scroll down
+  if(_scrollTipShown<3){ _scrollTipShown++; showScrollTip(); }
   BALLS.forEach(ball=>{
     const qty=player.balls[ball.id]||0;
     const btn=document.createElement('button');
@@ -2310,6 +2384,7 @@ function showThrowBallRow(monster){
 }
 
 function hideThrowBallRow(){
+  hideScrollTip();
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
   document.getElementById('throw-ball-section').style.display='none';
