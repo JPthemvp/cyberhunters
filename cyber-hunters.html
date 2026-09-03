@@ -173,9 +173,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .cap-meta{font-size:11px;opacity:.55;margin-top:2px}
 .cap-ball{font-size:18px}
 /* Throw ball button */
-.throw-btn{background:rgba(255,204,0,.12);border:1.5px solid rgba(255,204,0,.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;color:#ffcc00;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px}
-.throw-btn:hover:not(:disabled){background:rgba(255,204,0,.25);transform:translateY(-1px)}
-.throw-btn:disabled{opacity:.3;cursor:default}
+.throw-btn{background:rgba(255,204,0,.22);border:2px solid rgba(255,204,0,.75);border-radius:22px;padding:8px 16px;font-size:13px;font-weight:800;color:#ffe066;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:6px;box-shadow:0 0 10px rgba(255,204,0,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+.throw-btn:hover:not(:disabled){background:rgba(255,204,0,.38);border-color:#ffcc00;box-shadow:0 0 18px rgba(255,204,0,.4);transform:translateY(-2px)}
+.throw-btn:disabled{opacity:.25;cursor:default;box-shadow:none}
 /* Backpack floating button */
 #backpack-btn{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,.75);border:1px solid rgba(255,204,0,.35);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;color:#ffcc00;display:none;backdrop-filter:blur(8px);gap:6px;align-items:center;white-space:nowrap}
 #backpack-btn:hover{background:rgba(255,204,0,.15)}
@@ -229,6 +229,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 <!-- Item pickup toast -->
 <div id="item-toast"></div>
+
+<!-- Tutorial popup (shown once at game start) -->
+<div id="tutorial-popup" style="position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.82);padding:20px">
+  <div style="background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(58,127,255,.5);border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;position:relative">
+    <div style="font-size:42px;margin-bottom:10px">🗺️</div>
+    <div style="font-size:19px;font-weight:800;color:#3a7fff;margin-bottom:14px">How to Play</div>
+    <div style="text-align:left;font-size:13px;line-height:1.8;opacity:.88">
+      <div>🌿 <b>Walk into grass patches</b> to encounter cyber monsters</div>
+      <div>⚔️ <b>Answer questions</b> to deal damage and defeat them</div>
+      <div>⚡ <b>Weaken monsters</b> first — lower HP = easier to capture!</div>
+      <div>🎯 <b>Throw cyber balls</b> from your backpack to capture weakened foes</div>
+      <div>🏆 <b>Defeat zone bosses</b> to earn badges and unlock new areas</div>
+      <div>☠️ <b>Beat all bosses</b> to face the Final Boss — Exodia!</div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;opacity:.5">WASD / Arrow keys or D-Pad to move</div>
+    <button class="btn" style="margin-top:16px;padding:12px 36px" onclick="document.getElementById('tutorial-popup').style.display='none'">▶ Let's Go!</button>
+  </div>
+</div>
 
 <!-- Active buffs bar -->
 <div id="buff-bar"></div>
@@ -292,10 +310,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   </div>
   <div id="battle-result-bar"></div>
   <!-- THROW BALL ROW (shown during normal battles) -->
-  <div id="throw-ball-row" style="display:none;justify-content:center;gap:8px;padding:8px 0;flex-wrap:wrap"></div>
+  <div id="throw-ball-section" style="display:none;margin:0 10px 8px;background:rgba(255,204,0,.06);border:1.5px solid rgba(255,204,0,.3);border-radius:14px;padding:10px 12px">
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,204,0,.7);margin-bottom:8px;text-align:center">🎯 Throw a Cyber Ball to Capture</div>
+    <div id="throw-ball-row" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+  </div>
   <!-- BATTLE BACKPACK SHORTCUT -->
   <div id="battle-bp-row" style="display:none;justify-content:center;padding:4px 0 8px">
-    <button onclick="openBackpack()" style="background:rgba(255,204,0,.12);border:1px solid rgba(255,204,0,.35);border-radius:18px;padding:5px 14px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer">🎒 Open Backpack / Balls</button>
+    <button onclick="openBackpack()" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.5);border-radius:18px;padding:5px 14px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer">🎒 Open Backpack / Balls</button>
   </div>
 </div>
 
@@ -364,7 +385,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 </div>
 
 <!-- PET COMPANION HUD -->
-<div id="pet-hud" title="Your cyber pet companion"></div>
+<div id="pet-hud" title="Your cyber booster"></div>
 
 <!-- QUIT BUTTON (in-game) -->
 <button id="quit-btn" onclick="openQuit()">✕ Quit</button>
@@ -457,7 +478,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
   <!-- PET COMPANION SELECT -->
   <div style="margin-top:12px;width:100%;max-width:500px">
-    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">🐾 Choose Your Cyber Pet</div>
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">⚡ Choose Your Cyber Booster</div>
     <div id="pet-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%">
       <div class="pet-opt selected" data-pet="antivirus" onclick="selectPet(this)" title="Anti-Virus Pup">
         <div style="font-size:28px">🛡️</div>
@@ -987,6 +1008,7 @@ function flashEncounter(cb){
 let battleTimer,battleCountdown,currentBattle={};
 
 function startBattle(monster,zone){
+  hideLevelUpBanner();
   inBattle=true;
   let qs;
   if(currentWorld===2){
@@ -1202,16 +1224,21 @@ function updateXpBar(){
   const title=LEVEL_TITLES[Math.min(player.level,LEVEL_TITLES.length-1)]||'Legend';
   document.getElementById('level-badge').textContent='Lv.'+player.level+' '+title+' · '+playerName;
 }
+let _levelUpTimer=null;
 function showLevelUp(){
   const banner=document.getElementById('levelup-banner');
-  document.getElementById('levelup-text').textContent='Now Level '+player.level+'!';
-  banner.classList.add('show');
-  let lvlMsg='Now Level '+player.level+'! '+title+'!';
+  let lvlMsg='Now Level '+player.level+'!';
   if(player.level===5)lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!';
   if(player.level===10)lvlMsg='⭐ Cyber Expert! New challenges unlocked!';
   if(player.level===15)lvlMsg='🏆 CYBER LEGEND! Cyber Trust World unlocked!';
   document.getElementById('levelup-text').textContent=lvlMsg;
-  setTimeout(()=>banner.classList.remove('show'),2500);
+  banner.classList.add('show');
+  clearTimeout(_levelUpTimer);
+  _levelUpTimer=setTimeout(()=>banner.classList.remove('show'),2500);
+}
+function hideLevelUpBanner(){
+  clearTimeout(_levelUpTimer);
+  document.getElementById('levelup-banner').classList.remove('show');
 }
 
 // ─── HP HEARTS ──────────────────────────────────────────────────
@@ -1276,6 +1303,10 @@ function showW2Win(){
   document.getElementById('w2-win-screen').style.display='flex';
 }
 function showGameOver(){
+  gameRunning=false;
+  if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
+  // Hide levelup banner if showing
+  document.getElementById('levelup-banner').classList.remove('show');
   document.getElementById('gameover-screen').style.display='flex';
 }
 
@@ -1407,7 +1438,8 @@ function drawWorld(){
   ctx.arc(px,py+bob-2,bgR,0,Math.PI*2);
   ctx.fillStyle=bgGrd;
   ctx.fill();
-  // Body
+  // Body — reset fillStyle to opaque before emoji so canvas doesn't tint them dark
+  ctx.fillStyle='rgba(255,255,255,1)';
   ctx.font=TILE*.7+'px serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
@@ -1586,29 +1618,42 @@ function startExodiaRound(){
   // Show video + scenario text fallback
   const vid=document.getElementById('exodia-video');
   const scenTxt=document.getElementById('exodia-scenario-text');
+  let vidShownText=false;
   function showScenarioText(){
+    if(vidShownText)return; vidShownText=true;
     vid.style.display='none';
     scenTxt.style.display='block';
     const raw=eq.q||'';
     const snippet=raw.split('What')[0].replace(/^The simulation shows\s*/i,'').trim();
     scenTxt.textContent='📋 Scenario: '+(snippet||raw.slice(0,120));
   }
-  // Always prefer .mp4; .mov only plays on Safari
-  const mp4src=eq.video.replace(/\.mov$/,'.mp4');
+  // Always use .mp4; strip any .mov suffix
+  const mp4src=eq.video.replace(/\.mov$/i,'.mp4');
+  // Reset video element fully — use src attribute directly (more reliable than <source> nodes)
+  vid.removeEventListener('canplay',vid._cpHandler||null);
+  vid.removeEventListener('error',vid._errHandler||null);
+  vid.pause();
+  vid.removeAttribute('src');
   vid.innerHTML='';
-  // Put .mp4 first so Chrome/Edge picks it; also add original as fallback
-  const s1=document.createElement('source'); s1.src=mp4src; s1.type='video/mp4'; vid.appendChild(s1);
-  if(mp4src!==eq.video){const s2=document.createElement('source'); s2.src=eq.video; s2.type='video/mp4'; vid.appendChild(s2);}
+  vid.muted=true;
+  vid.autoplay=true;
+  vid.playsInline=true;
   vid.style.display='block';
   scenTxt.style.display='none';
-  vid.onerror=showScenarioText;
-  // Wait for canplay before calling play() so browser has buffered enough
-  vid.oncanplay=null;
-  const onCanPlay=()=>{ vid.oncanplay=null; vid.play().catch(showScenarioText); };
-  vid.oncanplay=onCanPlay;
+  // Attach handlers before setting src so no events are missed
+  const onCanPlay=()=>{
+    clearTimeout(vid._autoplayTimeout);
+    vid.removeEventListener('canplay',onCanPlay);
+    vid.play().catch(showScenarioText);
+  };
+  const onErr=()=>{ clearTimeout(vid._autoplayTimeout); showScenarioText(); };
+  vid.addEventListener('canplay',onCanPlay);
+  vid.addEventListener('error',onErr);
+  vid._cpHandler=onCanPlay; vid._errHandler=onErr;
+  vid.src=mp4src;
   vid.load();
-  // Timeout fallback: if no canplay in 4s, show text
-  const vidTimeout=setTimeout(()=>{ if(vid.paused&&vid.readyState<2){ vid.oncanplay=null; showScenarioText(); }},4000);
+  // Timeout fallback: if no canplay within 5s, show text
+  vid._autoplayTimeout=setTimeout(()=>{ vid.removeEventListener('canplay',onCanPlay); showScenarioText(); },5000);
   // Show question
   document.getElementById('battle-pillar').textContent=eq.pillar;
   document.getElementById('battle-pillar').style.color='#ff55ff';
@@ -1637,6 +1682,9 @@ function answerExodia(chosen,eq){
     else if(i===chosen)b.classList.add('wrong');
   });
   const vid=document.getElementById('exodia-video');
+  clearTimeout(vid._autoplayTimeout);
+  vid.removeEventListener('canplay',vid._cpHandler||null);
+  vid.removeEventListener('error',vid._errHandler||null);
   vid.pause();
   if(correct){
     const dmg=100;
@@ -1726,6 +1774,27 @@ function selectAvatar(el){
   el.classList.add('selected');
   playerAvatar=el.dataset.avatar;
 }
+let _lootTimer=null;
+function spawnOneLoot(){
+  // Find uncollected walkable tiles not already holding an item
+  const occupied=new Set(GROUND_ITEMS.filter(i=>!i.collected).map(i=>i.tx+','+i.ty));
+  const walkable=[];
+  for(let r=1;r<ROWS-1;r++) for(let c=1;c<COLS-1;c++){
+    const t=MAP_DATA[r][c];
+    if((t===T.PATH||t===T.SAND||t===T.GRASS)&&!occupied.has(c+','+r)) walkable.push([c,r]);
+  }
+  if(!walkable.length)return;
+  const [c,r]=walkable[Math.floor(Math.random()*walkable.length)];
+  const def=GROUND_ITEM_DEFS[Math.floor(Math.random()*GROUND_ITEM_DEFS.length)];
+  GROUND_ITEMS.push({tx:c,ty:r,def,collected:false});
+}
+function startLootTimer(){
+  if(_lootTimer)clearInterval(_lootTimer);
+  // Drop 3 items immediately spread out, then one new item every 60s
+  for(let i=0;i<3;i++) spawnOneLoot();
+  _lootTimer=setInterval(()=>{ if(gameRunning) spawnOneLoot(); },60000);
+}
+
 function startGame(){
   // Capture name from char-select screen if visible
   const nameField=document.getElementById('player-name-field');
@@ -1737,7 +1806,8 @@ function startGame(){
   document.getElementById('title-screen').style.display='none';
   gameRunning=true;
   applyPetPerks();
-  spawnGroundItems();
+  GROUND_ITEMS.length=0; // clear any stale items
+  startLootTimer();
   updateXpBar();
   // Show quit button + dev test button + backpack
   document.getElementById('quit-btn').style.display='block';
@@ -1750,6 +1820,8 @@ function startGame(){
   if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
+  // Show tutorial popup
+  document.getElementById('tutorial-popup').style.display='flex';
   requestAnimationFrame(loop);
 }
 
@@ -1900,7 +1972,7 @@ function showThrowBallRow(monster){
   if(monster.isBoss){return;} // can't catch bosses
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
-  row.style.display='flex';
+  document.getElementById('throw-ball-section').style.display='block';
   document.getElementById('battle-bp-row').style.display='flex';
   BALLS.forEach(ball=>{
     const qty=player.balls[ball.id]||0;
@@ -1916,7 +1988,8 @@ function showThrowBallRow(monster){
 
 function hideThrowBallRow(){
   const row=document.getElementById('throw-ball-row');
-  row.style.display='none'; row.innerHTML='';
+  row.innerHTML='';
+  document.getElementById('throw-ball-section').style.display='none';
   document.getElementById('battle-bp-row').style.display='none';
 }
 
@@ -2187,7 +2260,7 @@ function applyPetPerks(){
   // Show pet on HUD
   const hud=document.getElementById('pet-hud');
   hud.textContent=pet.icon; hud.style.display='block';
-  hud.title=pet.name+' — '+getPetPerkDesc(pet.perk);
+  hud.title='Booster: '+pet.name+' — '+getPetPerkDesc(pet.perk);
   // Apply stat perks
   if(pet.perk==='hpBonus'){ player.maxHp+=2; player.hp=player.maxHp; }
   if(pet.perk==='shield'){ player.petShieldReady=true; }
