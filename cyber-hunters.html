@@ -200,6 +200,167 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 /* ── WORLD 2 TEASER ── */
 #world2-screen{background:linear-gradient(135deg,#0a001a,#1a0030)}
 
+/* ════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   xs  = mobile portrait  ≤ 480px wide
+   sm  = mobile landscape / small tablet  481–767px
+   md  = tablet  768–1023px
+   lg  = laptop/desktop  ≥ 1024px
+   ════════════════════════════════════════════════ */
+
+/* ── Desktop / laptop (≥ 1024px) ─────────────────── */
+@media (min-width:1024px){
+  /* Hide touch D-pad on desktop — keyboard only */
+  #dpad{display:none!important}
+  /* Battle overlay: vertical scroll, centred content column */
+  #battle-overlay{align-items:center;overflow-y:auto}
+  #battle-sprites{max-width:700px;height:46vh}
+  #battle-textbox{max-width:680px;margin:0 auto 10px}
+  .battle-opts{gap:12px}
+  .battle-opt{font-size:14px;padding:12px 16px}
+  #battle-question{font-size:16px}
+  .sprite-emoji{font-size:clamp(60px,8vw,96px)}
+  /* HUD larger */
+  #level-badge{font-size:15px;padding:5px 14px}
+  #xp-wrap{width:180px;height:9px}
+  #score-display{font-size:20px}
+  #zone-name{font-size:13px}
+  .hp-heart{font-size:20px}
+  /* Levelup banner bigger */
+  #levelup-banner{padding:28px 56px}
+  #levelup-banner h2{font-size:32px}
+  /* Item toast */
+  #item-toast{font-size:15px;padding:12px 24px}
+  /* Quit button doesn't overlap D-pad gap */
+  #quit-btn{bottom:20px;left:20px}
+  /* Backpack panel card-like */
+  #backpack-panel{align-items:center;justify-content:center;background:rgba(5,8,18,.88)}
+  /* Pet / booster indicator up, not overlapping badge row */
+  #pet-hud{bottom:80px;right:20px;font-size:26px}
+  /* Overlay screens: restrict width */
+  .overlay{padding:40px}
+  .overlay h1{font-size:clamp(28px,4vw,48px)}
+  /* Char select scrollable on short landscape laptops */
+  #char-select{overflow-y:auto}
+  /* Throw section */
+  .throw-btn{font-size:14px;padding:10px 20px}
+  /* Badge row more spacious */
+  #badge-row{bottom:24px;right:20px;gap:8px}
+}
+
+/* ── Tablet (768 – 1023px) ──────────────────────── */
+@media (min-width:768px) and (max-width:1023px){
+  #dpad{bottom:24px;left:20px;grid-template-columns:54px 54px 54px;grid-template-rows:54px 54px 54px;gap:5px;opacity:.85}
+  .dpad-btn{font-size:20px}
+  #battle-sprites{height:50%}
+  .sprite-emoji{font-size:clamp(52px,9vw,88px)}
+  #level-badge{font-size:14px}
+  #xp-wrap{width:160px}
+  #score-display{font-size:19px}
+  .hp-heart{font-size:19px}
+  .battle-opt{font-size:13px;padding:11px 14px}
+  #battle-question{font-size:15px}
+  /* Throw section */
+  .throw-btn{font-size:13px;padding:9px 18px}
+  #pet-hud{bottom:60px;right:16px;font-size:24px}
+}
+
+/* ── Mobile landscape (481 – 767px wide, height < 500px) ── */
+@media (max-width:767px) and (orientation:landscape){
+  /* Compress battle overlay vertically */
+  #battle-sprites{height:38%}
+  .sprite-emoji{font-size:clamp(36px,8vw,56px)}
+  #battle-textbox{padding:8px 12px;margin:0 6px 6px}
+  #battle-question{font-size:clamp(11px,2.5vw,13px);margin-bottom:8px}
+  .battle-opt{padding:7px 10px;font-size:clamp(10px,2vw,12px)}
+  #battle-result-bar{padding:7px 12px;font-size:12px}
+  /* Smaller D-pad in landscape – tucked bottom-left */
+  #dpad{bottom:8px;left:8px;grid-template-columns:40px 40px 40px;grid-template-rows:40px 40px 40px;gap:3px;opacity:.8}
+  .dpad-btn{font-size:15px}
+  /* HUD tighter */
+  #level-badge{font-size:11px;padding:3px 8px}
+  #xp-wrap{width:100px;height:6px}
+  #score-display{font-size:14px}
+  #zone-name{font-size:10px}
+  .hp-heart{font-size:14px}
+  /* Move badge row out of D-pad way */
+  #badge-row{bottom:8px;right:8px;gap:4px}
+  .badge-chip{font-size:10px;padding:3px 8px}
+  /* Pet hud */
+  #pet-hud{bottom:8px;font-size:18px}
+  /* Quit button */
+  #quit-btn{bottom:8px;left:160px}
+  /* Char select scroll */
+  #char-select{overflow-y:auto;justify-content:flex-start;padding-top:16px}
+}
+
+/* ── Mobile portrait (≤ 480px) ──────────────────── */
+@media (max-width:480px){
+  /* Larger D-pad for thumbs */
+  #dpad{bottom:14px;left:10px;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:4px;opacity:.9}
+  .dpad-btn{font-size:20px;border-radius:12px}
+  /* HUD compact */
+  #level-badge{font-size:11px;padding:3px 9px}
+  #xp-wrap{width:90px;height:6px}
+  #score-display{font-size:14px}
+  #zone-name{font-size:10px;letter-spacing:.5px}
+  .hp-heart{font-size:14px}
+  #hud{padding:6px 8px}
+  /* Battle overlay compact */
+  #battle-sprites{height:48%}
+  .sprite-emoji{font-size:clamp(40px,12vw,64px)}
+  #battle-textbox{padding:10px 12px;margin:0 6px 8px}
+  #battle-question{font-size:12px;margin-bottom:8px}
+  .battle-opts{gap:6px}
+  .battle-opt{padding:9px 10px;font-size:11px}
+  #battle-result-bar{font-size:12px;padding:8px 12px;margin:0 6px 8px}
+  #tip-text{font-size:10px}
+  /* Throw ball section */
+  #throw-ball-section{margin:0 6px 6px;padding:8px 10px}
+  .throw-btn{font-size:11px;padding:6px 12px;border-radius:18px}
+  /* Item toast narrower */
+  #item-toast{font-size:12px;padding:8px 14px;max-width:calc(100vw - 32px)}
+  /* Level-up banner */
+  #levelup-banner{padding:18px 24px;width:80vw}
+  #levelup-banner h2{font-size:22px}
+  /* Zone hint */
+  #zone-hint{font-size:11px;padding:10px 14px;max-width:80vw;white-space:normal}
+  /* Badge row */
+  #badge-row{bottom:14px;right:8px;gap:4px}
+  .badge-chip{font-size:10px;padding:3px 7px}
+  /* Pet hud above D-pad */
+  #pet-hud{bottom:175px;right:10px;font-size:20px}
+  /* Quit button left of D-pad vertically */
+  #quit-btn{bottom:14px;left:180px;font-size:10px;padding:5px 10px}
+  /* Backpack button smaller */
+  #backpack-btn{font-size:10px;padding:5px 12px}
+  /* Gacha box */
+  #gacha-box{padding:24px 20px;max-width:95vw}
+  #gacha-icon{font-size:52px}
+  /* Char select scrollable + tighter */
+  #char-select{overflow-y:auto;justify-content:flex-start;padding:16px 12px}
+  .avatar-opt{width:50px;height:50px;font-size:28px}
+  .avatar-grid{gap:7px}
+  /* Avatar grid: 6 per row on small phones */
+  .avatar-grid{grid-template-columns:repeat(6,1fr)}
+  /* CSA panel hide on tiny screens in portrait to save space */
+  #csa-panel{display:none!important}
+  /* Tutorial popup */
+  #tutorial-popup>div{padding:20px 16px}
+  /* Tip popup */
+  #tip-popup-box{padding:18px 16px}
+}
+
+/* ── Very small phones (≤ 360px) ──────────────────── */
+@media (max-width:360px){
+  #dpad{grid-template-columns:46px 46px 46px;grid-template-rows:46px 46px 46px}
+  .dpad-btn{font-size:17px}
+  #quit-btn{left:160px}
+  .battle-opt{font-size:10px;padding:8px 8px}
+  #battle-question{font-size:11px}
+  .sprite-emoji{font-size:clamp(36px,10vw,56px)}
+}
+
 </style>
 </head>
 <body>
@@ -605,9 +766,22 @@ let W, H, TILE;
 
 function resize(){
   W = window.innerWidth; H = window.innerHeight;
-  canvas.width = W; canvas.height = H;
-  TILE = Math.floor(Math.min(W/20, H/15));
-  if(TILE<24)TILE=24; if(TILE>52)TILE=52;
+  canvas.width = W * (window.devicePixelRatio||1);
+  canvas.height = H * (window.devicePixelRatio||1);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+  // Calibrate tile size per device class
+  const isPortraitMobile = W <= 480;
+  const isLandscapeMobile = W <= 767 && H < 500;
+  const isTablet = W >= 768 && W < 1024;
+  const isDesktop = W >= 1024;
+  let baseTile;
+  if(isPortraitMobile)       baseTile = Math.floor(Math.min(W/14, H/13)); // more tiles visible, bigger feel
+  else if(isLandscapeMobile) baseTile = Math.floor(Math.min(W/22, H/11));
+  else if(isTablet)          baseTile = Math.floor(Math.min(W/20, H/14));
+  else                       baseTile = Math.floor(Math.min(W/24, H/16)); // more world visible on big screens
+  TILE = Math.max(22, Math.min(baseTile, isDesktop ? 64 : 52));
 }
 resize();
 window.addEventListener('resize', resize);
