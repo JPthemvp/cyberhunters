@@ -199,6 +199,182 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 .exodia-name{background:linear-gradient(135deg,#ff00ff,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* ── WORLD 2 TEASER ── */
 #world2-screen{background:linear-gradient(135deg,#0a001a,#1a0030)}
+/* ── ENCOUNTER SCREEN ── */
+@keyframes encBounce{from{transform:translateY(0) scale(1)}to{transform:translateY(-10px) scale(1.06)}}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes encFadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+#encounter-screen.show{animation:encFadeIn .25s ease-out}
+/* ── LEVEL BADGE ── */
+@keyframes badgeSpin{0%{transform:rotate(-20deg) scale(.5);opacity:0}60%{transform:rotate(8deg) scale(1.1)}100%{transform:rotate(0deg) scale(1);opacity:1}}
+@keyframes scrollTipBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+/* badge shelf chips inside popup */
+.lbp-chip{background:rgba(255,204,0,.12);border:1.5px solid rgba(255,204,0,.45);border-radius:14px;padding:6px 10px;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.lbp-chip span{font-size:9px;color:rgba(255,204,0,.7);font-weight:700;letter-spacing:.5px}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   xs  = mobile portrait  ≤ 480px wide
+   sm  = mobile landscape / small tablet  481–767px
+   md  = tablet  768–1023px
+   lg  = laptop/desktop  ≥ 1024px
+   ════════════════════════════════════════════════ */
+
+/* ── Desktop / laptop (≥ 1024px) ─────────────────── */
+@media (min-width:1024px){
+  #hint-box{bottom:64px;left:20px;max-width:260px}
+  /* Hide touch D-pad on desktop — keyboard only */
+  #dpad{display:none!important}
+  /* Battle overlay: vertical scroll, centred content column */
+  #battle-overlay{align-items:center;overflow-y:auto}
+  #battle-sprites{max-width:700px;height:46vh}
+  #battle-textbox{max-width:680px;margin:0 auto 10px}
+  .battle-opts{gap:12px}
+  .battle-opt{font-size:14px;padding:12px 16px}
+  #battle-question{font-size:16px}
+  .sprite-emoji{font-size:clamp(60px,8vw,96px)}
+  /* HUD larger */
+  #level-badge{font-size:15px;padding:5px 14px}
+  #xp-wrap{width:180px;height:9px}
+  #score-display{font-size:20px}
+  #zone-name{font-size:13px}
+  .hp-heart{font-size:20px}
+  /* Levelup banner bigger */
+  #levelup-banner{padding:28px 56px}
+  #levelup-banner h2{font-size:32px}
+  /* Item toast */
+  #item-toast{font-size:15px;padding:12px 24px}
+  /* Quit button doesn't overlap D-pad gap */
+  #quit-btn{bottom:20px;left:20px}
+  /* Backpack panel card-like */
+  #backpack-panel{align-items:center;justify-content:center;background:rgba(5,8,18,.88)}
+  /* Pet / booster indicator up, not overlapping badge row */
+  #pet-hud{bottom:80px;right:20px;font-size:26px}
+  /* Overlay screens: restrict width */
+  .overlay{padding:40px}
+  .overlay h1{font-size:clamp(28px,4vw,48px)}
+  /* Char select scrollable on short landscape laptops */
+  #char-select{overflow-y:auto}
+  /* Throw section */
+  .throw-btn{font-size:14px;padding:10px 20px}
+  /* Badge row more spacious */
+  #badge-row{bottom:24px;right:20px;gap:8px}
+}
+
+/* ── Tablet (768 – 1023px) ──────────────────────── */
+@media (min-width:768px) and (max-width:1023px){
+  #dpad{bottom:24px;left:20px;grid-template-columns:54px 54px 54px;grid-template-rows:54px 54px 54px;gap:5px;opacity:.85}
+  .dpad-btn{font-size:20px}
+  #battle-sprites{height:50%}
+  .sprite-emoji{font-size:clamp(52px,9vw,88px)}
+  #level-badge{font-size:14px}
+  #xp-wrap{width:160px}
+  #score-display{font-size:19px}
+  .hp-heart{font-size:19px}
+  .battle-opt{font-size:13px;padding:11px 14px}
+  #battle-question{font-size:15px}
+  /* Throw section */
+  .throw-btn{font-size:13px;padding:9px 18px}
+  #pet-hud{bottom:60px;right:16px;font-size:24px}
+}
+
+/* ── Mobile landscape (481 – 767px wide, height < 500px) ── */
+@media (max-width:767px) and (orientation:landscape){
+  /* Compress battle overlay vertically */
+  #battle-sprites{height:38%}
+  .sprite-emoji{font-size:clamp(36px,8vw,56px)}
+  #battle-textbox{padding:8px 12px;margin:0 6px 6px}
+  #battle-question{font-size:clamp(11px,2.5vw,13px);margin-bottom:8px}
+  .battle-opt{padding:7px 10px;font-size:clamp(10px,2vw,12px)}
+  #battle-result-bar{padding:7px 12px;font-size:12px}
+  /* Smaller D-pad in landscape – tucked bottom-left */
+  #dpad{bottom:8px;left:8px;grid-template-columns:40px 40px 40px;grid-template-rows:40px 40px 40px;gap:3px;opacity:.8}
+  .dpad-btn{font-size:15px}
+  /* HUD tighter */
+  #level-badge{font-size:11px;padding:3px 8px}
+  #xp-wrap{width:100px;height:6px}
+  #score-display{font-size:14px}
+  #zone-name{font-size:10px}
+  .hp-heart{font-size:14px}
+  /* Move badge row out of D-pad way */
+  #badge-row{bottom:8px;right:8px;gap:4px}
+  .badge-chip{font-size:10px;padding:3px 8px}
+  /* Pet hud */
+  #pet-hud{bottom:8px;font-size:18px}
+  /* Quit button */
+  #quit-btn{bottom:8px;left:160px}
+  /* Char select scroll */
+  #char-select{overflow-y:auto;justify-content:flex-start;padding-top:16px}
+}
+
+/* ── Mobile portrait (≤ 480px) ──────────────────── */
+@media (max-width:480px){
+  #hint-box{bottom:185px;left:8px;max-width:200px;padding:10px 12px 8px}
+  #hint-box>div:first-child>div{font-size:10px}
+  #hint-text{font-size:11px}
+  /* Larger D-pad for thumbs */
+  #dpad{bottom:14px;left:10px;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:4px;opacity:.9}
+  .dpad-btn{font-size:20px;border-radius:12px}
+  /* HUD compact */
+  #level-badge{font-size:11px;padding:3px 9px}
+  #xp-wrap{width:90px;height:6px}
+  #score-display{font-size:14px}
+  #zone-name{font-size:10px;letter-spacing:.5px}
+  .hp-heart{font-size:14px}
+  #hud{padding:6px 8px}
+  /* Battle overlay compact */
+  #battle-sprites{height:48%}
+  .sprite-emoji{font-size:clamp(40px,12vw,64px)}
+  #battle-textbox{padding:10px 12px;margin:0 6px 8px}
+  #battle-question{font-size:12px;margin-bottom:8px}
+  .battle-opts{gap:6px}
+  .battle-opt{padding:9px 10px;font-size:11px}
+  #battle-result-bar{font-size:12px;padding:8px 12px;margin:0 6px 8px}
+  #tip-text{font-size:10px}
+  /* Throw ball section */
+  #throw-ball-section{margin:0 6px 6px;padding:8px 10px}
+  .throw-btn{font-size:11px;padding:6px 12px;border-radius:18px}
+  /* Item toast narrower */
+  #item-toast{font-size:12px;padding:8px 14px;max-width:calc(100vw - 32px)}
+  /* Level-up banner */
+  #levelup-banner{padding:18px 24px;width:80vw}
+  #levelup-banner h2{font-size:22px}
+  /* Zone hint */
+  #zone-hint{font-size:11px;padding:10px 14px;max-width:80vw;white-space:normal}
+  /* Badge row */
+  #badge-row{bottom:14px;right:8px;gap:4px}
+  .badge-chip{font-size:10px;padding:3px 7px}
+  /* Pet hud above D-pad */
+  #pet-hud{bottom:175px;right:10px;font-size:20px}
+  /* Quit button left of D-pad vertically */
+  #quit-btn{bottom:14px;left:180px;font-size:10px;padding:5px 10px}
+  /* Backpack button smaller */
+  #backpack-btn{font-size:10px;padding:5px 12px}
+  /* Gacha box */
+  #gacha-box{padding:24px 20px;max-width:95vw}
+  #gacha-icon{font-size:52px}
+  /* Char select scrollable + tighter */
+  #char-select{overflow-y:auto;justify-content:flex-start;padding:16px 12px}
+  .avatar-opt{width:50px;height:50px;font-size:28px}
+  .avatar-grid{gap:7px}
+  /* Avatar grid: 6 per row on small phones */
+  .avatar-grid{grid-template-columns:repeat(6,1fr)}
+  /* CSA panel hide on tiny screens in portrait to save space */
+  #csa-panel{display:none!important}
+  /* Tutorial popup */
+  #tutorial-popup>div{padding:20px 16px}
+  /* Tip popup */
+  #tip-popup-box{padding:18px 16px}
+}
+
+/* ── Very small phones (≤ 360px) ──────────────────── */
+@media (max-width:360px){
+  #dpad{grid-template-columns:46px 46px 46px;grid-template-rows:46px 46px 46px}
+  .dpad-btn{font-size:17px}
+  #quit-btn{left:160px}
+  .battle-opt{font-size:10px;padding:8px 8px}
+  #battle-question{font-size:11px}
+  .sprite-emoji{font-size:clamp(36px,10vw,56px)}
+}
 
 </style>
 </head>
@@ -270,6 +446,56 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 <!-- Encounter flash -->
 <div id="encounter-flash"></div>
 
+<!-- Monster Encounter Loading Screen -->
+<div id="encounter-screen" style="position:fixed;inset:0;z-index:48;display:none;flex-direction:column;align-items:center;justify-content:center;background:#05080f;overflow:hidden">
+  <!-- scanline effect -->
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0px,rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);pointer-events:none;z-index:1"></div>
+  <!-- radial glow backdrop -->
+  <div id="enc-glow" style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(58,127,255,.18) 0%,transparent 70%);z-index:0;transition:background .4s"></div>
+  <div style="position:relative;z-index:2;text-align:center;padding:20px">
+    <div id="enc-sprite" style="font-size:clamp(72px,20vw,120px);line-height:1;animation:encBounce 0.6s ease-in-out infinite alternate;filter:drop-shadow(0 0 32px rgba(58,127,255,.7))">🦠</div>
+    <div id="enc-label" style="margin-top:18px;font-size:clamp(11px,2.5vw,14px);letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">A wild cyber threat appeared!</div>
+    <div id="enc-name" style="margin-top:8px;font-size:clamp(22px,6vw,36px);font-weight:900;color:#fff;letter-spacing:.5px">Loading…</div>
+    <div id="enc-boss-tag" style="display:none;margin-top:8px;background:linear-gradient(135deg,#ff0044,#ff8800);border-radius:20px;padding:4px 18px;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;display:inline-block">⚠️ ZONE BOSS</div>
+    <div id="enc-dots" style="margin-top:20px;display:flex;gap:8px;justify-content:center">
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out infinite"></span>
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out .2s infinite"></span>
+      <span style="width:8px;height:8px;border-radius:50%;background:#3a7fff;animation:dotPulse 1s ease-in-out .4s infinite"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Safari/iOS tip banner -->
+<div id="safari-tip" style="position:fixed;bottom:0;left:0;right:0;z-index:9000;display:none;background:rgba(10,14,26,.96);border-top:1.5px solid rgba(255,204,0,.4);padding:10px 16px;display:none;align-items:center;gap:10px">
+  <div style="flex:1;font-size:12px;line-height:1.5;opacity:.9">🌐 <strong>For the best experience</strong> on iPhone, open in <strong>Chrome</strong> — Safari hides the game behind its toolbar.</div>
+  <button onclick="document.getElementById('safari-tip').style.display='none'" style="background:rgba(255,204,0,.2);border:1px solid rgba(255,204,0,.5);border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer;flex-shrink:0;white-space:nowrap">Got it ✕</button>
+</div>
+
+<!-- Hint Box (bottom-left, above quit button) -->
+<div id="hint-box" style="position:fixed;bottom:60px;left:12px;z-index:9980;display:none;max-width:230px;background:rgba(10,14,26,.94);border:1.5px solid rgba(58,127,255,.4);border-radius:14px;padding:12px 14px 10px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.5)">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#7ab0ff;text-transform:uppercase">💡 Hint</div>
+    <button onclick="closeHintBox()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0" title="Close hints">✕</button>
+  </div>
+  <div id="hint-text" style="font-size:12px;line-height:1.6;opacity:.88"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+    <div id="hint-dots" style="display:flex;gap:4px"></div>
+    <button id="hint-next-btn" onclick="nextHint()" style="background:rgba(58,127,255,.2);border:1px solid rgba(58,127,255,.4);border-radius:12px;padding:3px 10px;font-size:10px;font-weight:700;color:#7ab0ff;cursor:pointer">Next →</button>
+  </div>
+</div>
+
+<!-- Level Badge Award Popup -->
+<div id="level-badge-popup" style="position:fixed;inset:0;z-index:75;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);padding:20px">
+  <div style="background:linear-gradient(135deg,#0f1528,#1a2040);border:2px solid rgba(255,204,0,.6);border-radius:22px;padding:32px 28px;max-width:340px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);position:relative">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,204,0,.7);margin-bottom:8px">🏅 Cyber Badge Earned!</div>
+    <div id="lbp-icon" style="font-size:72px;margin:8px 0;filter:drop-shadow(0 0 20px rgba(255,204,0,.6));animation:badgeSpin .6s ease-out">🏅</div>
+    <div id="lbp-name" style="font-size:22px;font-weight:900;color:#ffcc00;margin-bottom:6px">Badge Name</div>
+    <div id="lbp-desc" style="font-size:13px;opacity:.78;line-height:1.6;margin-bottom:20px">Description</div>
+    <div id="lbp-shelf" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px"></div>
+    <button onclick="closeLevelBadgePopup()" class="btn" style="margin-top:0;padding:10px 32px">Awesome! 🎉</button>
+  </div>
+</div>
+
 <!-- Level-up banner -->
 <div id="levelup-banner"><h2>⬆️ LEVEL UP!</h2><p id="levelup-text"></p></div>
 
@@ -309,6 +535,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="battle-opts" id="battle-opts"></div>
   </div>
   <div id="battle-result-bar"></div>
+  <!-- Scroll tip (shown first time balls appear) -->
+  <div id="scroll-tip" style="display:none;text-align:center;padding:4px 0 2px;animation:scrollTipBounce 1.2s ease-in-out infinite">
+    <span style="font-size:11px;color:rgba(255,204,0,.8);font-weight:700">👇 Scroll down to throw Cyber Balls &amp; catch the monster!</span>
+  </div>
   <!-- THROW BALL ROW (shown during normal battles) -->
   <div id="throw-ball-section" style="display:none;margin:0 10px 8px;background:rgba(255,204,0,.06);border:1.5px solid rgba(255,204,0,.3);border-radius:14px;padding:10px 12px">
     <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,204,0,.7);margin-bottom:8px;text-align:center">🎯 Throw a Cyber Ball to Capture</div>
@@ -476,9 +706,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
     <div class="avatar-opt" data-avatar="🤖" onclick="selectAvatar(this)">🤖</div>
   </div>
 
-  <!-- PET COMPANION SELECT -->
-  <div style="margin-top:12px;width:100%;max-width:500px">
-    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-bottom:8px;text-align:center">⚡ Choose Your Cyber Booster</div>
+  <!-- CYBER BOOSTER SELECT -->
+  <div style="margin-top:14px;width:100%;max-width:500px">
+    <!-- Header + explainer -->
+    <div style="background:rgba(58,127,255,.08);border:1.5px solid rgba(58,127,255,.25);border-radius:14px;padding:12px 14px;margin-bottom:10px;text-align:center">
+      <div style="font-size:13px;font-weight:800;color:#7ab0ff;letter-spacing:.5px;margin-bottom:4px">⚡ Choose 1 Free Cyber Booster</div>
+      <div style="font-size:12px;opacity:.75;line-height:1.6">A <strong>Cyber Booster</strong> is a special power-up companion that helps you throughout your adventure. Each one gives you a unique passive ability — like extra HP, a safety net on wrong answers, or better catch rates. <strong>Pick one</strong> — it stays with you the whole game!</div>
+    </div>
     <div id="pet-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%">
       <div class="pet-opt selected" data-pet="antivirus" onclick="selectPet(this)" title="Anti-Virus Pup">
         <div style="font-size:28px">🛡️</div>
@@ -605,9 +839,22 @@ let W, H, TILE;
 
 function resize(){
   W = window.innerWidth; H = window.innerHeight;
-  canvas.width = W; canvas.height = H;
-  TILE = Math.floor(Math.min(W/20, H/15));
-  if(TILE<24)TILE=24; if(TILE>52)TILE=52;
+  canvas.width = W * (window.devicePixelRatio||1);
+  canvas.height = H * (window.devicePixelRatio||1);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+  // Calibrate tile size per device class
+  const isPortraitMobile = W <= 480;
+  const isLandscapeMobile = W <= 767 && H < 500;
+  const isTablet = W >= 768 && W < 1024;
+  const isDesktop = W >= 1024;
+  let baseTile;
+  if(isPortraitMobile)       baseTile = Math.floor(Math.min(W/14, H/13)); // more tiles visible, bigger feel
+  else if(isLandscapeMobile) baseTile = Math.floor(Math.min(W/22, H/11));
+  else if(isTablet)          baseTile = Math.floor(Math.min(W/20, H/14));
+  else                       baseTile = Math.floor(Math.min(W/24, H/16)); // more world visible on big screens
+  TILE = Math.max(22, Math.min(baseTile, isDesktop ? 64 : 52));
 }
 resize();
 window.addEventListener('resize', resize);
@@ -995,13 +1242,36 @@ function tryEncounter(){
     const base=pool[Math.min(Math.floor(player.level/3),pool.length-1)];
     monster={...base,isBoss:false,pillar:z.pillar,zoneRef:z};
   }
-  flashEncounter(()=>startBattle(monster,z));
+  flashEncounter(monster,()=>startBattle(monster,z));
 }
 
-function flashEncounter(cb){
-  const el=document.getElementById('encounter-flash');
-  el.style.opacity=0.9;
-  setTimeout(()=>{el.style.opacity=0;cb()},200);
+function flashEncounter(monster, cb){
+  // Brief white flash first
+  const flash=document.getElementById('encounter-flash');
+  flash.style.opacity=0.85;
+  setTimeout(()=>flash.style.opacity=0, 180);
+
+  // Encounter loading screen
+  const scr=document.getElementById('encounter-screen');
+  document.getElementById('enc-sprite').textContent=monster.sprite||'🦠';
+  document.getElementById('enc-name').textContent=monster.name||'Unknown Threat';
+  const bossTag=document.getElementById('enc-boss-tag');
+  bossTag.style.display=monster.isBoss?'inline-block':'none';
+  // Boss = red glow, normal = blue glow
+  document.getElementById('enc-glow').style.background=monster.isBoss
+    ?'radial-gradient(ellipse 70% 60% at 50% 50%,rgba(255,0,68,.22) 0%,transparent 70%)'
+    :'radial-gradient(ellipse 70% 60% at 50% 50%,rgba(58,127,255,.18) 0%,transparent 70%)';
+  document.getElementById('enc-label').textContent=monster.isBoss
+    ?'⚠️ Zone Boss incoming — brace yourself!'
+    :'A wild cyber threat appeared!';
+  scr.classList.add('show');
+  scr.style.display='flex';
+  // Hold for 1.5s then launch battle
+  setTimeout(()=>{
+    scr.style.display='none';
+    scr.classList.remove('show');
+    cb();
+  }, 1500);
 }
 
 // ─── BATTLE SYSTEM ──────────────────────────────────────────────
@@ -1213,10 +1483,50 @@ function gainXp(amt){
   amt=Math.floor(amt*(player.petXpMult||1));
   player.xp+=amt;
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
-  if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); }
+  if(player.xp>=next&&player.level<MAX_LEVEL){ player.level++; player.xp=0; showLevelUp(); checkLevelMilestoneBadge(); }
   updateXpBar();
 }
 function updateScoreDisplay(){ document.getElementById('score-display').textContent=player.score+' pts'; }
+
+// ── LEVEL MILESTONE BADGES ───────────────────────────────────────
+const LEVEL_MILESTONE_BADGES=[
+  {level:5,  icon:'🔰', name:'Cyber Novice',      desc:'You\'ve battled through the basics and earned your first Cyber Badge. Boss zones are now unlocked — take them on!', color:'#3aff9a'},
+  {level:10, icon:'⭐', name:'Cyber Expert',       desc:'10 levels of cyber wisdom! New advanced threats await. Your skills are growing sharper with every battle.', color:'#ffcc00'},
+  {level:15, icon:'🏆', name:'Cyber Legend',       desc:'The highest honour a Cyber Hunter can achieve. Cyber Trust World unlocked — you are a true defender!', color:'#cc55ff'},
+];
+// All level badges the player has earned — shown as a shelf in the popup
+const earnedLevelBadges=[];
+
+function checkLevelMilestoneBadge(){
+  const badge=LEVEL_MILESTONE_BADGES.find(b=>b.level===player.level);
+  if(!badge||earnedLevelBadges.some(b=>b.level===badge.level))return;
+  earnedLevelBadges.push(badge);
+  // Slight delay so level-up banner shows first
+  setTimeout(()=>showLevelBadgePopup(badge),2800);
+}
+function showLevelBadgePopup(badge){
+  document.getElementById('lbp-icon').textContent=badge.icon;
+  document.getElementById('lbp-name').textContent=badge.name+' Badge';
+  document.getElementById('lbp-desc').textContent=badge.desc;
+  // Shelf of all earned badges so far
+  const shelf=document.getElementById('lbp-shelf');
+  shelf.innerHTML='';
+  earnedLevelBadges.forEach(b=>{
+    const chip=document.createElement('div');
+    chip.className='lbp-chip';
+    chip.innerHTML=`<span style="font-size:28px">${b.icon}</span><span>${b.name}</span>`;
+    chip.style.borderColor=b.color+'99';
+    chip.style.background=b.color+'18';
+    shelf.appendChild(chip);
+  });
+  document.getElementById('level-badge-popup').style.display='flex';
+  // Re-trigger badge spin animation
+  const ico=document.getElementById('lbp-icon');
+  ico.style.animation='none'; requestAnimationFrame(()=>{ ico.style.animation='badgeSpin .6s ease-out'; });
+}
+function closeLevelBadgePopup(){
+  document.getElementById('level-badge-popup').style.display='none';
+}
 function updateXpBar(){
   const next=XP_PER_LEVEL[Math.min(player.level,XP_PER_LEVEL.length-1)];
   const pct=Math.min(100,player.xp/next*100);
@@ -1228,7 +1538,7 @@ let _levelUpTimer=null;
 function showLevelUp(){
   const banner=document.getElementById('levelup-banner');
   let lvlMsg='Now Level '+player.level+'!';
-  if(player.level===5)lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!';
+  if(player.level===5){ lvlMsg='🎉 Cyber Novice! Boss Zone unlocked!'; setTimeout(nudgeHintForLevel,2800); }
   if(player.level===10)lvlMsg='⭐ Cyber Expert! New challenges unlocked!';
   if(player.level===15)lvlMsg='🏆 CYBER LEGEND! Cyber Trust World unlocked!';
   document.getElementById('levelup-text').textContent=lvlMsg;
@@ -1305,6 +1615,8 @@ function showW2Win(){
 function showGameOver(){
   gameRunning=false;
   if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
+  clearTimeout(_hintAutoTimer);
+  document.getElementById('hint-box').style.display='none';
   // Hide levelup banner if showing
   document.getElementById('levelup-banner').classList.remove('show');
   document.getElementById('gameover-screen').style.display='flex';
@@ -1483,6 +1795,18 @@ function loop(now){
 
 // ── MOBILE ORIENTATION ──────────────────────────────────────────
 const isMobile='ontouchstart' in window||navigator.maxTouchPoints>0;
+// Detect iOS Safari (not Chrome/Firefox on iOS) and show browser tip
+(function(){
+  const ua=navigator.userAgent;
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSafari=/^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  if(isIOS&&isSafari){
+    // Show tip after a short delay so title screen loads first
+    setTimeout(()=>{
+      document.getElementById('safari-tip').style.display='flex';
+    },1800);
+  }
+})();
 function checkOrientation(){
   if(!isMobile)return;
   const isLandscape=window.innerWidth>window.innerHeight;
@@ -1795,6 +2119,65 @@ function startLootTimer(){
   _lootTimer=setInterval(()=>{ if(gameRunning) spawnOneLoot(); },60000);
 }
 
+// ── HINT BOX SYSTEM ─────────────────────────────────────────────
+const HINTS=[
+  {icon:'🌿', text:'Walk into the <strong>tall green grass</strong> to encounter cyber monsters. They\'re hiding everywhere!'},
+  {icon:'⚔️', text:'Answer security questions correctly to <strong>deal damage</strong>. Wrong answers cost you HP — stay sharp!'},
+  {icon:'⚡', text:'<strong>Weaken a monster first</strong> before throwing a Cyber Ball — lower HP means higher catch chance!'},
+  {icon:'🎒', text:'Open your <strong>Backpack</strong> (top button) to throw Cyber Balls and capture weakened monsters.'},
+  {icon:'🏅', text:'Defeat the <strong>Zone Boss</strong> in each coloured area to earn a badge and unlock new zones.'},
+  {icon:'⬆️', text:'Battle monsters to earn XP and <strong>level up</strong>. Reach <strong>Level 5</strong> to unlock the boss zones!'},
+  {icon:'☠️', text:'Defeat <strong>all 5 Zone Bosses</strong> to awaken the Final Boss — Exodia. Good luck, Hunter!'},
+];
+let hintIndex=0, hintDismissed=false, _hintAutoTimer=null;
+
+function showHintBox(){
+  if(hintDismissed)return;
+  hintIndex=0;
+  renderHint();
+  document.getElementById('hint-box').style.display='block';
+}
+function closeHintBox(){
+  hintDismissed=true;
+  clearTimeout(_hintAutoTimer);
+  document.getElementById('hint-box').style.display='none';
+}
+function nextHint(){
+  clearTimeout(_hintAutoTimer);
+  hintIndex=(hintIndex+1)%HINTS.length;
+  renderHint();
+}
+function renderHint(){
+  if(hintDismissed)return;
+  const h=HINTS[hintIndex];
+  document.getElementById('hint-text').innerHTML=h.icon+' '+h.text;
+  // Dots
+  const dots=document.getElementById('hint-dots');
+  dots.innerHTML='';
+  HINTS.forEach((_,i)=>{
+    const d=document.createElement('span');
+    d.style.cssText=`width:6px;height:6px;border-radius:50%;background:${i===hintIndex?'#3a7fff':'rgba(255,255,255,.2)'};display:inline-block;transition:background .2s`;
+    dots.appendChild(d);
+  });
+  // Hide next button on last hint
+  const nb=document.getElementById('hint-next-btn');
+  if(hintIndex===HINTS.length-1){ nb.textContent='✓ Got it'; nb.onclick=closeHintBox; }
+  else { nb.textContent='Next →'; nb.onclick=nextHint; }
+  // Auto-advance after 8s
+  _hintAutoTimer=setTimeout(()=>{
+    if(hintIndex<HINTS.length-1){ hintIndex++; renderHint(); }
+  },8000);
+}
+// Update hint when player levels up to show boss hint
+function nudgeHintForLevel(){
+  if(hintDismissed||player.level<5)return;
+  clearTimeout(_hintAutoTimer);
+  hintIndex=HINTS.findIndex(h=>h.icon==='☠️');
+  if(hintIndex<0)hintIndex=HINTS.length-1;
+  renderHint();
+  document.getElementById('hint-box').style.display='block';
+}
+
 function startGame(){
   // Capture name from char-select screen if visible
   const nameField=document.getElementById('player-name-field');
@@ -1820,8 +2203,10 @@ function startGame(){
   if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
-  // Show tutorial popup
+  // Show tutorial popup, then hint box after player closes it
   document.getElementById('tutorial-popup').style.display='flex';
+  // Show hint box 2s after game starts (gives tutorial time to be read first)
+  setTimeout(showHintBox, 2000);
   requestAnimationFrame(loop);
 }
 
@@ -1968,12 +2353,24 @@ function calcCatchRate(ballId, monster){
 }
 
 // ── SHOW THROW BALL ROW ─────────────────────────────────────
+let _scrollTipShown=false, _scrollTipTimer=null;
+function showScrollTip(){
+  const tip=document.getElementById('scroll-tip');
+  tip.style.display='block';
+  clearTimeout(_scrollTipTimer);
+  // Auto-hide after 4s
+  _scrollTipTimer=setTimeout(()=>{ tip.style.display='none'; },4000);
+}
+function hideScrollTip(){ clearTimeout(_scrollTipTimer); document.getElementById('scroll-tip').style.display='none'; }
+
 function showThrowBallRow(monster){
   if(monster.isBoss){return;} // can't catch bosses
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
   document.getElementById('throw-ball-section').style.display='block';
   document.getElementById('battle-bp-row').style.display='flex';
+  // Show scroll tip first 3 times so player knows to scroll down
+  if(_scrollTipShown<3){ _scrollTipShown++; showScrollTip(); }
   BALLS.forEach(ball=>{
     const qty=player.balls[ball.id]||0;
     const btn=document.createElement('button');
@@ -1987,6 +2384,7 @@ function showThrowBallRow(monster){
 }
 
 function hideThrowBallRow(){
+  hideScrollTip();
   const row=document.getElementById('throw-ball-row');
   row.innerHTML='';
   document.getElementById('throw-ball-section').style.display='none';
