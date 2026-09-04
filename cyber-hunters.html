@@ -221,7 +221,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 /* ── Desktop / laptop (≥ 1024px) ─────────────────── */
 @media (min-width:1024px){
-  #hint-box{bottom:64px;left:20px;max-width:260px}
+  #hint-toggle-btn{bottom:64px;left:20px}
+  #hint-box{bottom:100px;left:20px;max-width:260px}
   /* Hide touch D-pad on desktop — keyboard only */
   #dpad{display:none!important}
   /* Battle overlay: vertical scroll, centred content column */
@@ -308,7 +309,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
 
 /* ── Mobile portrait (≤ 480px) ──────────────────── */
 @media (max-width:480px){
-  #hint-box{bottom:185px;left:8px;max-width:200px;padding:10px 12px 8px}
+  #hint-toggle-btn{bottom:185px;left:8px;font-size:11px;padding:4px 10px}
+  #hint-box{bottom:222px;left:8px;max-width:200px;padding:10px 12px 8px}
   #hint-box>div:first-child>div{font-size:10px}
   #hint-text{font-size:11px}
   /* Larger D-pad for thumbs */
@@ -471,11 +473,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;font-family:
   <button onclick="document.getElementById('safari-tip').style.display='none'" style="background:rgba(255,204,0,.2);border:1px solid rgba(255,204,0,.5);border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;color:#ffcc00;cursor:pointer;flex-shrink:0;white-space:nowrap">Got it ✕</button>
 </div>
 
-<!-- Hint Box (bottom-left, above quit button) -->
-<div id="hint-box" style="position:fixed;bottom:60px;left:12px;z-index:9980;display:none;max-width:230px;background:rgba(10,14,26,.94);border:1.5px solid rgba(58,127,255,.4);border-radius:14px;padding:12px 14px 10px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.5)">
+<!-- Hint Toggle Button + Panel (bottom-left) -->
+<button id="hint-toggle-btn" onclick="toggleHintBox()" style="display:none;position:fixed;bottom:60px;left:12px;z-index:9981;background:rgba(10,14,26,.92);border:1.5px solid rgba(58,127,255,.45);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;color:#7ab0ff;cursor:pointer;backdrop-filter:blur(8px);box-shadow:0 2px 12px rgba(0,0,0,.4);letter-spacing:.3px">💡 Hint</button>
+<div id="hint-box" style="position:fixed;bottom:96px;left:12px;z-index:9980;display:none;max-width:230px;background:rgba(10,14,26,.94);border:1.5px solid rgba(58,127,255,.4);border-radius:14px;padding:12px 14px 10px;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.5)">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
-    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#7ab0ff;text-transform:uppercase">💡 Hint</div>
-    <button onclick="closeHintBox()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0" title="Close hints">✕</button>
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#7ab0ff;text-transform:uppercase">💡 Tips</div>
+    <button onclick="toggleHintBox()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0" title="Close hints">✕</button>
   </div>
   <div id="hint-text" style="font-size:12px;line-height:1.6;opacity:.88"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
@@ -1618,8 +1621,8 @@ function showGameOver(){
   inBattle=false;
   if(_lootTimer){ clearInterval(_lootTimer); _lootTimer=null; }
   clearTimeout(_hintAutoTimer);
-  clearTimeout(_hintReappearTimer);
   document.getElementById('hint-box').style.display='none';
+  document.getElementById('hint-toggle-btn').style.display='none';
   document.getElementById('levelup-banner').classList.remove('show');
   document.getElementById('battle-overlay').style.display='none';
   // Show how many were lost
@@ -2138,23 +2141,26 @@ const HINTS=[
   {icon:'⬆️', text:'Battle monsters to earn XP and <strong>level up</strong>. Reach <strong>Level 5</strong> to unlock the boss zones!'},
   {icon:'☠️', text:'Defeat <strong>all 5 Zone Bosses</strong> to awaken the Final Boss — Exodia. Good luck, Hunter!'},
 ];
-let hintIndex=0, hintHidden=false, _hintAutoTimer=null, _hintReappearTimer=null;
+let hintIndex=0, _hintOpen=false, _hintAutoTimer=null;
 
-function showHintBox(){
-  clearTimeout(_hintReappearTimer);
-  hintHidden=false;
-  hintIndex=0;
-  renderHint();
-  document.getElementById('hint-box').style.display='block';
+function showHintToggleBtn(){
+  document.getElementById('hint-toggle-btn').style.display='block';
 }
-function closeHintBox(){
-  hintHidden=true;
-  clearTimeout(_hintAutoTimer);
-  document.getElementById('hint-box').style.display='none';
-  // Reappear after 20s if game is still running
-  _hintReappearTimer=setTimeout(()=>{
-    if(gameRunning&&hintHidden){ hintHidden=false; renderHint(); document.getElementById('hint-box').style.display='block'; }
-  },20000);
+function toggleHintBox(){
+  _hintOpen=!_hintOpen;
+  const box=document.getElementById('hint-box');
+  const btn=document.getElementById('hint-toggle-btn');
+  if(_hintOpen){
+    renderHint();
+    box.style.display='block';
+    btn.style.background='rgba(58,127,255,.25)';
+    btn.style.borderColor='rgba(58,127,255,.8)';
+  } else {
+    clearTimeout(_hintAutoTimer);
+    box.style.display='none';
+    btn.style.background='rgba(10,14,26,.92)';
+    btn.style.borderColor='rgba(58,127,255,.45)';
+  }
 }
 function nextHint(){
   clearTimeout(_hintAutoTimer);
@@ -2162,7 +2168,6 @@ function nextHint(){
   renderHint();
 }
 function renderHint(){
-  if(hintHidden)return;
   const h=HINTS[hintIndex];
   document.getElementById('hint-text').innerHTML=h.icon+' '+h.text;
   // Dots
@@ -2173,23 +2178,16 @@ function renderHint(){
     d.style.cssText=`width:6px;height:6px;border-radius:50%;background:${i===hintIndex?'#3a7fff':'rgba(255,255,255,.2)'};display:inline-block;transition:background .2s`;
     dots.appendChild(d);
   });
-  // Hide next button on last hint
   const nb=document.getElementById('hint-next-btn');
-  if(hintIndex===HINTS.length-1){ nb.textContent='✓ Got it'; nb.onclick=closeHintBox; }
-  else { nb.textContent='Next →'; nb.onclick=nextHint; }
-  // Auto-advance after 8s
-  _hintAutoTimer=setTimeout(()=>{
-    if(hintIndex<HINTS.length-1){ hintIndex++; renderHint(); }
-  },8000);
+  nb.textContent='Next →'; nb.onclick=nextHint;
 }
-// Update hint when player levels up to show boss hint
+// Update hint when player levels up to show boss tip
 function nudgeHintForLevel(){
   if(player.level<5)return;
-  clearTimeout(_hintAutoTimer);
+  // Just update which hint is shown next time player opens the panel
   hintIndex=HINTS.findIndex(h=>h.icon==='☠️');
   if(hintIndex<0)hintIndex=HINTS.length-1;
-  renderHint();
-  document.getElementById('hint-box').style.display='block';
+  if(_hintOpen) renderHint(); // refresh if panel is already open
 }
 
 function startGame(){
@@ -2217,10 +2215,10 @@ function startGame(){
   if(isMobile) checkOrientation();
   updateHpHearts();
   updateZoneHUD();
-  // Show tutorial popup, then hint box after player closes it
+  // Show tutorial popup
   document.getElementById('tutorial-popup').style.display='flex';
-  // Show hint box 2s after game starts (gives tutorial time to be read first)
-  setTimeout(showHintBox, 2000);
+  // Show Hint toggle button after 2s
+  setTimeout(showHintToggleBtn, 2000);
   requestAnimationFrame(loop);
 }
 
